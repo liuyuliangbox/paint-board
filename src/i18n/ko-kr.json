@@ -454,10 +454,16 @@
     "elementOperations": {
       "selectAll": "모든 요소 선택",
       "selectMultiple": "여러 요소 선택",
+      "rightClickSelect": "모든 모드에서 우클릭 선택",
+      "rightClickMarquee": "모든 모드에서 우클릭 드래그 박스 선택",
       "copySelected": "선택된 요소 복사",
       "pasteElements": "요소 붙여넣기",
       "pasteClipboard": "클립보드 붙여넣기",
       "duplicateSelected": "선택된 요소 복제",
+      "duplicateDrag": "드래그하며 복제",
+      "constrainMove": "수평/수직으로 이동 제한",
+      "nudgeSelected": "선택 요소 미세 이동",
+      "clearSelection": "선택 해제",
       "deleteSelected": "선택된 요소 삭제",
       "moveLayer": "요소 레이어 이동"
     },
@@ -479,7 +485,9 @@
       "doubleFingerZoom": "두 손가락으로 누른 후 축소",
       "doubleFingerTap": "두 손가락으로 누른 후 클릭",
       "threeFingerTap": "세 손가락으로 누른 후 클릭",
-      "mouseLeftClick": "마우스 왼쪽 클릭"
+      "mouseLeftClick": "마우스 왼쪽 클릭",
+      "mouseRightClick": "마우스 오른쪽 클릭",
+      "mouseRightDrag": "마우스 오른쪽 드래그"
     }
   }
 }

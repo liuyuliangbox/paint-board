@@ -454,10 +454,16 @@
     "elementOperations": {
       "selectAll": "全要素選択",
       "selectMultiple": "複数要素選択",
+      "rightClickSelect": "どのモードでも右クリックで選択",
+      "rightClickMarquee": "どのモードでも右ドラッグで範囲選択",
       "copySelected": "選択要素コピー",
       "pasteElements": "要素貼り付け",
       "pasteClipboard": "クリップボード貼り付け",
       "duplicateSelected": "選択要素複製",
+      "duplicateDrag": "ドラッグ中に複製",
+      "constrainMove": "水平/垂直に移動を制限",
+      "nudgeSelected": "選択要素を微調整",
+      "clearSelection": "選択解除",
       "deleteSelected": "選択要素削除",
       "moveLayer": "要素レイヤー移動"
     },
@@ -479,7 +485,9 @@
       "doubleFingerZoom": "二本指で押した後のズーム",
       "doubleFingerTap": "二本指で二回クリック",
       "threeFingerTap": "三本指で二回クリック",
-      "mouseLeftClick": "マウス左クリック"
+      "mouseLeftClick": "マウス左クリック",
+      "mouseRightClick": "マウス右クリック",
+      "mouseRightDrag": "マウス右ドラッグ"
     }
   }
 }

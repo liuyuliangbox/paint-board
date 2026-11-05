@@ -12,30 +12,56 @@ export const initCustomObjectAttr = (obj: fabric.Object, type: string) => {
   } as any)
 }
 
-export const cloneObjects = (objects: fabric.Object[]) => {
+type CloneObjectsOptions = {
+  offsetX?: number
+  offsetY?: number
+  /** Keep the current selection instead of selecting the clones. */
+  keepSelection?: boolean
+  /** Skip history write; useful while a drag is still in progress. */
+  skipHistory?: boolean
+  /** Insert each clone at the source object's stack index (behind it). */
+  insertBehindSource?: boolean
+}
+
+const cloneFabricObjects = (
+  objects: fabric.Object[],
+  resolvePosition: (
+    source: fabric.Object,
+    cloned: fabric.Object
+  ) => { left: number; top: number },
+  options: CloneObjectsOptions = {}
+) => {
   const canvas = paintBoard.canvas
-  if (!canvas) {
-    return
+  if (!canvas || !objects.length) {
+    return Promise.resolve([] as fabric.Object[])
   }
 
-  // clear the current selection
-  canvas.discardActiveObject()
-
-  const offsetX = 20
-  const offsetY = 20
+  if (!options.keepSelection) {
+    canvas.discardActiveObject()
+  }
 
   const copys = objects.map((object) => {
     return new Promise<fabric.Object>((resolve) => {
       object?.clone((cloned: fabric.Object) => {
+        const { left, top } = resolvePosition(object, cloned)
         const id = uuidv4()
         cloned.set({
-          left: (cloned?.left || 0) + offsetX,
-          top: (cloned?.top || 0) + offsetY,
+          left,
+          top,
           evented: true,
           id,
           perPixelTargetFind: true
         })
-        canvas.add(cloned)
+        if (options.insertBehindSource) {
+          const index = canvas.getObjects().indexOf(object)
+          if (index >= 0) {
+            canvas.insertAt(cloned, index, false)
+          } else {
+            canvas.add(cloned)
+          }
+        } else {
+          canvas.add(cloned)
+        }
         // Endpoint handlers read the canvas transform, so the object has to be
         // on the canvas before the controls are built and measured.
         initObjectControls(cloned)
@@ -44,23 +70,88 @@ export const cloneObjects = (objects: fabric.Object[]) => {
       }, CANVAS_CUSTOM_PROPERTIES)
     })
   })
-  Promise.all(copys).then((objs) => {
+
+  return Promise.all(copys).then((objs) => {
     if (!objs.length) {
-      return
+      return objs
     }
-    // A one-object ActiveSelection draws the default bounding-box handles.
-    // Select the copy itself so its own controls, such as line endpoints, show immediately.
-    if (objs.length === 1) {
-      canvas.setActiveObject(objs[0])
+
+    if (!options.keepSelection) {
+      // A one-object ActiveSelection draws the default bounding-box handles.
+      // Select the copy itself so its own controls, such as line endpoints, show immediately.
+      if (objs.length === 1) {
+        canvas.setActiveObject(objs[0])
+      } else {
+        canvas.setActiveObject(
+          new fabric.ActiveSelection(objs, {
+            canvas
+          })
+        )
+      }
+    }
+
+    if (options.skipHistory) {
+      canvas.requestRenderAll()
     } else {
-      canvas.setActiveObject(
-        new fabric.ActiveSelection(objs, {
-          canvas
-        })
-      )
+      paintBoard.render()
     }
-    paintBoard.render()
+    return objs
   })
+}
+
+export const cloneObjects = (objects: fabric.Object[]) => {
+  const offsetX = 20
+  const offsetY = 20
+  return cloneFabricObjects(objects, (_source, cloned) => ({
+    left: (cloned.left || 0) + offsetX,
+    top: (cloned.top || 0) + offsetY
+  }))
+}
+
+/**
+ * Canvas-space left/top for an object, including when it lives inside an
+ * ActiveSelection / group (where object.left/top are only relative).
+ */
+export const getObjectScenePosition = (obj: fabric.Object) => {
+  if (!obj.group) {
+    return {
+      left: obj.left ?? 0,
+      top: obj.top ?? 0
+    }
+  }
+
+  const point = fabric.util.transformPoint(
+    new fabric.Point(obj.left ?? 0, obj.top ?? 0),
+    obj.group.calcTransformMatrix()
+  )
+  return {
+    left: point.x,
+    top: point.y
+  }
+}
+
+/**
+ * Leave copies at absolute positions while the current selection keeps moving.
+ * Used by Ctrl/Cmd + drag duplicate.
+ */
+export const cloneObjectsInPlace = (
+  items: Array<{ object: fabric.Object; left: number; top: number }>
+) => {
+  return cloneFabricObjects(
+    items.map((item) => item.object),
+    (source) => {
+      const match = items.find((item) => item.object === source)
+      return {
+        left: match?.left ?? source.left ?? 0,
+        top: match?.top ?? source.top ?? 0
+      }
+    },
+    {
+      keepSelection: true,
+      skipHistory: true,
+      insertBehindSource: true
+    }
+  )
 }
 
 /**

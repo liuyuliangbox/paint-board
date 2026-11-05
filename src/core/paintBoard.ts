@@ -5,7 +5,7 @@ import { alignGuideLine } from './fabricMixin/alignGuideLine'
 import './fabricMixin/extendPrototype'
 
 import { History } from './history'
-import { ActionMode, ELEMENT_CUSTOM_TYPE } from '@/constants'
+import { ActionMode } from '@/constants'
 import { DrawStyle, DrawType } from '@/constants/draw'
 
 import debounce from 'lodash-es/debounce'
@@ -68,7 +68,10 @@ export class PaintBoard {
       selectionColor: 'rgba(101, 204, 138, 0.3)',
       preserveObjectStacking: true,
       enableRetinaScaling: true,
-      backgroundVpt: false
+      backgroundVpt: false,
+      // Required for cross-mode right-click select / marquee.
+      fireRightClick: true,
+      stopContextMenu: true
     })
     fabric.Object.prototype.set({
       borderColor: '#65CC8A',
@@ -436,11 +439,14 @@ export class PaintBoard {
     this.canvas.selection = selection
     fabric.Object.prototype.set(objectSet)
 
+    // Keep every object in sync with the mode. Only updating IText left
+    // previously drawn paths stuck with selectable:false after mode switches.
     this.canvas.forEachObject((obj) => {
-      if (obj._customType === ELEMENT_CUSTOM_TYPE.I_TEXT) {
-        obj.selectable = objectSet.selectable
-        obj.hoverCursor = objectSet.hoverCursor
+      if (obj.excludeFromExport) {
+        return
       }
+      obj.selectable = Boolean(objectSet.selectable)
+      obj.hoverCursor = objectSet.hoverCursor
     })
 
     this.canvas.requestRenderAll()

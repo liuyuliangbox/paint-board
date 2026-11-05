@@ -3,6 +3,8 @@ import { EraserCursor } from '@/core/element/eraser/cursor'
 import { CanvasMouseEvent } from './mouseEvent'
 import { ImageDrop } from './imageDrop'
 import { ObjectEvent } from './objectEvent'
+import { DragInteraction } from './dragInteraction'
+import { RightClickSelect } from './rightClickSelect'
 import { CanvasTouchEvent } from './touchEvent'
 import { CanvasZoomEvent } from './zoomEvent'
 import { WindowEvent } from './windowEvent'
@@ -13,6 +15,8 @@ export class EventModule {
   mouseEvent: CanvasMouseEvent
   zoomEvent: CanvasZoomEvent
   objectEvent: ObjectEvent
+  dragInteraction: DragInteraction
+  rightClickSelect: RightClickSelect
   windowEvent: WindowEvent
   touchEvent: CanvasTouchEvent
 
@@ -31,6 +35,12 @@ export class EventModule {
 
     const objectEvent = new ObjectEvent()
     this.objectEvent = objectEvent
+
+    const dragInteraction = new DragInteraction()
+    this.dragInteraction = dragInteraction
+
+    const rightClickSelect = new RightClickSelect()
+    this.rightClickSelect = rightClickSelect
 
     const windowEvent = new WindowEvent()
     this.windowEvent = windowEvent

@@ -454,10 +454,16 @@
     "elementOperations": {
       "selectAll": "選中全部元素",
       "selectMultiple": "選擇多個元素",
+      "rightClickSelect": "任意模式下右鍵選中元素",
+      "rightClickMarquee": "任意模式下右鍵拖動框選",
       "copySelected": "複製當前選中元素",
       "pasteElements": "粘貼元素",
       "pasteClipboard": "粘貼剪貼板",
       "duplicateSelected": "複製粘貼當前選中元素",
+      "duplicateDrag": "拖動時複製選中元素",
+      "constrainMove": "拖動時鎖定水平/垂直",
+      "nudgeSelected": "微調選中元素位置",
+      "clearSelection": "取消選中",
       "deleteSelected": "刪除當前選中元素",
       "moveLayer": "移動元素圖層"
     },
@@ -479,7 +485,9 @@
       "doubleFingerZoom": "雙指按壓後縮放",
       "doubleFingerTap": "雙指雙擊",
       "threeFingerTap": "三指雙擊",
-      "mouseLeftClick": "鼠標左鍵"
+      "mouseLeftClick": "鼠標左鍵",
+      "mouseRightClick": "鼠標右鍵",
+      "mouseRightDrag": "鼠標右鍵拖拽"
     }
   }
 }

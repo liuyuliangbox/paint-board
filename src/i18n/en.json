@@ -454,10 +454,16 @@
     "elementOperations": {
       "selectAll": "Select All Elements",
       "selectMultiple": "Select Multiple Elements",
+      "rightClickSelect": "Right-click Select in Any Mode",
+      "rightClickMarquee": "Right-drag Marquee Select in Any Mode",
       "copySelected": "Copy Selected Elements",
       "pasteElements": "Paste Elements",
       "pasteClipboard": "Paste Clipboard",
       "duplicateSelected": "Duplicate Selected Elements",
+      "duplicateDrag": "Duplicate While Dragging",
+      "constrainMove": "Constrain Move to Axis",
+      "nudgeSelected": "Nudge Selected Elements",
+      "clearSelection": "Clear Selection",
       "deleteSelected": "Delete Selected Elements",
       "moveLayer": "Move Element Layer"
     },
@@ -479,7 +485,9 @@
       "doubleFingerZoom": "Double Finger Press and Drag",
       "doubleFingerTap": "Double Finger Tap",
       "threeFingerTap": "Three Finger Tap",
-      "mouseLeftClick": "Mouse Left Click"
+      "mouseLeftClick": "Mouse Left Click",
+      "mouseRightClick": "Mouse Right Click",
+      "mouseRightDrag": "Mouse Right Click and Drag"
     }
   }
 }

@@ -4,6 +4,8 @@ import { DrawStyle, DrawType } from './draw'
 export enum KeyCode {
   SPACE = 'Space',
   BACKSPACE = 'Backspace',
+  DELETE = 'Delete',
+  ESCAPE = 'Escape',
   DIGIT_1 = 'Digit1',
   DIGIT_2 = 'Digit2',
   DIGIT_3 = 'Digit3',

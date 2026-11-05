@@ -20,6 +20,11 @@ export class CanvasMouseEvent {
     const canvas = paintBoard.canvas
 
     canvas?.on('mouse:down', (e) => {
+      // Right-click is reserved for cross-mode select / marquee.
+      if ((e.e as MouseEvent | undefined)?.button === 2) {
+        return
+      }
+
       this.isMouseDown = true
       if (this.isSpaceKeyDown) {
         return

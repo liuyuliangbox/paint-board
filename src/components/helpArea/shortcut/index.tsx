@@ -136,6 +136,14 @@ const Shortcut = () => {
               </td>
             </tr>
             <tr>
+              <td>{t('helpInfo.elementOperations.rightClickSelect')}</td>
+              <td>{t('helpInfo.keyboardShortcuts.mouseRightClick')}</td>
+            </tr>
+            <tr>
+              <td>{t('helpInfo.elementOperations.rightClickMarquee')}</td>
+              <td>{t('helpInfo.keyboardShortcuts.mouseRightDrag')}</td>
+            </tr>
+            <tr>
               <td>{t('helpInfo.elementOperations.copySelected')}</td>
               <td>
                 <kbd className="kbd kbd-sm">{metaKey}</kbd>
@@ -168,9 +176,48 @@ const Shortcut = () => {
               </td>
             </tr>
             <tr>
+              <td>{t('helpInfo.elementOperations.duplicateDrag')}</td>
+              <td>
+                <kbd className="kbd kbd-sm">{metaKey}</kbd>
+                <span> + </span>
+                <span>{t('helpInfo.keyboardShortcuts.spaceDrag')}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>{t('helpInfo.elementOperations.constrainMove')}</td>
+              <td>
+                <kbd className="kbd kbd-sm">Shift</kbd>
+                <span> + </span>
+                <span>{t('helpInfo.keyboardShortcuts.spaceDrag')}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>{t('helpInfo.elementOperations.nudgeSelected')}</td>
+              <td>
+                <kbd className="kbd kbd-sm">▲</kbd>
+                <span> / </span>
+                <kbd className="kbd kbd-sm">◀︎</kbd>
+                <span> / </span>
+                <kbd className="kbd kbd-sm">▶︎</kbd>
+                <span> / </span>
+                <kbd className="kbd kbd-sm">▼</kbd>
+                <span> · </span>
+                <kbd className="kbd kbd-sm">Shift</kbd>
+                <span> ×10</span>
+              </td>
+            </tr>
+            <tr>
+              <td>{t('helpInfo.elementOperations.clearSelection')}</td>
+              <td>
+                <kbd className="kbd kbd-sm">Esc</kbd>
+              </td>
+            </tr>
+            <tr>
               <td>{t('helpInfo.elementOperations.deleteSelected')}</td>
               <td>
                 <kbd className="kbd kbd-sm">Backspace</kbd>
+                <span> / </span>
+                <kbd className="kbd kbd-sm">Delete</kbd>
               </td>
             </tr>
             <tr>

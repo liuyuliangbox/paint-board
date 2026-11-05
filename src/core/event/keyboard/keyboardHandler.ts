@@ -23,6 +23,7 @@ export class KeyboardHandler {
   private transformCanvasHandler: TransformCanvasHandler
   private modeHandler: ModeHandler
   private spacePanBypass = false
+  private nudgeDirty = false
 
   constructor() {
     this.clipboardHandler = new ClipboardHandler()
@@ -77,6 +78,7 @@ export class KeyboardHandler {
       case KeyCode.KEY_C:
         // Ctrl+C (Windows/Linux) or Cmd+C (Mac) copy selected objects
         if (this.isModifierKey(e) && !e.shiftKey && !e.altKey) {
+          e.preventDefault()
           this.clipboardHandler.copySelectedObjects()
         } else {
           this.modeHandler.switchDrawStyle(e.code)
@@ -144,18 +146,28 @@ export class KeyboardHandler {
         break
 
       case KeyCode.BACKSPACE:
+      case KeyCode.DELETE:
         // Delete selected objects
+        e.preventDefault()
         paintBoard.deleteObject()
+        break
+
+      case KeyCode.ESCAPE:
+        e.preventDefault()
+        this.clearSelection()
         break
 
       case KeyCode.ARROW_UP:
       case KeyCode.ARROW_DOWN:
       case KeyCode.ARROW_LEFT:
       case KeyCode.ARROW_RIGHT:
-        // Ctrl+Arrow keys (Windows/Linux) or Cmd+Arrow keys (Mac) pan canvas
+        // Ctrl/Cmd+Arrow pans the canvas; bare arrows nudge the selection.
         if (this.isModifierKey(e) && !e.shiftKey && !e.altKey) {
           e.preventDefault()
           this.transformCanvasHandler.panCanvas(e.code)
+        } else if (!this.isModifierKey(e) && !e.altKey) {
+          e.preventDefault()
+          this.nudgeSelection(e.code, e.shiftKey ? 10 : 1)
         }
         break
 
@@ -244,6 +256,16 @@ export class KeyboardHandler {
     }
 
     switch (e.code) {
+      case KeyCode.ARROW_UP:
+      case KeyCode.ARROW_DOWN:
+      case KeyCode.ARROW_LEFT:
+      case KeyCode.ARROW_RIGHT:
+        if (this.nudgeDirty) {
+          this.nudgeDirty = false
+          paintBoard.history?.saveState()
+          paintBoard.triggerHook()
+        }
+        break
       case KeyCode.SPACE:
         // A dialog that never started a pan should not restore draw mode.
         if (
@@ -298,5 +320,57 @@ export class KeyboardHandler {
       target.tagName === 'TEXTAREA' ||
       target.isContentEditable
     )
+  }
+
+  private clearSelection() {
+    const canvas = paintBoard.canvas
+    if (!canvas || paintBoard.textElement.isTextEditing) {
+      return
+    }
+    if (!canvas.getActiveObject()) {
+      return
+    }
+    canvas.discardActiveObject()
+    canvas.requestRenderAll()
+    paintBoard.triggerHook()
+  }
+
+  private nudgeSelection(code: string, step: number) {
+    const canvas = paintBoard.canvas
+    if (!canvas || paintBoard.textElement.isTextEditing) {
+      return
+    }
+
+    const active = canvas.getActiveObject()
+    if (!active) {
+      return
+    }
+
+    let dx = 0
+    let dy = 0
+    switch (code) {
+      case KeyCode.ARROW_LEFT:
+        dx = -step
+        break
+      case KeyCode.ARROW_RIGHT:
+        dx = step
+        break
+      case KeyCode.ARROW_UP:
+        dy = -step
+        break
+      case KeyCode.ARROW_DOWN:
+        dy = step
+        break
+      default:
+        return
+    }
+
+    active.set({
+      left: (active.left ?? 0) + dx,
+      top: (active.top ?? 0) + dy
+    })
+    active.setCoords()
+    canvas.requestRenderAll()
+    this.nudgeDirty = true
   }
 }

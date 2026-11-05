@@ -64,6 +64,10 @@ class BrushMouseMixin {
         if (isDisableDraw) {
           return
         }
+        // Right-click select must not start a brush/eraser stroke.
+        if ('button' in event && (event as MouseEvent).button === 2) {
+          return
+        }
 
         // Keep the gesture inside Fabric's drawing mouseup path so a click
         // does not fall through into selection.
@@ -77,6 +81,9 @@ class BrushMouseMixin {
       },
       _onMouseMoveInDrawingMode: function (this: DrawingCanvas, event: Event) {
         if (isDisableDraw) {
+          return
+        }
+        if ('buttons' in event && (event as MouseEvent).buttons === 2) {
           return
         }
 
