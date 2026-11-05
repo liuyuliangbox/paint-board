@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
+# Disabled automatic deploy: this fork uses Cloudflare Pages
+# (.github/workflows/deploy-cloudflare.yml) instead of GitHub Pages.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
