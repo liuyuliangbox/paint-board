@@ -92,6 +92,26 @@
     "saveFile": "ファイルデータ保存",
     "uploadFile": "ファイルデータアップロード"
   },
+  "widget": {
+    "panelTitle": "ウィジェット",
+    "emptyHint": "選択して右クリック、またはツールバーからウィジェットに追加",
+    "emptyCategory": "このカテゴリにウィジェットはありません",
+    "addToWidgets": "ウィジェットに追加",
+    "insert": "キャンバスに挿入",
+    "rename": "名前変更",
+    "delete": "削除",
+    "addSuccess": "ウィジェットに追加しました",
+    "addFailed": "ウィジェットを追加できません",
+    "insertFailed": "ウィジェットを挿入できません",
+    "limitReached": "ウィジェット数の上限です",
+    "categoryAll": "すべて",
+    "categoryUncategorized": "未分類",
+    "addCategory": "新規",
+    "categoryName": "名前",
+    "deleteCategory": "カテゴリ削除",
+    "setCategory": "カテゴリ設定",
+    "categoryAddFailed": "カテゴリを追加できません（重複または上限）"
+  },
   "objectList": {
     "title": "レイヤー",
     "empty": "このボードには要素がありません",

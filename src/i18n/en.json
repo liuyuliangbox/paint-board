@@ -92,6 +92,26 @@
     "saveFile": "Save File Data",
     "uploadFile": "Upload File Data"
   },
+  "widget": {
+    "panelTitle": "Widgets",
+    "emptyHint": "Select content, then right-click or use the toolbar to save a widget",
+    "emptyCategory": "No widgets in this category",
+    "addToWidgets": "Add to Widgets",
+    "insert": "Insert onto canvas",
+    "rename": "Rename",
+    "delete": "Delete",
+    "addSuccess": "Added to widgets",
+    "addFailed": "Could not add widget",
+    "insertFailed": "Could not insert widget",
+    "limitReached": "Widget limit reached",
+    "categoryAll": "All",
+    "categoryUncategorized": "Uncategorized",
+    "addCategory": "New",
+    "categoryName": "Name",
+    "deleteCategory": "Delete category",
+    "setCategory": "Set category",
+    "categoryAddFailed": "Could not add category (duplicate or limit)"
+  },
   "objectList": {
     "title": "Layers",
     "empty": "This board has no elements yet",

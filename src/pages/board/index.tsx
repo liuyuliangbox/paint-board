@@ -21,6 +21,8 @@ import ToolPanel from '@/components/toolPanel'
 import HelpArea from '@/components/helpArea'
 import CleanModal from '@/components/cleanModal'
 import BoardOperation from '@/components/boardOperation'
+import WidgetPanel from '@/components/widgetPanel'
+import WidgetContextMenu from '@/components/widgetPanel/contextMenu'
 import BackgroundColor from '@/components/background/backgroundColor'
 import BackgroundImage from '@/components/background/backgroundImage'
 import BackgroundCamera from '@/components/background/backgroundCamera'
@@ -121,6 +123,8 @@ const Board: React.FC = () => {
       {persistFailed && <Toast message="tip.filePersistFail" type="error" />}
       {canvasLoaded && (
         <>
+          <WidgetPanel />
+          <WidgetContextMenu />
           <ToolPanel />
           <HelpArea />
           <CleanModal />

@@ -6,6 +6,7 @@ import {
   filterUnlockedObjects,
   isObjectLocked
 } from '@/core/utils/object'
+import useWidgetMenuStore from '@/store/widgetMenu'
 
 const DRAG_THRESHOLD = 4
 
@@ -238,6 +239,27 @@ export class RightClickSelect {
       return
     }
 
+    // Right-click (no drag) on the current selection → widget context menu.
+    if (!moved) {
+      const active = canvas.getActiveObject()
+      const activeObjects = canvas.getActiveObjects()
+      const target = this.findTargetAtEvent(e)
+      if (
+        active &&
+        activeObjects.length > 0 &&
+        target &&
+        this.isTargetInSelection(active, activeObjects, target)
+      ) {
+        this.resumeDrawingMode = false
+        useBoardStore.getState().updateMode(ActionMode.SELECT)
+        useWidgetMenuStore
+          .getState()
+          .openMenu(e.clientX, e.clientY)
+        canvas.requestRenderAll()
+        return
+      }
+    }
+
     let selected: fabric.Object[] = []
 
     if (moved) {
@@ -247,7 +269,7 @@ export class RightClickSelect {
       }
     } else {
       const target = this.findTargetAtEvent(e)
-      if (target) {
+      if (target && target.type !== 'activeSelection') {
         selected = [target]
       }
     }
@@ -263,6 +285,20 @@ export class RightClickSelect {
     this.resumeDrawingMode = false
     useBoardStore.getState().updateMode(ActionMode.SELECT)
     this.applySelection(canvas, selected)
+  }
+
+  private isTargetInSelection(
+    active: fabric.Object,
+    activeObjects: fabric.Object[],
+    target: fabric.Object
+  ) {
+    if (target === active || activeObjects.includes(target)) {
+      return true
+    }
+    if (active.type === 'activeSelection') {
+      return (active as fabric.ActiveSelection).getObjects().includes(target)
+    }
+    return false
   }
 
   private cancelGesture() {
@@ -302,7 +338,11 @@ export class RightClickSelect {
       }
     }
 
-    if (!target || target.type === 'activeSelection' || isObjectLocked(target)) {
+    if (!target) {
+      return null
+    }
+    // ActiveSelection is a valid hit when multi-selecting (widget menu, etc.).
+    if (target.type !== 'activeSelection' && isObjectLocked(target)) {
       return null
     }
     return target

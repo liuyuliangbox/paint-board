@@ -33,8 +33,10 @@ import {
   X,
   Menu,
   BookText,
-  Layers
+  Layers,
+  LayoutTemplate
 } from 'lucide-react'
+import useWidgetStore, { MAX_WIDGET_COUNT } from '@/store/widgets'
 
 import FileList from './fileList'
 import ObjectList from './objectList'
@@ -67,6 +69,12 @@ const BoardOperation = () => {
   const [uploadImageURL, setUploadImageURL] = useState('')
   const [dropNotice, setDropNotice] = useState<string | null>(null)
   const [showUploadModal, setShowUploadModal] = useState(false)
+  const [widgetNotice, setWidgetNotice] = useState<string | null>(null)
+  const addWidgetFromSelection = useWidgetStore(
+    (state) => state.addWidgetFromSelection
+  )
+  const setWidgetPanelOpen = useWidgetStore((state) => state.setPanelOpen)
+  const widgetCount = useWidgetStore((state) => state.widgets.length)
 
   // toggle fullscreen mode
   const toggleFullscreen = useCallback(async () => {
@@ -109,6 +117,20 @@ const BoardOperation = () => {
   // delete activity object
   const deleteObject = () => {
     paintBoard.deleteObject()
+  }
+
+  const saveSelectionAsWidget = async () => {
+    if (widgetCount >= MAX_WIDGET_COUNT) {
+      setWidgetNotice('widget.limitReached')
+      return
+    }
+    const ok = await addWidgetFromSelection()
+    if (ok) {
+      setWidgetPanelOpen(true)
+      setWidgetNotice('widget.addSuccess')
+    } else {
+      setWidgetNotice('widget.addFailed')
+    }
   }
 
   // click undo
@@ -166,6 +188,14 @@ const BoardOperation = () => {
       window.clearTimeout(timer)
     }
   }, [])
+
+  useEffect(() => {
+    if (!widgetNotice) {
+      return
+    }
+    const timer = window.setTimeout(() => setWidgetNotice(null), 2800)
+    return () => window.clearTimeout(timer)
+  }, [widgetNotice])
 
   useEffect(() => {
     const refreshSelection = () => {
@@ -248,6 +278,15 @@ const BoardOperation = () => {
                       data-tip={t('operate.group')}
                     >
                       <Group strokeWidth={2} color="#66CC8A" />
+                    </div>
+                  )}
+                  {hasSelection && (
+                    <div
+                      onClick={() => void saveSelectionAsWidget()}
+                      className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
+                      data-tip={t('widget.addToWidgets')}
+                    >
+                      <LayoutTemplate strokeWidth={2} color="#66CC8A" />
                     </div>
                   )}
                   <div
@@ -343,6 +382,12 @@ const BoardOperation = () => {
       </div>
       {exportError && <Toast message={exportError} type="error" />}
       {dropNotice && <Toast message={dropNotice} type="warning" />}
+      {widgetNotice && (
+        <Toast
+          message={widgetNotice}
+          type={widgetNotice === 'widget.addSuccess' ? 'success' : 'error'}
+        />
+      )}
       {showObjectList && <ObjectList updateShow={updateShowObjectList} />}
       {showFile && <FileList updateShow={updateShowFile} />}
       {showDownloadModal && exportImage && (

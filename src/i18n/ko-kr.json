@@ -92,6 +92,26 @@
     "saveFile": "파일 데이터 저장",
     "uploadFile": "파일 데이터 업로드"
   },
+  "widget": {
+    "panelTitle": "위젯",
+    "emptyHint": "선택 후 우클릭하거나 도구 모음으로 위젯에 추가하세요",
+    "emptyCategory": "이 분류에 위젯이 없습니다",
+    "addToWidgets": "위젯에 추가",
+    "insert": "캔버스에 삽입",
+    "rename": "이름 바꾸기",
+    "delete": "삭제",
+    "addSuccess": "위젯에 추가됨",
+    "addFailed": "위젯을 추가할 수 없습니다",
+    "insertFailed": "위젯을 삽입할 수 없습니다",
+    "limitReached": "위젯 개수 한도에 도달했습니다",
+    "categoryAll": "전체",
+    "categoryUncategorized": "미분류",
+    "addCategory": "새 분류",
+    "categoryName": "이름",
+    "deleteCategory": "분류 삭제",
+    "setCategory": "분류 설정",
+    "categoryAddFailed": "분류를 추가할 수 없습니다 (중복 또는 한도)"
+  },
   "objectList": {
     "title": "레이어",
     "empty": "이 보드에는 요소가 없습니다",

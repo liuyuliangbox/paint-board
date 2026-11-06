@@ -92,6 +92,26 @@
     "saveFile": "保存文件数据",
     "uploadFile": "上传文件数据"
   },
+  "widget": {
+    "panelTitle": "小組件",
+    "emptyHint": "選中內容後右鍵，或點工具列圖示加入小組件",
+    "emptyCategory": "當前分類還沒有小組件",
+    "addToWidgets": "加入小組件",
+    "insert": "插入到畫布",
+    "rename": "重新命名",
+    "delete": "刪除",
+    "addSuccess": "已加入小組件",
+    "addFailed": "無法加入小組件",
+    "insertFailed": "無法插入小組件",
+    "limitReached": "小組件數量已達上限",
+    "categoryAll": "全部",
+    "categoryUncategorized": "未分類",
+    "addCategory": "新分類",
+    "categoryName": "分類名",
+    "deleteCategory": "刪除分類",
+    "setCategory": "設置分類",
+    "categoryAddFailed": "無法添加分類（重名或已達上限）"
+  },
   "objectList": {
     "title": "圖層",
     "empty": "當前畫板還沒有元素",

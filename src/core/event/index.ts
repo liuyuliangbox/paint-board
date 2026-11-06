@@ -5,6 +5,7 @@ import { ImageDrop } from './imageDrop'
 import { ObjectEvent } from './objectEvent'
 import { DragInteraction } from './dragInteraction'
 import { RightClickSelect } from './rightClickSelect'
+import { WidgetDrop } from './widgetDrop'
 import { CanvasTouchEvent } from './touchEvent'
 import { CanvasZoomEvent } from './zoomEvent'
 import { WindowEvent } from './windowEvent'
@@ -12,6 +13,7 @@ import { WindowEvent } from './windowEvent'
 export class EventModule {
   eraserCursor: EraserCursor
   imageDrop: ImageDrop
+  widgetDrop: WidgetDrop
   mouseEvent: CanvasMouseEvent
   zoomEvent: CanvasZoomEvent
   objectEvent: ObjectEvent
@@ -23,9 +25,11 @@ export class EventModule {
   constructor(canvas: fabric.Canvas | null) {
     this.eraserCursor = new EraserCursor()
     this.imageDrop = new ImageDrop()
+    this.widgetDrop = new WidgetDrop()
     if (canvas) {
       this.eraserCursor.attach(canvas)
       this.imageDrop.attach(canvas)
+      this.widgetDrop.attach(canvas)
     }
     const mouseEvent = new CanvasMouseEvent(this.eraserCursor)
     this.mouseEvent = mouseEvent
@@ -52,6 +56,7 @@ export class EventModule {
   removeEvent() {
     this.eraserCursor.detach()
     this.imageDrop.detach()
+    this.widgetDrop.detach()
     this.windowEvent.removeWindowEvents()
     this.touchEvent.removeTouchEvents()
   }

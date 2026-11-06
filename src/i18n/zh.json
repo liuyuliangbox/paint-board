@@ -92,6 +92,26 @@
     "saveFile": "保存文件数据",
     "uploadFile": "上传文件数据"
   },
+  "widget": {
+    "panelTitle": "小组件",
+    "emptyHint": "选中内容后右键，或点工具栏图标加入小组件",
+    "emptyCategory": "当前分类还没有小组件",
+    "addToWidgets": "加入小组件",
+    "insert": "插入到画布",
+    "rename": "重命名",
+    "delete": "删除",
+    "addSuccess": "已加入小组件",
+    "addFailed": "无法加入小组件",
+    "insertFailed": "无法插入小组件",
+    "limitReached": "小组件数量已达上限",
+    "categoryAll": "全部",
+    "categoryUncategorized": "未分类",
+    "addCategory": "新分类",
+    "categoryName": "分类名",
+    "deleteCategory": "删除分类",
+    "setCategory": "设置分类",
+    "categoryAddFailed": "无法添加分类（重名或已达上限）"
+  },
   "objectList": {
     "title": "图层",
     "empty": "当前画板还没有元素",
