@@ -167,7 +167,9 @@
     "polygon": "多角形",
     "graph": "図形",
     "group": "グループ",
-    "element": "要素"
+    "element": "要素",
+    "multiSelect": "複数選択",
+    "multiSelectHint": "複数選択オン：タップで切替、再タップでオフ"
   },
   "cleanModal": {
     "title": "コンテンツのクリアを確認しますか？"
@@ -225,7 +227,8 @@
     "syncCloudEmpty": "この同期コードにボードはありません",
     "syncCloudCount": "クラウド {{count}}",
     "syncLoadedAs": "表示中：{{code}}",
-    "syncOwnSpace": "自分の領域（削除可）"
+    "syncOwnSpace": "自分の領域（削除可）",
+    "open": "開く"
   },
   "templatePrompt": {
     "title": "Paint Board",
@@ -539,15 +542,16 @@
       "panBoard1": "ボード移動(1)",
       "panBoardCtrlDrag": "ボード移動(空白)",
       "panBoard2": "ボード移動(2)",
-      "panBoardMobile": "ボード移動(モバイル)",
+      "panBoardMobile": "ボード移動(二本指)",
       "zoomBoard1": "ボードズーム(1)",
       "zoomBoard2": "ボードズーム(2)",
-      "zoomBoardMobile": "ボードズーム(モバイル)",
+      "zoomBoardMobile": "ズーム(二本指)",
       "resetZoom": "ズームリセット",
       "undo": "元に戻す",
       "undoMobile": "元に戻す(モバイル)",
       "redo": "やり直し",
-      "redoMobile": "やり直し(モバイル)"
+      "redoMobile": "やり直し(モバイル)",
+      "panBoardHand": "ボード移動(ハンドモード)"
     },
     "elementOperations": {
       "selectAll": "全要素選択",
@@ -563,7 +567,10 @@
       "nudgeSelected": "選択要素を微調整",
       "clearSelection": "選択解除",
       "deleteSelected": "選択要素削除",
-      "moveLayer": "要素レイヤー移動"
+      "moveLayer": "要素レイヤー移動",
+      "longPressSelect": "長押しで選択",
+      "longPressMarquee": "長押しドラッグで範囲選択",
+      "duplicateDragTouch": "複製モードでドラッグ複製"
     },
     "toolOperations": {
       "switchDrawMode": "描画モード切替",
@@ -587,7 +594,15 @@
       "threeFingerTap": "三本指で二回クリック",
       "mouseLeftClick": "マウス左クリック",
       "mouseRightClick": "マウス右クリック",
-      "mouseRightDrag": "マウス右ドラッグ"
+      "mouseRightDrag": "マウス右ドラッグ",
+      "handPanToggle": "ハンドボタン後に一本指ドラッグ",
+      "longPress": "長押し",
+      "longPressDrag": "長押し後ドラッグ",
+      "duplicateModeToggle": "複製ボタンをタップしてからドラッグ"
     }
+  },
+  "touchUi": {
+    "panMode": "ハンドでボード移動",
+    "duplicateMode": "複製モード（ドラッグでコピー）"
   }
 }

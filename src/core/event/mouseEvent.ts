@@ -1,5 +1,6 @@
 import { fabric } from 'fabric'
 import { paintBoard } from '@/core/paintBoard'
+import useBoardStore from '@/store/board'
 import { isCanvasTextObject } from '@/core/element/text/placeholder'
 import { EraserCursor } from '@/core/element/eraser/cursor'
 import { DrawingHandler } from './draw/drawingHandler'
@@ -11,7 +12,10 @@ export class CanvasMouseEvent {
   isSpaceKeyDown = false
   /** Ctrl/Cmd + drag on empty canvas pans (does not conflict with Ctrl-drag copy on objects). */
   isCtrlEmptyPan = false
+  /** Touch hand-tool pan (isPanMode). */
+  isHandPan = false
   private eraserCursor: EraserCursor
+  private handPanActive = false
 
   constructor(eraserCursor: EraserCursor) {
     this.eraserCursor = eraserCursor
@@ -31,7 +35,15 @@ export class CanvasMouseEvent {
 
       this.isMouseDown = true
       this.isCtrlEmptyPan = false
+      this.isHandPan = false
       if (this.isSpaceKeyDown) {
+        return
+      }
+
+      // Hand-tool pan (touch): single finger moves the board.
+      if (useBoardStore.getState().isPanMode && mouse?.button === 0) {
+        this.isHandPan = true
+        this.beginHandPan(canvas)
         return
       }
 
@@ -65,8 +77,8 @@ export class CanvasMouseEvent {
 
     canvas?.on('mouse:move', (e) => {
       if (this.isMouseDown) {
-        // Space-drag or Ctrl-drag on empty canvas pans the board.
-        if (this.isSpaceKeyDown || this.isCtrlEmptyPan) {
+        // Space / Ctrl-empty / hand-tool pan.
+        if (this.isSpaceKeyDown || this.isCtrlEmptyPan || this.isHandPan) {
           canvas.relativePan(new fabric.Point(e.e.movementX, e.e.movementY))
           return
         }
@@ -88,8 +100,11 @@ export class CanvasMouseEvent {
       if (this.isCtrlEmptyPan) {
         this.isCtrlEmptyPan = false
         endCanvasPan(canvas)
-        canvas.defaultCursor = 'default'
-        canvas.setCursor('default')
+        paintBoard.syncPanModeCursor()
+      }
+      if (this.isHandPan) {
+        this.isHandPan = false
+        this.endHandPan(canvas)
       }
 
       if (e.absolutePointer) {
@@ -107,5 +122,25 @@ export class CanvasMouseEvent {
 
   setSpaceKeyDownState(isSpaceKeyDown: boolean) {
     this.isSpaceKeyDown = isSpaceKeyDown
+  }
+
+  private beginHandPan(canvas: fabric.Canvas | undefined) {
+    if (!canvas || this.handPanActive) {
+      return
+    }
+    this.handPanActive = true
+    beginCanvasPan(canvas)
+    canvas.defaultCursor = 'grabbing'
+    canvas.setCursor('grabbing')
+  }
+
+  private endHandPan(canvas: fabric.Canvas | undefined) {
+    if (!this.handPanActive) {
+      paintBoard.syncPanModeCursor()
+      return
+    }
+    this.handPanActive = false
+    endCanvasPan(canvas)
+    paintBoard.syncPanModeCursor()
   }
 }

@@ -101,6 +101,10 @@ const Shortcut = () => {
               <td>{t('helpInfo.keyboardShortcuts.doubleFingerDrag')}</td>
             </tr>
             <tr>
+              <td>{t('helpInfo.boardOperations.panBoardHand')}</td>
+              <td>{t('helpInfo.keyboardShortcuts.handPanToggle')}</td>
+            </tr>
+            <tr>
               <td>{t('helpInfo.boardOperations.zoomBoardMobile')}</td>
               <td>{t('helpInfo.keyboardShortcuts.doubleFingerZoom')}</td>
             </tr>
@@ -154,6 +158,14 @@ const Shortcut = () => {
               <td>{t('helpInfo.keyboardShortcuts.mouseRightDrag')}</td>
             </tr>
             <tr>
+              <td>{t('helpInfo.elementOperations.longPressSelect')}</td>
+              <td>{t('helpInfo.keyboardShortcuts.longPress')}</td>
+            </tr>
+            <tr>
+              <td>{t('helpInfo.elementOperations.longPressMarquee')}</td>
+              <td>{t('helpInfo.keyboardShortcuts.longPressDrag')}</td>
+            </tr>
+            <tr>
               <td>{t('helpInfo.elementOperations.copySelected')}</td>
               <td>
                 <kbd className="kbd kbd-sm">{metaKey}</kbd>
@@ -192,6 +204,10 @@ const Shortcut = () => {
                 <span> + </span>
                 <span>{t('helpInfo.keyboardShortcuts.spaceDrag')}</span>
               </td>
+            </tr>
+            <tr>
+              <td>{t('helpInfo.elementOperations.duplicateDragTouch')}</td>
+              <td>{t('helpInfo.keyboardShortcuts.duplicateModeToggle')}</td>
             </tr>
             <tr>
               <td>{t('helpInfo.elementOperations.constrainMove')}</td>

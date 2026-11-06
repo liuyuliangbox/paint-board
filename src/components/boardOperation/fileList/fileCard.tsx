@@ -1,7 +1,8 @@
 import { FC, MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pencil } from 'lucide-react'
+import { FolderOpen, Pencil } from 'lucide-react'
 import { IFile } from '@/store/files'
+import { useTouchUi } from '@/hooks/useTouchUi'
 
 const finePointerHidden =
   '[@media(hover:hover)_and_(pointer:fine)]:pointer-events-none [@media(hover:hover)_and_(pointer:fine)]:opacity-0 [@media(hover:hover)_and_(pointer:fine)]:group-hover:pointer-events-auto [@media(hover:hover)_and_(pointer:fine)]:group-hover:opacity-100 [@media(hover:hover)_and_(pointer:fine)]:group-focus-within:pointer-events-auto [@media(hover:hover)_and_(pointer:fine)]:group-focus-within:opacity-100'
@@ -35,10 +36,16 @@ const FileCard: FC<IProps> = ({
   onRename
 }) => {
   const { t } = useTranslation()
+  const { coarse } = useTouchUi()
 
   const handleCardClick = (event: MouseEvent<HTMLButtonElement>) => {
     // Ignore the second click of a double-click so focus is not applied twice.
     if (event.detail > 1) {
+      return
+    }
+    // Touch: tap current again to open (no reliable double-tap).
+    if (coarse && current) {
+      onOpen(file.id)
       return
     }
     onFocus(file.id)
@@ -90,8 +97,8 @@ const FileCard: FC<IProps> = ({
         </div>
       </button>
       <label
-        className={`absolute left-2 top-2 z-10 flex h-7 w-7 cursor-pointer items-center justify-center rounded-md bg-white/90 ${
-          checked ? '' : finePointerHidden
+        className={`absolute left-2 top-2 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-md bg-white/90 ${
+          checked || coarse ? '' : finePointerHidden
         }`}
         onClick={(event) => event.stopPropagation()}
       >
@@ -104,9 +111,24 @@ const FileCard: FC<IProps> = ({
           onClick={(event) => event.stopPropagation()}
         />
       </label>
+      {coarse && (
+        <button
+          type="button"
+          className="absolute right-10 top-2 z-10 rounded-md bg-white/90 p-1.5 text-primary hover:bg-slate-100"
+          aria-label={t('fileBoard.open') || undefined}
+          onClick={(event) => {
+            event.stopPropagation()
+            onOpen(file.id)
+          }}
+        >
+          <FolderOpen size={16} />
+        </button>
+      )}
       <button
         type="button"
-        className={`absolute right-2 top-2 z-10 rounded-md bg-white/90 p-1 text-primary hover:bg-slate-100 ${finePointerHidden}`}
+        className={`absolute right-2 top-2 z-10 rounded-md bg-white/90 p-1.5 text-primary hover:bg-slate-100 ${
+          coarse ? '' : finePointerHidden
+        }`}
         aria-label={t('fileBoard.rename') || undefined}
         onClick={(event) => {
           event.stopPropagation()

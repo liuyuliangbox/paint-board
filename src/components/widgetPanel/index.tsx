@@ -35,6 +35,7 @@ import {
 import { isCloudLoggedIn, subscribeCloudAuth } from '@/core/auth/cloudAuth'
 import Toast from '@/components/toast'
 import CloudLoginModal from '@/components/cloudAuth/CloudLoginModal'
+import { useTouchUi } from '@/hooks/useTouchUi'
 
 type SyncTab = 'local' | 'cloud'
 
@@ -81,6 +82,7 @@ const WidgetPanel = () => {
   const panelRef = useRef<HTMLDivElement>(null)
   /** Only fire regenerate if pointerdown also started on that button. */
   const regenerateArmedRef = useRef(false)
+  const { coarse, narrow } = useTouchUi()
 
   useEffect(() => subscribeCloudAuth(() => setLoggedIn(isCloudLoggedIn())), [])
 
@@ -425,10 +427,14 @@ const WidgetPanel = () => {
           panelOpen ? 'w-[min(96vw,56rem)]' : 'w-auto'
         }`}
       >
-        <div className="pointer-events-auto overflow-hidden rounded-b-xl border border-t-0 border-slate-200 bg-[#eef1ff]/95 shadow-md backdrop-blur">
+        <div
+          className={`pointer-events-auto overflow-hidden rounded-b-xl border border-t-0 border-slate-200 bg-[#eef1ff]/95 shadow-md backdrop-blur ${
+            panelOpen && narrow ? 'max-h-[min(45vh,22rem)]' : ''
+          }`}
+        >
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-1.5 px-2.5 py-1 text-xs text-slate-600 hover:bg-white/50"
+            className="flex w-full items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-600 hover:bg-white/50"
             onClick={togglePanel}
           >
             <LayoutTemplate className="h-3.5 w-3.5 text-[#66CC8A]" />
@@ -444,7 +450,11 @@ const WidgetPanel = () => {
           </button>
 
           {panelOpen && (
-            <div className="border-t border-slate-200/80 px-3 pb-3 pt-2">
+            <div
+              className={`border-t border-slate-200/80 px-3 pb-3 pt-2 ${
+                narrow ? 'max-h-[min(40vh,20rem)] overflow-y-auto' : ''
+              }`}
+            >
               <div className="mb-2 flex items-center gap-1.5">
                 <button
                   type="button"
@@ -613,7 +623,9 @@ const WidgetPanel = () => {
                             <div className="absolute left-1 top-1 z-[1]">
                               <input
                                 type="checkbox"
-                                className="checkbox checkbox-xs bg-white"
+                                className={`checkbox checkbox-xs bg-white ${
+                                  coarse || checked ? '' : 'opacity-70'
+                                }`}
                                 checked={checked}
                                 aria-label={
                                   t('widget.select', {
@@ -630,6 +642,10 @@ const WidgetPanel = () => {
                               title={String(t('widget.insertHint'))}
                               onClick={(event) => {
                                 if (event.detail > 1) {
+                                  return
+                                }
+                                if (coarse && focused) {
+                                  void insertAtCenter(widget.id)
                                   return
                                 }
                                 focusWidget(widget.id)
@@ -682,9 +698,25 @@ const WidgetPanel = () => {
                                     {t('widget.current')}
                                   </span>
                                 )}
+                                {coarse && (
+                                  <button
+                                    type="button"
+                                    className="rounded bg-[#66CC8A]/15 px-1 py-0.5 text-[9px] text-[#3d9a5c]"
+                                    title={String(t('widget.insert'))}
+                                    onClick={() =>
+                                      void insertAtCenter(widget.id)
+                                    }
+                                  >
+                                    {t('widget.insert')}
+                                  </button>
+                                )}
                                 <button
                                   type="button"
-                                  className="rounded p-0.5 text-slate-400 opacity-0 hover:bg-slate-100 group-hover:opacity-100"
+                                  className={`rounded p-0.5 text-slate-400 hover:bg-slate-100 ${
+                                    coarse
+                                      ? ''
+                                      : 'opacity-0 group-hover:opacity-100'
+                                  }`}
                                   title={String(t('widget.rename'))}
                                   onClick={() => {
                                     setEditingId(widget.id)

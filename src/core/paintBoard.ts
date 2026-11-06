@@ -31,6 +31,7 @@ import { clearFabricFontCache, relayoutFonts } from './font/applyFont'
 import useFileStore, { waitForFilesHydration } from '@/store/files'
 import useDrawStore from '@/store/draw'
 import useBoardStore from '@/store/board'
+import { applyTouchTransformChrome } from './event/touchTransformChrome'
 
 interface BoardLoadJob {
   serial: number
@@ -80,6 +81,7 @@ export class PaintBoard {
       borderDashArray: [3, 3],
       transparentCorners: false
     })
+    applyTouchTransformChrome()
     fabric.Line.prototype.strokeLineJoin = 'round'
     fabric.Line.prototype.strokeLineCap = 'round'
 
@@ -88,6 +90,7 @@ export class PaintBoard {
 
     this.evnet = new EventModule(this.canvas)
     this.handleMode()
+    this.syncPanModeCursor()
     ensureFreehandInput()
 
     const canvas = this.canvas
@@ -438,6 +441,7 @@ export class PaintBoard {
     this.canvas.isDrawingMode = isDrawingMode
     this.canvas.selection = selection
     fabric.Object.prototype.set(objectSet)
+    applyTouchTransformChrome()
 
     // Keep every object in sync with the mode. Only updating IText left
     // previously drawn paths stuck with selectable:false after mode switches.
@@ -451,6 +455,31 @@ export class PaintBoard {
 
     this.canvas.requestRenderAll()
     this.evnet?.eraserCursor.setActive(mode === ActionMode.ERASE)
+    this.syncPanModeCursor()
+  }
+
+  /** Cursor + skipTargetFind for touch hand-pan mode. */
+  syncPanModeCursor() {
+    const canvas = this.canvas
+    if (!canvas) {
+      return
+    }
+    if (useBoardStore.getState().isPanMode) {
+      canvas.defaultCursor = 'grab'
+      canvas.setCursor('grab')
+      canvas.selection = false
+      canvas.skipTargetFind = true
+      return
+    }
+    canvas.skipTargetFind = false
+    if (useBoardStore.getState().mode === ActionMode.SELECT) {
+      canvas.defaultCursor = 'default'
+      canvas.setCursor('default')
+      canvas.selection = true
+      return
+    }
+    canvas.defaultCursor = 'default'
+    canvas.setCursor('default')
   }
 
   /**

@@ -74,6 +74,9 @@ export class DragInteraction {
     if (paintBoard.evnet?.mouseEvent.isSpaceKeyDown) {
       return
     }
+    if (useBoardStore.getState().isPanMode) {
+      return
+    }
 
     const active = canvas.getActiveObject()
     if (!active || isObjectLocked(active)) {
@@ -114,7 +117,11 @@ export class DragInteraction {
     }
 
     const mouseEvent = e as MouseEvent
-    if (mouseEvent.ctrlKey || mouseEvent.metaKey) {
+    const wantsDuplicate =
+      mouseEvent.ctrlKey ||
+      mouseEvent.metaKey ||
+      useBoardStore.getState().duplicateDragEnabled
+    if (wantsDuplicate) {
       // ActiveSelection children use group-relative left/top — convert to
       // canvas space so the copy stays under the original, not far away.
       this.pendingDuplicate = activeObjects.map((object) => {

@@ -228,10 +228,10 @@ const DownloadImage: FC<IProps> = ({
       }}
     >
       {downloadFailed && <Toast message="tip.exportFail" type="error" />}
-      <div className="p-6 bg-[#eef1ff] card shadow-xl overflow-auto max-w-[800px] w-[80vw] h-fit max-h-[60vh]">
+      <div className="card h-fit max-h-[85vh] w-[min(96vw,800px)] overflow-auto bg-[#eef1ff] p-4 shadow-xl sm:max-h-[60vh] sm:w-[80vw] sm:p-6">
         {completedCrop && (
-          <div className="w-full flex justify-between">
-            <div className="w-[48%]">
+          <div className="flex w-full flex-col gap-4 sm:flex-row sm:justify-between sm:gap-0">
+            <div className="w-full sm:w-[48%]">
               <div className="flex items-center flex-wrap gap-y-2">
                 <div
                   className="mr-[12px] shrink-0 min-xs:tooltip"
@@ -342,21 +342,21 @@ const DownloadImage: FC<IProps> = ({
               </div>
             </div>
 
-            <div className="w-[48%] flex flex-wrap gap-x-4 gap-y-2 h-fit">
+            <div className="flex h-fit w-full flex-wrap gap-x-4 gap-y-2 sm:w-[48%]">
               <button
-                className="btn btn-ghost btn-outline btn-sm"
+                className="btn btn-ghost btn-outline btn-sm min-h-10"
                 onClick={() => setShowModal(false)}
               >
                 {t('cancel')}
               </button>
               <button
-                className="btn btn-secondary btn-sm"
+                className="btn btn-secondary btn-sm min-h-10"
                 onClick={handleReset}
               >
                 {t('reset')}
               </button>
               <button
-                className="btn btn-primary btn-sm"
+                className="btn btn-primary btn-sm min-h-10"
                 disabled={backgroundPending}
                 onClick={onDownloadCropClick}
               >
@@ -378,20 +378,21 @@ const DownloadImage: FC<IProps> = ({
             </div>
           </div>
         )}
-        <div className="w-full flex justify-between mt-3">
+        <div className="mt-3 flex w-full flex-col gap-3 sm:flex-row sm:justify-between">
           {url && (
-            <div className="w-[48%] shrink-0">
-              <div className="w-fit bg-transparent bg-[length:13px_13px] bg-white flex">
+            <div className="w-full shrink-0 overflow-auto sm:w-[48%]">
+              <div className="flex w-fit max-w-full bg-transparent bg-white bg-[length:13px_13px]">
                 <ReactCrop
                   crop={crop}
                   onChange={setCrop}
                   onComplete={setCompletedCrop}
-                  minHeight={100}
-                  minWidth={100}
+                  minHeight={80}
+                  minWidth={80}
                 >
                   <img
                     ref={imgRef}
                     src={displayUrl}
+                    className="max-w-full"
                     style={{
                       transform: `scale(${saveImageScale}) rotate(${saveImageRotate}deg)`
                     }}
@@ -402,7 +403,7 @@ const DownloadImage: FC<IProps> = ({
             </div>
           )}
           {completedCrop && (
-            <div className="w-[48%] shrink-0">
+            <div className="w-full max-h-48 shrink-0 overflow-auto sm:max-h-none sm:w-[48%]">
               <canvas
                 ref={previewCanvasRef}
                 className="object-contain border border-base-content border-dashed"

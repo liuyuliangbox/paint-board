@@ -3,6 +3,7 @@ import Sortable from 'sortablejs'
 import { useTranslation } from 'react-i18next'
 import { Link2, Link2Off } from 'lucide-react'
 import { paintBoard } from '@/core/paintBoard'
+import { useTouchUi } from '@/hooks/useTouchUi'
 import {
   objectListRows,
   ObjectListRow,
@@ -38,10 +39,12 @@ const readRows = (): ObjectListRow[] => {
 
 const ObjectList: FC<IProps> = ({ updateShow }) => {
   const { t } = useTranslation()
+  const { coarse } = useTouchUi()
   const sortableRef = useRef<HTMLUListElement>(null)
   const [rows, setRows] = useState<ObjectListRow[]>(readRows)
   const [anchorIndex, setAnchorIndex] = useState(0)
   const [canUnlink, setCanUnlink] = useState(false)
+  const [multiSelect, setMultiSelect] = useState(false)
   const selectedCount = rows.filter((row) => row.selected).length
 
   useEffect(() => {
@@ -98,7 +101,7 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
     let mode: ListSelectMode = 'replace'
     if (event.shiftKey) {
       mode = 'range'
-    } else if (event.metaKey || event.ctrlKey) {
+    } else if (event.metaKey || event.ctrlKey || (coarse && multiSelect)) {
       mode = 'toggle'
     } else {
       setAnchorIndex(index)
@@ -134,6 +137,18 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
             {t('objectList.title')}
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+            {coarse && (
+              <button
+                type="button"
+                className={`btn btn-sm gap-1 ${
+                  multiSelect ? 'btn-primary' : 'btn-ghost'
+                }`}
+                aria-pressed={multiSelect}
+                onClick={() => setMultiSelect((value) => !value)}
+              >
+                {t('objectList.multiSelect')}
+              </button>
+            )}
             <button
               type="button"
               className="btn btn-sm btn-ghost gap-1"
@@ -160,7 +175,9 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
             </button>
           </div>
           <p className="mt-2 text-center text-[11px] text-slate-400">
-            {t('objectList.hint')}
+            {coarse && multiSelect
+              ? t('objectList.multiSelectHint')
+              : t('objectList.hint')}
           </p>
           <div className="mt-4 w-full max-w-full rounded-2xl bg-[#eef1ff] py-2">
             <ul

@@ -13,6 +13,10 @@ interface BoardState {
   language: string // i18n language 'zh' 'en'
   isObjectCaching: boolean // fabric objectCaching
   openGuideLine: boolean // does the guide line show
+  /** Touch hand tool: single-finger pan (independent of ActionMode.Board). */
+  isPanMode: boolean
+  /** Touch duplicate-while-drag (desktop still uses Ctrl/Cmd+drag). */
+  duplicateDragEnabled: boolean
 }
 
 interface BoardAction {
@@ -21,6 +25,10 @@ interface BoardAction {
   updateLanguage: (language: string) => void
   updateCacheState: () => void
   updateOpenGuideLine: () => void
+  setPanMode: (enabled: boolean) => void
+  togglePanMode: () => void
+  setDuplicateDragEnabled: (enabled: boolean) => void
+  toggleDuplicateDragEnabled: () => void
 }
 
 const initLanguage = getInitLanguage()
@@ -33,13 +41,18 @@ const useBoardStore = create<BoardState & BoardAction>()(
       language: initLanguage,
       isObjectCaching: true,
       openGuideLine: false,
+      isPanMode: false,
+      duplicateDragEnabled: false,
       updateMode: (mode) => {
         const oldMode = get().mode
         if (oldMode !== mode) {
-          paintBoard.handleMode(mode)
+          // Switching tool modes clears temporary touch pan / dup-drag toggles.
           set({
-            mode
+            mode,
+            isPanMode: false,
+            duplicateDragEnabled: false
           })
+          paintBoard.handleMode(mode)
         }
       },
       updateDrawType: (drawType) => {
@@ -72,10 +85,45 @@ const useBoardStore = create<BoardState & BoardAction>()(
           openGuideLine: newOpenGuideLine
         })
         alignGuideLine.updateOpenState(newOpenGuideLine)
+      },
+      setPanMode(enabled) {
+        set({
+          isPanMode: enabled,
+          ...(enabled ? { duplicateDragEnabled: false } : {})
+        })
+        if (enabled) {
+          paintBoard.syncPanModeCursor()
+        } else {
+          paintBoard.handleMode()
+        }
+      },
+      togglePanMode() {
+        get().setPanMode(!get().isPanMode)
+      },
+      setDuplicateDragEnabled(enabled) {
+        set({
+          duplicateDragEnabled: enabled,
+          ...(enabled ? { isPanMode: false } : {})
+        })
+        if (!enabled) {
+          paintBoard.handleMode()
+        } else {
+          paintBoard.syncPanModeCursor()
+        }
+      },
+      toggleDuplicateDragEnabled() {
+        get().setDuplicateDragEnabled(!get().duplicateDragEnabled)
       }
     }),
     {
-      name: 'PAINT-BOARD-STORE'
+      name: 'PAINT-BOARD-STORE',
+      partialize: (state) => ({
+        mode: state.mode,
+        drawType: state.drawType,
+        language: state.language,
+        isObjectCaching: state.isObjectCaching,
+        openGuideLine: state.openGuideLine
+      })
     }
   )
 )

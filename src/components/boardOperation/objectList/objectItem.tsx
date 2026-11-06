@@ -93,7 +93,7 @@ const ObjectItem: FC<IProps> = ({
           )}
         </span>
         <GripVertical
-          className="drag-object-list-handle hidden cursor-grab group-hover:block xs:block"
+          className="drag-object-list-handle hidden cursor-grab group-hover:block [@media(pointer:coarse)]:block xs:block"
           color={iconColor}
           size={16}
           onClick={(event) => {

@@ -167,7 +167,9 @@
     "polygon": "多邊形",
     "graph": "圖形",
     "group": "組合",
-    "element": "元素"
+    "element": "元素",
+    "multiSelect": "多選",
+    "multiSelectHint": "多選已開：點按切換選中；再點「多選」關閉"
   },
   "cleanModal": {
     "title": "確認清除內容？"
@@ -225,7 +227,8 @@
     "syncCloudEmpty": "該同步碼下暫無畫板",
     "syncCloudCount": "雲端 {{count}}",
     "syncLoadedAs": "目前：{{code}}",
-    "syncOwnSpace": "我的空間（可刪除）"
+    "syncOwnSpace": "我的空間（可刪除）",
+    "open": "打開"
   },
   "templatePrompt": {
     "title": "Paint Board",
@@ -539,15 +542,16 @@
       "panBoard1": "平移畫板(1)",
       "panBoardCtrlDrag": "平移畫板(空白處)",
       "panBoard2": "平移畫板(2)",
-      "panBoardMobile": "平移畫板(移動端)",
+      "panBoardMobile": "平移畫板(雙指)",
       "zoomBoard1": "縮放畫板(1)",
       "zoomBoard2": "縮放畫板(2)",
-      "zoomBoardMobile": "縮放畫板(移動端)",
+      "zoomBoardMobile": "縮放畫板(雙指)",
       "resetZoom": "重置畫板縮放",
       "undo": "撤銷",
       "undoMobile": "撤銷(移動端)",
       "redo": "重做",
-      "redoMobile": "重做(移動端)"
+      "redoMobile": "重做(移動端)",
+      "panBoardHand": "平移畫板(手型模式)"
     },
     "elementOperations": {
       "selectAll": "選中全部元素",
@@ -563,7 +567,10 @@
       "nudgeSelected": "微調選中元素位置",
       "clearSelection": "取消選中",
       "deleteSelected": "刪除當前選中元素",
-      "moveLayer": "移動元素圖層"
+      "moveLayer": "移動元素圖層",
+      "longPressSelect": "觸屏長按選中元素",
+      "longPressMarquee": "觸屏長按拖動框選",
+      "duplicateDragTouch": "開啟複製模式後拖動複製"
     },
     "toolOperations": {
       "switchDrawMode": "切換繪畫模式",
@@ -587,7 +594,15 @@
       "threeFingerTap": "三指雙擊",
       "mouseLeftClick": "鼠標左鍵",
       "mouseRightClick": "鼠標右鍵",
-      "mouseRightDrag": "鼠標右鍵拖拽"
+      "mouseRightDrag": "鼠標右鍵拖拽",
+      "handPanToggle": "點按底部手型按鈕後單指拖拽",
+      "longPress": "長按",
+      "longPressDrag": "長按後拖拽",
+      "duplicateModeToggle": "點按底部複製按鈕後拖動"
     }
+  },
+  "touchUi": {
+    "panMode": "手型平移畫布",
+    "duplicateMode": "複製模式（拖動時留下副本）"
   }
 }
