@@ -375,19 +375,8 @@ const FileList: FC<IProps> = ({ updateShow }) => {
     <>
       <div className="modal modal-open z-[70]">
         <div className="modal-box flex h-[min(88vh,920px)] w-[94vw] max-w-5xl flex-col overflow-hidden p-0">
-          <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
-            <div>
-              <h3 className="font-fredokaOne text-2xl">
-                {t('fileBoard.title')}
-              </h3>
-              <div className="mt-1 text-sm text-slate-500">
-                {t('fileBoard.selected', { count: selected.size })}
-                <span className="mx-2">·</span>
-                {tab === 'local'
-                  ? `${files.length}/${MAX_BOARD_COUNT}`
-                  : t('fileBoard.syncCloudCount', { count: cloudMetas.length })}
-              </div>
-            </div>
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+            <h3 className="font-fredokaOne text-2xl">{t('fileBoard.title')}</h3>
             <div className="flex items-center gap-1">
               {loggedIn ? (
                 <button
@@ -462,6 +451,11 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                     ? t('fileBoard.clearSelection')
                     : t('fileBoard.selectAll')}
                 </label>
+                <span className="text-sm text-slate-500">
+                  {t('fileBoard.selected', { count: selected.size })}
+                  <span className="mx-1.5">·</span>
+                  {`${files.length}/${MAX_BOARD_COUNT}`}
+                </span>
                 <div className="ml-auto flex items-center gap-1">
                   {selected.size === 0 ? (
                     <>
@@ -618,6 +612,11 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                       ? t('fileBoard.clearSelection')
                       : t('fileBoard.selectAll')}
                   </label>
+                  <span className="text-sm text-slate-500">
+                    {t('fileBoard.selected', { count: selected.size })}
+                    <span className="mx-1.5">·</span>
+                    {t('fileBoard.syncCloudCount', { count: cloudMetas.length })}
+                  </span>
                   <div className="ml-auto flex items-center gap-1">
                     {selected.size > 0 && (
                       <>
