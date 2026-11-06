@@ -1,7 +1,8 @@
-import { useState, FC } from 'react'
+import { useState, useEffect, useRef, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import useBoardStore from '@/store/board'
 import { ActionMode } from '@/constants'
+import { paintBoard } from '@/core/paintBoard'
 import { modeSwitch } from './constant'
 
 import { X, Menu } from 'lucide-react'
@@ -13,17 +14,55 @@ import BoardConfig from './boardConfig'
 const ToolPanel: FC = () => {
   const { t } = useTranslation()
   const { mode, updateMode } = useBoardStore()
-  const [showPanel, setShowPanel] = useState(true) // toggle main panel display
+  const [showPanel, setShowPanel] = useState(true)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // Close when interacting with the canvas (blank / draw), same as widget panel.
+  useEffect(() => {
+    if (!showPanel) {
+      return
+    }
+    const onPointerDown = (event: PointerEvent) => {
+      const root = panelRef.current
+      if (root?.contains(event.target as Node)) {
+        return
+      }
+      const canvas = paintBoard.canvas
+      if (!canvas) {
+        return
+      }
+      const lower = canvas.getElement()
+      const upper = (canvas as unknown as { upperCanvasEl?: HTMLElement })
+        .upperCanvasEl
+      const target = event.target
+      if (
+        target === lower ||
+        target === upper ||
+        (lower && lower.contains(target as Node)) ||
+        (upper && upper.contains(target as Node))
+      ) {
+        setShowPanel(false)
+      }
+    }
+    document.addEventListener('pointerdown', onPointerDown, true)
+    return () =>
+      document.removeEventListener('pointerdown', onPointerDown, true)
+  }, [showPanel])
 
   return (
     <div
+      ref={panelRef}
       className={`fixed top-7 left-7 flex flex-col card shadow-xl overflow-visible z-[3] bg-[#eef1ff] max-h-[80%] max-w-[85%] ${
         showPanel ? 'p-4' : ''
       }`}
     >
       {/* toggle main panel display button */}
       <label className="btn btn-neutral btn-circle swap swap-rotate absolute -top-3 -left-3 h-7 w-7 min-h-0">
-        <input type="checkbox" onChange={() => setShowPanel((v) => !v)} />
+        <input
+          type="checkbox"
+          checked={!showPanel}
+          onChange={() => setShowPanel((v) => !v)}
+        />
         <Menu
           strokeWidth={2.5}
           color="#fff"

@@ -10,6 +10,8 @@ interface IProps {
   as?: 'button' | 'div' | 'label'
   htmlFor?: string
   className?: string
+  /** Phone vertical rail vs desktop bottom bar. */
+  layout?: 'rail' | 'bar'
 }
 
 const DockButton: FC<IProps> = ({
@@ -21,16 +23,18 @@ const DockButton: FC<IProps> = ({
   children,
   as = 'button',
   htmlFor,
-  className = ''
+  className = '',
+  layout = 'bar'
 }) => {
-  // Vertical phone rail: icon + text in one row per item.
-  // Horizontal desktop bar: same row layout when legend is open.
-  const base = `flex shrink-0 items-center justify-center gap-1 rounded-lg px-1.5 py-1.5 transition-colors ${
+  const rail = layout === 'rail'
+  const base = `flex shrink-0 items-center justify-center rounded-lg transition-colors ${
     disabled
       ? 'cursor-not-allowed opacity-40'
       : 'cursor-pointer hover:bg-slate-200'
   } ${active ? 'bg-[#66CC8A]/25 text-[#2d8f55]' : 'text-slate-700'} ${
-    showLabel ? 'justify-start xs:w-full' : ''
+    rail
+      ? `w-full flex-col gap-0.5 px-0.5 py-1.5 ${showLabel ? '' : 'py-2'}`
+      : `flex-row gap-1 px-1.5 py-1.5`
   } ${className}`
 
   const content = (
@@ -39,14 +43,19 @@ const DockButton: FC<IProps> = ({
         {children}
       </span>
       {showLabel && (
-        <span className="shrink-0 whitespace-nowrap text-[11px] font-medium leading-tight text-slate-700">
+        <span
+          className={
+            rail
+              ? 'w-full px-0.5 text-center text-[9px] font-medium leading-[1.1] text-slate-700 line-clamp-2'
+              : 'shrink-0 whitespace-nowrap text-[11px] font-medium leading-tight text-slate-700'
+          }
+        >
           {label}
         </span>
       )}
     </>
   )
 
-  // Only use native title tooltips when labels are hidden.
   const tip = showLabel ? undefined : label
 
   if (as === 'label') {

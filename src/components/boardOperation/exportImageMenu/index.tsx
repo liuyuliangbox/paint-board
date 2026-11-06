@@ -11,6 +11,8 @@ interface IProps {
   onExportBoard: () => void
   /** When true, show function name next to the icon (dock legend mode). */
   showLabel?: boolean
+  /** Phone vertical rail vs desktop bottom bar. */
+  layout?: 'rail' | 'bar'
   label?: string
 }
 
@@ -21,6 +23,7 @@ const ExportImageMenu = ({
   onExport,
   onExportBoard,
   showLabel = false,
+  layout = 'bar',
   label
 }: IProps) => {
   const { t } = useTranslation()
@@ -155,9 +158,11 @@ const ExportImageMenu = ({
         aria-expanded={open}
         aria-label={buttonLabel || undefined}
         title={showLabel ? undefined : buttonLabel || undefined}
-        className={`flex shrink-0 cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1.5 hover:bg-slate-200 xs:w-full ${
-          open ? 'bg-slate-200/80' : ''
-        }`}
+        className={`flex shrink-0 cursor-pointer items-center justify-center rounded-lg hover:bg-slate-200 ${
+          layout === 'rail'
+            ? `w-full flex-col gap-0.5 px-0.5 ${showLabel ? 'py-1.5' : 'py-2'}`
+            : 'flex-row gap-1 px-1.5 py-1.5'
+        } ${open ? 'bg-slate-200/80' : ''}`}
         onMouseEnter={() => {
           if (canHover.current) {
             openMenu()
@@ -174,7 +179,13 @@ const ExportImageMenu = ({
       >
         <Save strokeWidth={2} color="#66CC8A" size={18} />
         {showLabel && (
-          <span className="shrink-0 whitespace-nowrap text-[11px] font-medium leading-tight text-slate-700">
+          <span
+            className={
+              layout === 'rail'
+                ? 'w-full px-0.5 text-center text-[9px] font-medium leading-[1.1] text-slate-700 line-clamp-2'
+                : 'shrink-0 whitespace-nowrap text-[11px] font-medium leading-tight text-slate-700'
+            }
+          >
             {buttonLabel}
           </span>
         )}

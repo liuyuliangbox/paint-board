@@ -112,11 +112,30 @@ const OperationDock: FC<OperationDockProps> = ({
   const { t } = useTranslation()
   const labelOf = (key: string) => String(t(key))
   const { touchUi } = useTouchUi()
+  // Match Tailwind `xs` (max 750px) so rail layout tracks the vertical dock.
+  const [railLayout, setRailLayout] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia(SIDE_MQ).matches
+  )
+  const layout = railLayout ? 'rail' : 'bar'
   const [legendOpen, setLegendOpen] = useState(() => readDockLegendOpen())
   const [moreOpen, setMoreOpen] = useState(false)
   const dockRef = useRef<HTMLDivElement>(null)
   const swipeStart = useRef<{ x: number; y: number } | null>(null)
   const showLabel = legendOpen
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') {
+      return
+    }
+    const mq = window.matchMedia(SIDE_MQ)
+    const sync = () => setRailLayout(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   const setLegend = useCallback((open: boolean) => {
     setLegendOpen(open)
@@ -222,45 +241,42 @@ const OperationDock: FC<OperationDockProps> = ({
           ? labelOf('operate.collapseLegend')
           : labelOf('operate.expandLegend')
       }
-      // Always show this control with text (not only after legend opens).
+      // Always show this control with text so the rail entry is discoverable.
       showLabel
+      layout={layout}
       active={legendOpen}
       onClick={onToggleLegend}
-      className="border border-[#66CC8A]/50 bg-white shadow-sm xs:w-full"
+      className="border border-[#66CC8A]/50 bg-white shadow-sm"
     >
-      {/* Phone vertical rail uses left/right chevrons; desktop uses up/down. */}
-      <span className="hidden xs:inline-flex">
-        {legendOpen ? (
+      {layout === 'rail' ? (
+        legendOpen ? (
           <ChevronRight strokeWidth={iconStroke} />
         ) : (
           <ChevronLeft strokeWidth={iconStroke} />
-        )}
-      </span>
-      <span className="inline-flex xs:hidden">
-        {legendOpen ? (
-          <ChevronDown strokeWidth={iconStroke} />
-        ) : (
-          <ChevronUp strokeWidth={iconStroke} />
-        )}
-      </span>
+        )
+      ) : legendOpen ? (
+        <ChevronDown strokeWidth={iconStroke} />
+      ) : (
+        <ChevronUp strokeWidth={iconStroke} />
+      )}
     </DockButton>
   )
 
   return (
     <div
       className={`pointer-events-none fixed z-[12] ${
-        // Phone: right vertical rail. Desktop: bottom horizontal bar.
-        'bottom-4 left-1/2 w-[min(96vw,44rem)] -translate-x-1/2 xs:bottom-auto xs:left-auto xs:right-2 xs:top-1/2 xs:w-auto xs:translate-x-0 xs:-translate-y-1/2'
+        // Phone: slim right rail. Desktop: bottom bar.
+        'bottom-4 left-1/2 w-[min(96vw,44rem)] -translate-x-1/2 xs:bottom-auto xs:left-auto xs:right-1.5 xs:top-1/2 xs:w-auto xs:translate-x-0 xs:-translate-y-1/2'
       }`}
     >
       <div
         ref={dockRef}
-        className={`pointer-events-auto relative flex overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1.5 py-1 shadow-md backdrop-blur max-h-[30vh] items-stretch gap-1 xs:max-h-[78vh] xs:flex-col xs:gap-1 ${
-          legendOpen ? 'xs:w-[9.25rem]' : 'xs:w-[3.75rem]'
+        className={`pointer-events-auto relative flex items-stretch gap-1 overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1 py-1 shadow-md backdrop-blur max-h-[30vh] xs:max-h-[78vh] xs:flex-col xs:gap-0.5 xs:px-0.5 ${
+          // Slim rail: icon above text — never a wide icon+text row.
+          legendOpen ? 'xs:w-16' : 'xs:w-11'
         }`}
       >
-        {/* Pinned so “展开说明” stays visible while the list scrolls. */}
-        <div className="flex shrink-0 items-center border-r border-slate-200/80 pr-1 xs:border-r-0 xs:border-b xs:pb-1 xs:pr-0">
+        <div className="flex shrink-0 items-center border-r border-slate-200/80 pr-1 xs:border-r-0 xs:border-b xs:px-0.5 xs:pb-1 xs:pr-0">
           {legendToggle}
         </div>
 
@@ -269,6 +285,7 @@ const OperationDock: FC<OperationDockProps> = ({
             <DockButton
               label={labelOf('operate.dock.undo')}
               showLabel={showLabel}
+              layout={layout}
               onClick={onUndo}
             >
               <Undo2 strokeWidth={iconStroke} />
@@ -276,6 +293,7 @@ const OperationDock: FC<OperationDockProps> = ({
             <DockButton
               label={labelOf('operate.dock.redo')}
               showLabel={showLabel}
+              layout={layout}
               onClick={onRedo}
             >
               <Redo2 strokeWidth={iconStroke} />
@@ -284,6 +302,7 @@ const OperationDock: FC<OperationDockProps> = ({
               <DockButton
                 label={labelOf('operate.dock.pan')}
                 showLabel={showLabel}
+                layout={layout}
                 active={isPanMode}
                 onClick={onTogglePanMode}
               >
@@ -300,6 +319,7 @@ const OperationDock: FC<OperationDockProps> = ({
               <DockButton
                 label={labelOf('operate.dock.copy')}
                 showLabel={showLabel}
+                layout={layout}
                 onClick={onCopy}
               >
                 <Copy strokeWidth={iconStroke} />
@@ -308,6 +328,7 @@ const OperationDock: FC<OperationDockProps> = ({
                 <DockButton
                   label={labelOf('operate.dock.group')}
                   showLabel={showLabel}
+                  layout={layout}
                   onClick={onGroup}
                 >
                   <Group strokeWidth={iconStroke} />
@@ -316,6 +337,7 @@ const OperationDock: FC<OperationDockProps> = ({
               <DockButton
                 label={labelOf('operate.dock.widget')}
                 showLabel={showLabel}
+                layout={layout}
                 onClick={onAddWidget}
               >
                 <LayoutTemplate strokeWidth={iconStroke} />
@@ -324,6 +346,7 @@ const OperationDock: FC<OperationDockProps> = ({
                 <DockButton
                   label={labelOf('operate.dock.duplicateMode')}
                   showLabel={showLabel}
+                  layout={layout}
                   active={duplicateDragEnabled}
                   onClick={onToggleDuplicateMode}
                 >
@@ -338,6 +361,7 @@ const OperationDock: FC<OperationDockProps> = ({
               <DockButton
                 label={labelOf('operate.dock.delete')}
                 showLabel={showLabel}
+                layout={layout}
                 onClick={onDelete}
               >
                 <Trash2 strokeWidth={iconStroke} />
@@ -349,6 +373,7 @@ const OperationDock: FC<OperationDockProps> = ({
             <DockButton
               label={labelOf('operate.dock.text')}
               showLabel={showLabel}
+              layout={layout}
               onClick={onText}
             >
               <Type strokeWidth={iconStroke} />
@@ -356,6 +381,7 @@ const OperationDock: FC<OperationDockProps> = ({
             <DockButton
               label={labelOf('operate.dock.image')}
               showLabel={showLabel}
+              layout={layout}
               as="label"
               htmlFor="image-upload-dock"
             >
@@ -371,6 +397,7 @@ const OperationDock: FC<OperationDockProps> = ({
             <DockButton
               label={labelOf('operate.dock.clean')}
               showLabel={showLabel}
+              layout={layout}
               as="label"
               htmlFor="clean-modal"
             >
@@ -381,11 +408,13 @@ const OperationDock: FC<OperationDockProps> = ({
               onExport={onExport}
               onExportBoard={onExportBoard}
               showLabel={showLabel}
+              layout={layout}
               label={labelOf('operate.dock.save')}
             />
             <DockButton
               label={labelOf('operate.dock.layers')}
               showLabel={showLabel}
+              layout={layout}
               onClick={onToggleObjectList}
             >
               <Layers strokeWidth={iconStroke} />
@@ -393,6 +422,7 @@ const OperationDock: FC<OperationDockProps> = ({
             <DockButton
               label={labelOf('operate.dock.boards')}
               showLabel={showLabel}
+              layout={layout}
               onClick={onOpenFiles}
             >
               <BookText strokeWidth={iconStroke} />
@@ -400,17 +430,24 @@ const OperationDock: FC<OperationDockProps> = ({
           </Section>
 
           {!isMobile && (
-            <div className="relative">
+            <div className="relative xs:w-full">
               <DockButton
                 label={labelOf('operate.dock.more')}
                 showLabel={showLabel}
+                layout={layout}
                 active={moreOpen}
                 onClick={() => setMoreOpen((v) => !v)}
               >
                 <Ellipsis strokeWidth={iconStroke} />
               </DockButton>
               {moreOpen && (
-                <div className="absolute bottom-full left-1/2 z-20 mb-2 min-w-[8rem] -translate-x-1/2 rounded-xl border border-slate-200 bg-[#eef1ff] p-1 shadow-lg">
+                <div
+                  className={
+                    layout === 'rail'
+                      ? 'absolute right-full top-0 z-20 mr-2 min-w-[8rem] rounded-xl border border-slate-200 bg-[#eef1ff] p-1 shadow-lg'
+                      : 'absolute bottom-full left-1/2 z-20 mb-2 min-w-[8rem] -translate-x-1/2 rounded-xl border border-slate-200 bg-[#eef1ff] p-1 shadow-lg'
+                  }
+                >
                   <button
                     type="button"
                     className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs hover:bg-slate-200"
