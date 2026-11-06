@@ -412,6 +412,11 @@ const WidgetPanel = () => {
                 <div className="mb-1.5 text-[11px] font-medium text-slate-600">
                   {t('widget.syncTitle')}
                 </div>
+                {!isWidgetSyncConfigured() && (
+                  <p className="mb-1.5 text-[10px] text-amber-600">
+                    {t('widget.syncNotConfigured')}
+                  </p>
+                )}
                 <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
                   <span className="text-[10px] text-slate-500">
                     {t('widget.syncMyCode')}

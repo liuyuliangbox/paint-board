@@ -10,7 +10,7 @@ const Toast: FC<IProps> = ({ message, type = 'success' }) => {
   const { t } = useTranslation()
 
   return (
-    <div className="toast toast-top toast-center">
+    <div className="toast toast-top toast-center z-[100]">
       <div className={`alert alert-${type}`}>
         <div>
           <span className="whitespace-nowrap">{t(message)}</span>

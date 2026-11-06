@@ -33,10 +33,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Only inject the GitHub Variable when set; an empty env would override
+      # `.env.production` and leave sync unconfigured in the bundle.
       - name: Build
-        env:
-          VITE_WIDGET_SYNC_URL: ${{ vars.VITE_WIDGET_SYNC_URL }}
-        run: pnpm build
+        run: |
+          if [ -n "${{ vars.VITE_WIDGET_SYNC_URL }}" ]; then
+            export VITE_WIDGET_SYNC_URL="${{ vars.VITE_WIDGET_SYNC_URL }}"
+          fi
+          pnpm build
 
       - name: Deploy to Cloudflare Pages
         env:
