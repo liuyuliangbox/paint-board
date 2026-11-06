@@ -20,8 +20,9 @@ describe('draw default colors', () => {
   })
 
   it('detects the legacy four-color default for persist migration', () => {
-    expect(sameColorList(LEGACY_DEFAULT_DRAW_COLORS, LEGACY_DEFAULT_DRAW_COLORS))
-      .toBe(true)
+    expect(
+      sameColorList(LEGACY_DEFAULT_DRAW_COLORS, LEGACY_DEFAULT_DRAW_COLORS)
+    ).toBe(true)
     expect(sameColorList(DEFAULT_DRAW_COLORS, LEGACY_DEFAULT_DRAW_COLORS)).toBe(
       false
     )
