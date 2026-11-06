@@ -4,6 +4,7 @@ import { paintBoard } from '@/core/paintBoard'
 import { CANVAS_CUSTOM_PROPERTIES } from '@/core/utils/canvasProperties'
 import { getObjectScenePosition } from '@/core/utils/object'
 import { initObjectControls } from '@/core/utils/loadCanvas'
+import { stampPaintLinkId } from '@/core/element/layer/paintLink'
 import { ActionMode } from '@/constants'
 import useBoardStore from '@/store/board'
 
@@ -149,6 +150,10 @@ export const insertWidgetObjects = async (
       })
       object.setCoords()
     })
+  }
+
+  if (enlivened.length > 1) {
+    stampPaintLinkId(enlivened)
   }
 
   if (enlivened.length === 1) {

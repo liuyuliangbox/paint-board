@@ -12,6 +12,11 @@ import { TransformCanvasHandler } from './transformCanvasHandler'
 import { ModeHandler } from './modeHandler'
 import { beginCanvasPan, endCanvasPan } from '../canvasPan'
 import { isModalDialogOpen } from './modalGuard'
+import {
+  bringSelectedForwardInList,
+  isObjectListDrawerOpen,
+  sendSelectedBackwardInList
+} from '@/core/element/layer/objectListActions'
 
 /**
  * Main keyboard shortcuts handler
@@ -161,11 +166,25 @@ export class KeyboardHandler {
       case KeyCode.ARROW_DOWN:
       case KeyCode.ARROW_LEFT:
       case KeyCode.ARROW_RIGHT:
-        // Ctrl/Cmd+Arrow pans the canvas; bare arrows nudge the selection.
+        // Ctrl/Cmd+Arrow pans the canvas.
+        // With the layer panel open, bare Up/Down reorder z-index;
+        // otherwise bare arrows nudge the selection.
         if (this.isModifierKey(e) && !e.shiftKey && !e.altKey) {
           e.preventDefault()
           this.transformCanvasHandler.panCanvas(e.code)
         } else if (!this.isModifierKey(e) && !e.altKey) {
+          if (
+            isObjectListDrawerOpen() &&
+            (e.code === KeyCode.ARROW_UP || e.code === KeyCode.ARROW_DOWN)
+          ) {
+            e.preventDefault()
+            if (e.code === KeyCode.ARROW_UP) {
+              bringSelectedForwardInList()
+            } else {
+              sendSelectedBackwardInList()
+            }
+            break
+          }
           e.preventDefault()
           this.nudgeSelection(e.code, e.shiftKey ? 10 : 1)
         }

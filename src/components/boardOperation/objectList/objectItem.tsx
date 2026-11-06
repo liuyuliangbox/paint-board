@@ -1,17 +1,28 @@
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, GripVertical } from 'lucide-react'
+import { Eye, EyeOff, GripVertical, Link2 } from 'lucide-react'
 import { ObjectListRow } from '@/core/element/layer/objectList'
 
 interface IProps {
   row: ObjectListRow
-  onSelect: () => void
+  onSelect: (event: React.MouseEvent) => void
   onToggleVisible: () => void
+  onCommitText?: (value: string) => void
 }
 
-const ObjectItem: FC<IProps> = ({ row, onSelect, onToggleVisible }) => {
+const ObjectItem: FC<IProps> = ({
+  row,
+  onSelect,
+  onToggleVisible,
+  onCommitText
+}) => {
   const { t } = useTranslation()
   const iconColor = row.selected ? '#fff' : '#66CC8A'
+  const [draft, setDraft] = useState(row.textValue || '')
+
+  useEffect(() => {
+    setDraft(row.textValue || '')
+  }, [row.textValue, row.key])
 
   return (
     <li
@@ -20,19 +31,55 @@ const ObjectItem: FC<IProps> = ({ row, onSelect, onToggleVisible }) => {
       } ${row.visible ? '' : 'opacity-50'}`}
       onClick={onSelect}
     >
-      <span
-        className={`w-full truncate ${
-          row.selected ? 'text-white font-semibold' : ''
-        }`}
-      >
-        {t(row.labelKey)}
-        {row.detail ? (
-          <span className={row.selected ? 'font-normal' : 'text-slate-500'}>
-            {` ${row.detail}`}
-          </span>
+      <span className="flex w-full min-w-0 items-center gap-1.5">
+        {row.linked ? (
+          <Link2
+            size={14}
+            color={iconColor}
+            className="shrink-0"
+            aria-label={String(t('objectList.linked'))}
+          />
         ) : null}
+        {row.isText ? (
+          <input
+            className={`input input-ghost input-xs h-8 min-w-0 flex-1 px-1 text-sm ${
+              row.selected
+                ? 'text-white caret-white placeholder:text-white/70'
+                : 'text-base-content'
+            }`}
+            value={draft}
+            placeholder={String(t('objectList.text'))}
+            onClick={(event) => event.stopPropagation()}
+            onMouseDown={(event) => event.stopPropagation()}
+            onChange={(event) => setDraft(event.target.value)}
+            onBlur={() => onCommitText?.(draft)}
+            onKeyDown={(event) => {
+              event.stopPropagation()
+              if (event.key === 'Enter') {
+                ;(event.target as HTMLInputElement).blur()
+              }
+              if (event.key === 'Escape') {
+                setDraft(row.textValue || '')
+                ;(event.target as HTMLInputElement).blur()
+              }
+            }}
+          />
+        ) : (
+          <span
+            className={`w-full truncate ${
+              row.selected ? 'text-white font-semibold' : ''
+            }`}
+          >
+            {t(row.labelKey)}
+            {row.detail ? (
+              <span className={row.selected ? 'font-normal' : 'text-slate-500'}>
+                {` ${row.detail}`}
+              </span>
+            ) : null}
+          </span>
+        )}
       </span>
-      <span className="ml-5 flex items-center gap-x-2 shrink-0">
+      <span className="ml-3 flex shrink-0 items-center gap-x-2">
         <span
           onClick={(event) => {
             event.stopPropagation()
@@ -46,7 +93,7 @@ const ObjectItem: FC<IProps> = ({ row, onSelect, onToggleVisible }) => {
           )}
         </span>
         <GripVertical
-          className="drag-object-list-handle hidden group-hover:block xs:block cursor-grab"
+          className="drag-object-list-handle hidden cursor-grab group-hover:block xs:block"
           color={iconColor}
           size={16}
           onClick={(event) => {

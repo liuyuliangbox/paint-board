@@ -32,6 +32,7 @@ export type ObjectListSource = {
   id?: string
   type?: string
   _customType?: string
+  _paintLinkId?: string
   text?: string
   visible?: boolean
 }
@@ -40,9 +41,18 @@ export type ObjectListRow = {
   key: string
   labelKey: string
   detail?: string
+  textValue?: string
+  isText: boolean
+  linked: boolean
   visible: boolean
   selected: boolean
 }
+
+export const isTextListObject = (object: ObjectListSource) =>
+  object._customType === ELEMENT_CUSTOM_TYPE.I_TEXT ||
+  object.type === 'i-text' ||
+  object.type === 'text' ||
+  object.type === 'textbox'
 
 /**
  * `undefined` means delete the instance value and follow `fabric.Object.prototype`.
@@ -75,12 +85,7 @@ export const textSnippet = (text?: string) => {
 
 export const objectListLabel = (object: ObjectListSource) => {
   const customType = object._customType
-  if (
-    customType === ELEMENT_CUSTOM_TYPE.I_TEXT ||
-    object.type === 'i-text' ||
-    object.type === 'text' ||
-    object.type === 'textbox'
-  ) {
+  if (isTextListObject(object)) {
     return {
       labelKey: 'objectList.text',
       detail: textSnippet(object.text)
@@ -109,10 +114,14 @@ export const objectListRows = (
   return [...objects].reverse().map((object, listIndex) => {
     const label = objectListLabel(object)
     const canvasIndex = objects.length - 1 - listIndex
+    const isText = isTextListObject(object)
     return {
       key: object.id || `missing:${canvasIndex}`,
       labelKey: label.labelKey,
       detail: label.detail,
+      textValue: isText ? object.text || '' : undefined,
+      isText,
+      linked: Boolean(object._paintLinkId),
       visible: object.visible !== false,
       selected: selectedSet.has(object)
     }

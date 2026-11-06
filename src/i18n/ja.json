@@ -146,6 +146,10 @@
   "objectList": {
     "title": "レイヤー",
     "empty": "このボードには要素がありません",
+    "hint": "Ctrl クリック · Shift 範囲 · Alt でリンク除外 · ↑↓ 順序 · Delete",
+    "link": "リンク",
+    "unlink": "リンク解除",
+    "linked": "リンク済み",
     "show": "表示",
     "hide": "非表示",
     "brush": "ブラシ",

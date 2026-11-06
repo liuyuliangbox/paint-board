@@ -1,6 +1,7 @@
 import { FC, useEffect, useRef, useState } from 'react'
 import Sortable from 'sortablejs'
 import { useTranslation } from 'react-i18next'
+import { Link2, Link2Off } from 'lucide-react'
 import { paintBoard } from '@/core/paintBoard'
 import {
   objectListRows,
@@ -8,10 +9,15 @@ import {
   ObjectListSource
 } from '@/core/element/layer/objectList'
 import {
+  activeHasLink,
+  linkActiveObjects,
+  ListSelectMode,
   moveObjectInList,
   objectFromList,
   selectObjectFromList,
-  toggleObjectVisible
+  toggleObjectVisible,
+  unlinkActiveObjects,
+  updateObjectTextFromList
 } from '@/core/element/layer/objectListActions'
 import ObjectItem from './objectItem'
 
@@ -34,10 +40,14 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
   const { t } = useTranslation()
   const sortableRef = useRef<HTMLUListElement>(null)
   const [rows, setRows] = useState<ObjectListRow[]>(readRows)
+  const [anchorIndex, setAnchorIndex] = useState(0)
+  const [canUnlink, setCanUnlink] = useState(false)
+  const selectedCount = rows.filter((row) => row.selected).length
 
   useEffect(() => {
     const refresh = () => {
       setRows(readRows())
+      setCanUnlink(activeHasLink())
     }
     refresh()
     paintBoard.addHookFn(refresh)
@@ -45,11 +55,17 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
     canvas?.on('object:added', refresh)
     canvas?.on('object:removed', refresh)
     canvas?.on('object:modified', refresh)
+    canvas?.on('selection:created', refresh)
+    canvas?.on('selection:updated', refresh)
+    canvas?.on('selection:cleared', refresh)
     return () => {
       paintBoard.removeHookFn(refresh)
       canvas?.off('object:added', refresh)
       canvas?.off('object:removed', refresh)
       canvas?.off('object:modified', refresh)
+      canvas?.off('selection:created', refresh)
+      canvas?.off('selection:updated', refresh)
+      canvas?.off('selection:cleared', refresh)
     }
   }, [])
 
@@ -74,6 +90,32 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
     }
   }, [])
 
+  const handleSelect = (index: number, event: React.MouseEvent) => {
+    const object = objectFromList(index)
+    if (!object) {
+      return
+    }
+    let mode: ListSelectMode = 'replace'
+    if (event.shiftKey) {
+      mode = 'range'
+    } else if (event.metaKey || event.ctrlKey) {
+      mode = 'toggle'
+    } else {
+      setAnchorIndex(index)
+    }
+    selectObjectFromList(object, {
+      mode,
+      listIndex: index,
+      anchorIndex,
+      expandLinks: !event.altKey
+    })
+    if (mode === 'range') {
+      // keep existing anchor
+    } else if (mode === 'replace') {
+      setAnchorIndex(index)
+    }
+  }
+
   return (
     <div className="drawer drawer-end fixed top-0 z-[5]">
       <input
@@ -87,14 +129,43 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
           className="drawer-overlay"
           onClick={() => updateShow(false)}
         ></label>
-        <div className="h-screen bg-white px-5 py-7 overflow-hidden max-w-[80%] w-96">
-          <div className="font-fredokaOne text-2xl text-center">
+        <div className="h-screen max-w-[80%] w-96 overflow-hidden bg-white px-5 py-7">
+          <div className="text-center font-fredokaOne text-2xl">
             {t('objectList.title')}
           </div>
-          <div className="bg-[#eef1ff] rounded-2xl mt-5 py-2 w-full max-w-full">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost gap-1"
+              disabled={selectedCount < 2}
+              title={String(t('objectList.link'))}
+              onClick={() => {
+                linkActiveObjects()
+              }}
+            >
+              <Link2 size={16} />
+              {t('objectList.link')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost gap-1"
+              disabled={!canUnlink}
+              title={String(t('objectList.unlink'))}
+              onClick={() => {
+                unlinkActiveObjects()
+              }}
+            >
+              <Link2Off size={16} />
+              {t('objectList.unlink')}
+            </button>
+          </div>
+          <p className="mt-2 text-center text-[11px] text-slate-400">
+            {t('objectList.hint')}
+          </p>
+          <div className="mt-4 w-full max-w-full rounded-2xl bg-[#eef1ff] py-2">
             <ul
               ref={sortableRef}
-              className="text-base-content my-2 mx-4 py-3 px-2 rounded-xl bg-white max-h-[70vh] xs:max-h-[40vh] overflow-y-auto noScrollbar flex-nowrap max-w-full"
+              className="text-base-content noScrollbar my-2 mx-4 flex-nowrap overflow-y-auto rounded-xl bg-white px-2 py-3 max-h-[70vh] max-w-full xs:max-h-[40vh]"
             >
               {rows.length === 0 ? (
                 <li className="px-2 py-6 text-center text-sm text-slate-400">
@@ -105,16 +176,17 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
                   <ObjectItem
                     key={row.key}
                     row={row}
-                    onSelect={() => {
-                      const object = objectFromList(index)
-                      if (object) {
-                        selectObjectFromList(object)
-                      }
-                    }}
+                    onSelect={(event) => handleSelect(index, event)}
                     onToggleVisible={() => {
                       const object = objectFromList(index)
                       if (object) {
                         toggleObjectVisible(object)
+                      }
+                    }}
+                    onCommitText={(value) => {
+                      const object = objectFromList(index)
+                      if (object) {
+                        updateObjectTextFromList(object, value)
                       }
                     }}
                   />

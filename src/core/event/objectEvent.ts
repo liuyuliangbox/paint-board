@@ -13,8 +13,14 @@ import {
   refreshEditingBox
 } from '@/core/element/text/editingBox'
 import { fabric } from 'fabric'
+import {
+  collectLinkedObjects,
+  getPaintLinkId
+} from '@/core/element/layer/paintLink'
 
 export class ObjectEvent {
+  private skipLinkExpand = false
+
   constructor() {
     this.initObjectEvent()
     this.initTextEvent()
@@ -22,6 +28,10 @@ export class ObjectEvent {
 
   initObjectEvent() {
     const canvas = paintBoard?.canvas
+    canvas?.on('mouse:down', (e) => {
+      this.skipLinkExpand = Boolean(e.e && (e.e as MouseEvent).altKey)
+    })
+
     canvas?.on('selection:created', (e) => {
       this.handleSelectionChange(e)
     })
@@ -81,7 +91,24 @@ export class ObjectEvent {
     if (!canvas) return
 
     // get current selected objects
-    const selectedObjects = e.selected || []
+    const selectedObjects: fabric.Object[] = e.selected || []
+
+    // Soft-link: selecting one linked object expands to the whole link
+    // (Alt+click skips expand for single-object edits).
+    if (
+      !this.skipLinkExpand &&
+      selectedObjects.length === 1 &&
+      getPaintLinkId(selectedObjects[0])
+    ) {
+      const linked = collectLinkedObjects(canvas, selectedObjects)
+      if (linked.length > 1) {
+        canvas.discardActiveObject()
+        canvas.setActiveObject(new fabric.ActiveSelection(linked, { canvas }))
+        canvas.requestRenderAll()
+        paintBoard.triggerHook()
+        return
+      }
+    }
 
     if (selectedObjects.length <= 1) {
       paintBoard.triggerHook()

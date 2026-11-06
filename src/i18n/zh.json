@@ -146,6 +146,10 @@
   "objectList": {
     "title": "图层",
     "empty": "当前画板还没有元素",
+    "hint": "Ctrl 点选 · Shift 范围选 · Alt 不扩关联 · ↑↓ 调层级 · Delete 删除",
+    "link": "关联",
+    "unlink": "取消关联",
+    "linked": "已关联",
     "show": "显示",
     "hide": "隐藏",
     "brush": "画笔",

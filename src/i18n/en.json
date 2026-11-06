@@ -146,6 +146,10 @@
   "objectList": {
     "title": "Layers",
     "empty": "This board has no elements yet",
+    "hint": "Ctrl click · Shift range · Alt skip link · ↑↓ reorder · Delete",
+    "link": "Link",
+    "unlink": "Unlink",
+    "linked": "Linked",
     "show": "Show",
     "hide": "Hide",
     "brush": "Brush",

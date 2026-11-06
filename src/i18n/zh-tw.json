@@ -146,6 +146,10 @@
   "objectList": {
     "title": "圖層",
     "empty": "當前畫板還沒有元素",
+    "hint": "Ctrl 點選 · Shift 範圍選 · Alt 不擴關聯 · ↑↓ 調層級 · Delete 刪除",
+    "link": "關聯",
+    "unlink": "取消關聯",
+    "linked": "已關聯",
     "show": "顯示",
     "hide": "隱藏",
     "brush": "畫筆",

@@ -18,10 +18,14 @@ describe('object list', () => {
     expect(rows[0]).toMatchObject({
       labelKey: 'objectList.text',
       detail: 'Hello',
+      textValue: 'Hello',
+      isText: true,
+      linked: false,
       selected: true,
       visible: true
     })
     expect(rows[1].selected).toBe(false)
+    expect(rows[1].isText).toBe(false)
   })
 
   it('labels brushes, shapes, and clipped text', () => {
