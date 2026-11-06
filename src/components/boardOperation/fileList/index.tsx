@@ -454,37 +454,40 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                     : t('fileBoard.selectAll')}
                 </label>
                 <div className="ml-auto flex items-center gap-1">
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm min-xs:tooltip"
-                    data-tip={t('fileBoard.create')}
-                    aria-label={t('fileBoard.create') || undefined}
-                    onClick={() => {
-                      if (atLimit) {
-                        showLimitMessage()
-                        return
-                      }
-                      setCreating(true)
-                    }}
-                  >
-                    <FilePlus size={18} color="#66CC8A" />
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm min-xs:tooltip"
-                    data-tip={t('operate.uploadFile')}
-                    aria-label={t('operate.uploadFile') || undefined}
-                    onClick={() => {
-                      if (atLimit) {
-                        showLimitMessage()
-                        return
-                      }
-                      uploadRef.current?.click()
-                    }}
-                  >
-                    <FileUp size={18} color="#66CC8A" />
-                  </button>
-                  {selected.size > 0 && (
+                  {selected.size === 0 ? (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm min-xs:tooltip"
+                        data-tip={t('fileBoard.create')}
+                        aria-label={t('fileBoard.create') || undefined}
+                        onClick={() => {
+                          if (atLimit) {
+                            showLimitMessage()
+                            return
+                          }
+                          setCreating(true)
+                        }}
+                      >
+                        <FilePlus size={18} color="#66CC8A" />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm min-xs:tooltip"
+                        data-tip={t('operate.uploadFile')}
+                        aria-label={t('operate.uploadFile') || undefined}
+                        onClick={() => {
+                          if (atLimit) {
+                            showLimitMessage()
+                            return
+                          }
+                          uploadRef.current?.click()
+                        }}
+                      >
+                        <FileUp size={18} color="#66CC8A" />
+                      </button>
+                    </>
+                  ) : (
                     <>
                       <button
                         type="button"
