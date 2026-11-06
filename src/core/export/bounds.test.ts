@@ -214,11 +214,16 @@ describe('ink framing', () => {
 })
 
 describe('export size limit', () => {
-  it('keeps the retina multiplier when the result fits', () => {
+  it('keeps the preferred multiplier when the result fits', () => {
     expect(chooseExportMultiplier(1000, 800, 2)).toBe(2)
   })
 
-  it('falls back to 1x when only the retina image is too large', () => {
+  it('steps down before falling all the way to 1x', () => {
+    // 3000×3000 at 3× exceeds the pixel cap; 2× still fits.
+    expect(chooseExportMultiplier(3000, 3000, 3)).toBe(2)
+  })
+
+  it('falls back to 1x when only unit scale fits', () => {
     expect(chooseExportMultiplier(9000, 4000, 2)).toBe(1)
   })
 

@@ -301,20 +301,39 @@ export const withinExportLimit = (width: number, height: number) => {
   return width * height <= MAX_EXPORT_PIXELS
 }
 
+/**
+ * Prefer sharper-than-screen exports: at least 2× CSS pixels, and 2× the
+ * on-screen (retina) bitmap when the device already paints at higher DPR.
+ */
+export const preferredExportMultiplier = (retina: number) => {
+  const dpr = retina > 0 ? retina : 1
+  return Math.max(2, dpr * 2)
+}
+
 export const chooseExportMultiplier = (
   width: number,
   height: number,
   preferred: number
 ) => {
   const safePreferred = preferred > 0 ? preferred : 1
-  const preferredSize = outputPixelSize(width, height, safePreferred)
-  if (withinExportLimit(preferredSize.width, preferredSize.height)) {
-    return safePreferred
-  }
-  if (safePreferred !== 1) {
-    const unit = outputPixelSize(width, height, 1)
-    if (withinExportLimit(unit.width, unit.height)) {
-      return 1
+  // Step down instead of jumping straight to 1× when the preferred size is too big.
+  const candidates = [
+    safePreferred,
+    Math.min(safePreferred, 3),
+    Math.min(safePreferred, 2),
+    Math.min(safePreferred, 1.5),
+    1
+  ]
+  const seen = new Set<number>()
+  for (const raw of candidates) {
+    const multiplier = Math.round(raw * 1000) / 1000
+    if (!(multiplier > 0) || seen.has(multiplier)) {
+      continue
+    }
+    seen.add(multiplier)
+    const size = outputPixelSize(width, height, multiplier)
+    if (withinExportLimit(size.width, size.height)) {
+      return multiplier
     }
   }
   return null

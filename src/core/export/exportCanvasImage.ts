@@ -10,6 +10,7 @@ import {
   intersectVisibleCanvas,
   opaqueBounds,
   outputPixelSize,
+  preferredExportMultiplier,
   withinExportLimit,
   type Bounds,
   type MeasurableObject
@@ -254,45 +255,34 @@ const exportViewport = (
     window.innerWidth,
     window.innerHeight
   )
-  const ratioX = lower.width / cssWidth
-  const ratioY = lower.height / cssHeight
-  const outputWidth = Math.max(1, Math.round(view.width * ratioX))
-  const outputHeight = Math.max(1, Math.round(view.height * ratioY))
-  if (!withinExportLimit(outputWidth, outputHeight)) {
+  if (view.width < 1 || view.height < 1) {
+    throw new Error('Canvas is empty')
+  }
+
+  // Re-render the visible region (do not blit the screen buffer). A straight
+  // copy of the lower canvas can only ever match on-screen pixels; zooming the
+  // PNG then looks soft. Higher multiplier keeps the same framing with more detail.
+  const retina = lower.width / cssWidth
+  const multiplier = chooseExportMultiplier(
+    view.width,
+    view.height,
+    preferredExportMultiplier(retina)
+  )
+  if (!multiplier) {
     throw new Error(EXPORT_TOO_LARGE_ERROR)
   }
 
-  const output = document.createElement('canvas')
-  output.width = outputWidth
-  output.height = outputHeight
-  const ctx = output.getContext('2d')
-  if (!ctx) {
-    throw new Error('No 2d context')
-  }
-  ctx.drawImage(
-    lower,
-    view.left * ratioX,
-    view.top * ratioY,
-    view.width * ratioX,
-    view.height * ratioY,
-    0,
-    0,
-    outputWidth,
-    outputHeight
-  )
-  // Fabric's lower canvas is always transparent. Background is a separate
-  // board layer (color / image / camera) — not the page slate behind the canvas.
-  // Only offer compositing when there is something to paint.
+  const rendered = renderObjects(canvas, canvas.getObjects(), view, multiplier)
   const canPaint = hasPaintableBackground(background)
   return {
-    url: output.toDataURL('image/png'),
+    url: rendered.toDataURL('image/png'),
     background: canPaint ? background : null,
     backgroundFrame: canPaint
       ? {
-          width: lower.width,
-          height: lower.height,
-          offsetX: -view.left * ratioX,
-          offsetY: -view.top * ratioY
+          width: cssWidth * multiplier,
+          height: cssHeight * multiplier,
+          offsetX: -view.left * multiplier,
+          offsetY: -view.top * multiplier
         }
       : null
   }
@@ -308,7 +298,11 @@ const exportObjectRegion = (
   const cssWidth = canvas.getWidth() || 1
   const cssHeight = canvas.getHeight() || 1
   const retina = lower.width > 0 ? lower.width / cssWidth : 1
-  const multiplier = chooseExportMultiplier(crop.width, crop.height, retina)
+  const multiplier = chooseExportMultiplier(
+    crop.width,
+    crop.height,
+    preferredExportMultiplier(retina)
+  )
   if (!multiplier) {
     throw new Error(EXPORT_TOO_LARGE_ERROR)
   }

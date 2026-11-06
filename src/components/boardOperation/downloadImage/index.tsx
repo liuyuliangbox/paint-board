@@ -1,7 +1,6 @@
 import { useState, FC, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDebounceEffect } from '@/hooks/useDebounceEffect'
-import { canvasToPngBlob } from '@/core/utils/canvasBlob'
 import {
   composeExportLayers,
   PAGE_EXPORT_FILL,
@@ -10,7 +9,7 @@ import {
 } from '@/core/export/exportCanvasImage'
 
 import ReactCrop, { Crop } from 'react-image-crop'
-import { canvasPreview } from './canvasPreview'
+import { canvasPreview, renderExportCrop } from './canvasPreview'
 import Toast from '@/components/toast'
 
 import { Scaling, RotateCw, Proportions, Image } from 'lucide-react'
@@ -152,26 +151,30 @@ const DownloadImage: FC<IProps> = ({
 
   const onDownloadCropClick = async () => {
     const image = imgRef.current
-    const previewCanvas = previewCanvasRef.current
     if (backgroundPending) {
       return
     }
-    if (!image || !previewCanvas || !completedCrop) {
+    if (!image || !completedCrop) {
       setDownloadFailed(true)
       return
     }
 
-    const scaleX = image.naturalWidth / image.width
-    const scaleY = image.naturalHeight / image.height
-
     try {
-      const blob = await canvasToPngBlob(
-        previewCanvas,
-        previewCanvas.width,
-        previewCanvas.height,
-        completedCrop.width * scaleX * saveImageSize,
-        completedCrop.height * scaleY * saveImageSize
+      // Encode from the source image's natural pixels — not the DPR preview
+      // canvas, which used to be downscaled and looked softer than the board.
+      const exportCanvas = renderExportCrop(
+        image,
+        completedCrop,
+        saveImageScale,
+        saveImageRotate,
+        saveImageSize
       )
+      const blob = await new Promise<Blob | null>((resolve) => {
+        exportCanvas.toBlob((result) => resolve(result), 'image/png')
+      })
+      if (!blob) {
+        throw new Error('canvas toBlob failed')
+      }
 
       if (blobUrlRef.current) {
         URL.revokeObjectURL(blobUrlRef.current)

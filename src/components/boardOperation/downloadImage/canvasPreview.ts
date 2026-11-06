@@ -2,49 +2,28 @@ import { Crop } from 'react-image-crop'
 
 const TO_RADIANS = Math.PI / 180
 
-export async function canvasPreview(
+const paintCrop = (
+  ctx: CanvasRenderingContext2D,
   image: HTMLImageElement,
-  canvas: HTMLCanvasElement,
   crop: Crop,
-  scale = 1,
-  rotate = 0
-) {
-  const ctx = canvas.getContext('2d')
-
-  if (!ctx) {
-    throw new Error('No 2d context')
-  }
-
-  const scaleX = image.naturalWidth / image.width
-  const scaleY = image.naturalHeight / image.height
-
-  // devicePixelRatio slightly increases sharpness on retina devices
-  const pixelRatio = window.devicePixelRatio ?? 1
-
-  canvas.width = Math.floor(crop.width * scaleX * pixelRatio)
-  canvas.height = Math.floor(crop.height * scaleY * pixelRatio)
-
-  ctx.scale(pixelRatio, pixelRatio)
-  ctx.imageSmoothingQuality = 'high'
-
+  scaleX: number,
+  scaleY: number,
+  scale: number,
+  rotate: number
+) => {
   const cropX = crop.x * scaleX
   const cropY = crop.y * scaleY
-
   const rotateRads = rotate * TO_RADIANS
   const centerX = image.naturalWidth / 2
   const centerY = image.naturalHeight / 2
 
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
   ctx.save()
-
-  // 5) Move the crop origin to the canvas origin (0,0)
   ctx.translate(-cropX, -cropY)
-  // 4) Move the origin to the center of the original position
   ctx.translate(centerX, centerY)
-  // 3) Rotate around the origin
   ctx.rotate(rotateRads)
-  // 2) Scale the image
   ctx.scale(scale, scale)
-  // 1) Move the center of the image to the origin (0,0)
   ctx.translate(-centerX, -centerY)
   ctx.drawImage(
     image,
@@ -57,6 +36,75 @@ export async function canvasPreview(
     image.naturalWidth,
     image.naturalHeight
   )
-
   ctx.restore()
+}
+
+/** Sharp on-screen preview (extra DPR for the modal). */
+export async function canvasPreview(
+  image: HTMLImageElement,
+  canvas: HTMLCanvasElement,
+  crop: Crop,
+  scale = 1,
+  rotate = 0
+) {
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    throw new Error('No 2d context')
+  }
+
+  const scaleX = image.naturalWidth / image.width
+  const scaleY = image.naturalHeight / image.height
+  const pixelRatio = window.devicePixelRatio ?? 1
+
+  canvas.width = Math.floor(crop.width * scaleX * pixelRatio)
+  canvas.height = Math.floor(crop.height * scaleY * pixelRatio)
+  ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0)
+  paintCrop(ctx, image, crop, scaleX, scaleY, scale, rotate)
+}
+
+/**
+ * Encode the crop at `outputScale`× natural resolution for download.
+ * Avoids resampling through the DPR preview canvas (which looked soft).
+ */
+export const renderExportCrop = (
+  image: HTMLImageElement,
+  crop: Crop,
+  scale = 1,
+  rotate = 0,
+  outputScale = 1
+) => {
+  const scaleX = image.naturalWidth / image.width
+  const scaleY = image.naturalHeight / image.height
+  const width = Math.max(1, Math.round(crop.width * scaleX * outputScale))
+  const height = Math.max(1, Math.round(crop.height * scaleY * outputScale))
+
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    throw new Error('No 2d context')
+  }
+
+  // Pixel-perfect path when not rotating/scaling the crop view.
+  if (rotate === 0 && scale === 1) {
+    ctx.imageSmoothingEnabled = outputScale !== 1
+    ctx.imageSmoothingQuality = 'high'
+    ctx.drawImage(
+      image,
+      crop.x * scaleX,
+      crop.y * scaleY,
+      crop.width * scaleX,
+      crop.height * scaleY,
+      0,
+      0,
+      width,
+      height
+    )
+    return canvas
+  }
+
+  ctx.setTransform(outputScale, 0, 0, outputScale, 0, 0)
+  paintCrop(ctx, image, crop, scaleX, scaleY, scale, rotate)
+  return canvas
 }
