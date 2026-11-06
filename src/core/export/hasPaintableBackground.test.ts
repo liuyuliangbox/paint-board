@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   hasPaintableBackground,
+  PAGE_EXPORT_FILL,
   type ExportBackground
 } from './exportBackground'
 
@@ -34,5 +35,9 @@ describe('hasPaintableBackground', () => {
         cameraFrame: 'data:image/png;base64,xx'
       })
     ).toBe(true)
+  })
+
+  it('uses slate-100 for the optional page grey fill', () => {
+    expect(PAGE_EXPORT_FILL).toBe('#f1f5f9')
   })
 })

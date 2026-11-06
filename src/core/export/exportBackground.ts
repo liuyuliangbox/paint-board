@@ -15,6 +15,12 @@ export interface ExportBackgroundFrame {
   offsetY: number
 }
 
+/**
+ * Matches the board page shell (`bg-slate-100` on the viewport wrapper).
+ * Used when the user opts into “page grey” under transparent exports.
+ */
+export const PAGE_EXPORT_FILL = '#f1f5f9'
+
 /** True when board config has at least one layer that can be painted. */
 export const hasPaintableBackground = (background: ExportBackground) =>
   background.sort.some((type) => {

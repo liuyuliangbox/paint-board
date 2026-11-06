@@ -416,7 +416,9 @@
     "rotate": "旋轉",
     "scale": "縮放",
     "size": "尺寸",
-    "background": "背景"
+    "background": "背景",
+    "boardBackground": "畫板背景",
+    "pageGrey": "頁面灰底"
   },
   "eraserConfig": {
     "eraser": "橡皮擦",

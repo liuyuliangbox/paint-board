@@ -416,7 +416,9 @@
     "rotate": "回転",
     "scale": "拡大縮小",
     "size": "サイズ",
-    "background": "背景"
+    "background": "背景",
+    "boardBackground": "ボード背景",
+    "pageGrey": "ページの灰色背景"
   },
   "eraserConfig": {
     "eraser": "消しゴム",

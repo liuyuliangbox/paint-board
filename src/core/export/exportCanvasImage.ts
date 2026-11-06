@@ -17,13 +17,14 @@ import {
 import { EXPORT_TOO_LARGE_ERROR } from './exportError'
 import {
   hasPaintableBackground,
+  PAGE_EXPORT_FILL,
   type ExportBackground,
   type ExportBackgroundFrame
 } from './exportBackground'
 
 export type ExportScope = 'viewport' | 'content' | 'selection'
 export type { ExportBackground, ExportBackgroundFrame }
-export { hasPaintableBackground }
+export { hasPaintableBackground, PAGE_EXPORT_FILL }
 
 export interface ExportImageResult {
   url: string
@@ -67,46 +68,6 @@ const paintBackground = async (
   }
 }
 
-const compositeImage = async (
-  foreground: CanvasImageSource,
-  sourceX: number,
-  sourceY: number,
-  sourceWidth: number,
-  sourceHeight: number,
-  outputWidth: number,
-  outputHeight: number,
-  background: ExportBackground,
-  backgroundWidth: number,
-  backgroundHeight: number,
-  offsetX: number,
-  offsetY: number
-) => {
-  const output = document.createElement('canvas')
-  output.width = outputWidth
-  output.height = outputHeight
-  const ctx = output.getContext('2d')
-  if (!ctx) {
-    throw new Error('No 2d context')
-  }
-
-  ctx.save()
-  ctx.translate(offsetX, offsetY)
-  await paintBackground(ctx, background, backgroundWidth, backgroundHeight)
-  ctx.restore()
-  ctx.drawImage(
-    foreground,
-    sourceX,
-    sourceY,
-    sourceWidth,
-    sourceHeight,
-    0,
-    0,
-    outputWidth,
-    outputHeight
-  )
-  return output.toDataURL('image/png')
-}
-
 const loadImage = (url: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image()
@@ -115,6 +76,50 @@ const loadImage = (url: string) =>
     image.src = url
   })
 
+export type ComposeExportOptions = {
+  /** Solid fill under everything (e.g. page slate grey). */
+  pageFill?: string | null
+  board?: {
+    background: ExportBackground
+    frame: ExportBackgroundFrame
+  } | null
+}
+
+/**
+ * Stack optional page fill → board background → transparent foreground.
+ */
+export const composeExportLayers = async (
+  foregroundUrl: string,
+  options: ComposeExportOptions = {}
+) => {
+  const image = await loadImage(foregroundUrl)
+  const outputWidth = image.naturalWidth
+  const outputHeight = image.naturalHeight
+  const output = document.createElement('canvas')
+  output.width = outputWidth
+  output.height = outputHeight
+  const ctx = output.getContext('2d')
+  if (!ctx) {
+    throw new Error('No 2d context')
+  }
+
+  if (options.pageFill) {
+    ctx.fillStyle = options.pageFill
+    ctx.fillRect(0, 0, outputWidth, outputHeight)
+  }
+
+  if (options.board) {
+    const { background, frame } = options.board
+    ctx.save()
+    ctx.translate(frame.offsetX, frame.offsetY)
+    await paintBackground(ctx, background, frame.width, frame.height)
+    ctx.restore()
+  }
+
+  ctx.drawImage(image, 0, 0, outputWidth, outputHeight)
+  return output.toDataURL('image/png')
+}
+
 /**
  * Paint the canvas background under an already exported foreground.
  * The foreground itself stays transparent until the modal asks for this.
@@ -122,24 +127,13 @@ const loadImage = (url: string) =>
 export const applyExportBackground = async (
   foregroundUrl: string,
   background: ExportBackground,
-  frame: ExportBackgroundFrame
-) => {
-  const image = await loadImage(foregroundUrl)
-  return compositeImage(
-    image,
-    0,
-    0,
-    image.naturalWidth,
-    image.naturalHeight,
-    image.naturalWidth,
-    image.naturalHeight,
-    background,
-    frame.width,
-    frame.height,
-    frame.offsetX,
-    frame.offsetY
-  )
-}
+  frame: ExportBackgroundFrame,
+  pageFill?: string | null
+) =>
+  composeExportLayers(foregroundUrl, {
+    pageFill,
+    board: { background, frame }
+  })
 
 const transparentResult = (image: HTMLCanvasElement): ExportImageResult => ({
   url: image.toDataURL('image/png'),
@@ -307,10 +301,12 @@ const exportViewport = (
 const exportObjectRegion = (
   canvas: fabric.Canvas,
   crop: Bounds,
-  objects: fabric.Object[]
-) => {
+  objects: fabric.Object[],
+  background: ExportBackground
+): ExportImageResult => {
   const lower = canvas.getElement()
   const cssWidth = canvas.getWidth() || 1
+  const cssHeight = canvas.getHeight() || 1
   const retina = lower.width > 0 ? lower.width / cssWidth : 1
   const multiplier = chooseExportMultiplier(crop.width, crop.height, retina)
   if (!multiplier) {
@@ -319,7 +315,22 @@ const exportObjectRegion = (
 
   const rendered = renderObjects(canvas, objects, crop, multiplier)
   const framed = frameInk(rendered, crop, multiplier)
-  return transparentResult(framed.image)
+  const canPaint = hasPaintableBackground(background)
+  if (!canPaint) {
+    return transparentResult(framed.image)
+  }
+
+  // Same board background layers as the viewport export, aligned to the crop.
+  return {
+    url: framed.image.toDataURL('image/png'),
+    background,
+    backgroundFrame: {
+      width: cssWidth * multiplier,
+      height: cssHeight * multiplier,
+      offsetX: -framed.crop.left * multiplier,
+      offsetY: -framed.crop.top * multiplier
+    }
+  }
 }
 
 export const exportCanvasImage = async (
@@ -350,7 +361,7 @@ export const exportCanvasImage = async (
     if (!bounds) {
       throw new Error('Empty selection')
     }
-    return exportObjectRegion(canvas, bounds, [active])
+    return exportObjectRegion(canvas, bounds, [active], background)
   }
 
   const bounds = contentBounds(
@@ -361,5 +372,5 @@ export const exportCanvasImage = async (
   if (!bounds) {
     return exportViewport(canvas, background)
   }
-  return exportObjectRegion(canvas, bounds, canvas.getObjects())
+  return exportObjectRegion(canvas, bounds, canvas.getObjects(), background)
 }

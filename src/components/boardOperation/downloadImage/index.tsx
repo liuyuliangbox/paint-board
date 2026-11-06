@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { useDebounceEffect } from '@/hooks/useDebounceEffect'
 import { canvasToPngBlob } from '@/core/utils/canvasBlob'
 import {
-  applyExportBackground,
+  composeExportLayers,
+  PAGE_EXPORT_FILL,
   type ExportBackground,
   type ExportBackgroundFrame
 } from '@/core/export/exportCanvasImage'
@@ -36,15 +37,14 @@ const DownloadImage: FC<IProps> = ({
   const [saveImageRotate, updateSaveImageRotate] = useState(0)
   const [saveImageScale, updateSaveImageScale] = useState(1)
   const [saveImageSize, updateSaveImageSize] = useState(1)
-  const [includeBackground, setIncludeBackground] = useState(
+  const [includeBoardBackground, setIncludeBoardBackground] = useState(
     Boolean(backgroundFrame)
   )
+  const [includePageGrey, setIncludePageGrey] = useState(false)
   const [displayUrl, setDisplayUrl] = useState(url)
   const [imageVersion, setImageVersion] = useState(0)
-  const [backgroundPending, setBackgroundPending] = useState(
-    Boolean(backgroundFrame)
-  )
-  const previewUrl = useRef<string | null>(backgroundFrame ? null : url)
+  const [backgroundPending, setBackgroundPending] = useState(false)
+  const previewUrl = useRef<string | null>(url)
 
   const [completedCrop, setCompletedCrop] = useState<Crop | undefined>()
   const [crop, setCrop] = useState<Crop | undefined>()
@@ -56,31 +56,36 @@ const DownloadImage: FC<IProps> = ({
   const cropInitialized = useRef(false)
   const [downloadFailed, setDownloadFailed] = useState(false)
 
+  const wantsBoard =
+    includeBoardBackground && Boolean(background) && Boolean(backgroundFrame)
+  const needsComposite = wantsBoard || includePageGrey
+
   useEffect(() => {
     cropInitialized.current = false
-    setIncludeBackground(Boolean(backgroundFrame))
+    setIncludeBoardBackground(Boolean(backgroundFrame))
+    setIncludePageGrey(false)
     setDisplayUrl(url)
-    if (backgroundFrame) {
-      previewUrl.current = null
-      setBackgroundPending(true)
-    } else {
-      previewUrl.current = url
-      setBackgroundPending(false)
-    }
+    previewUrl.current = url
+    setBackgroundPending(false)
   }, [url, backgroundFrame])
 
   useEffect(() => {
-    if (!includeBackground || !background || !backgroundFrame) {
+    if (!needsComposite) {
       previewUrl.current = url
       setDisplayUrl(url)
-      const showingTarget = imgRef.current?.getAttribute('src') === url
-      setBackgroundPending(Boolean(backgroundFrame) && !showingTarget)
+      setBackgroundPending(false)
       return
     }
     let cancelled = false
     previewUrl.current = null
     setBackgroundPending(true)
-    applyExportBackground(url, background, backgroundFrame)
+    composeExportLayers(url, {
+      pageFill: includePageGrey ? PAGE_EXPORT_FILL : null,
+      board:
+        wantsBoard && background && backgroundFrame
+          ? { background, frame: backgroundFrame }
+          : null
+    })
       .then((next) => {
         if (cancelled) {
           return
@@ -89,7 +94,7 @@ const DownloadImage: FC<IProps> = ({
         setDisplayUrl(next)
       })
       .catch((error) => {
-        console.error('Failed to composite export background', error)
+        console.error('Failed to composite export layers', error)
         if (cancelled) {
           return
         }
@@ -102,7 +107,14 @@ const DownloadImage: FC<IProps> = ({
     return () => {
       cancelled = true
     }
-  }, [url, includeBackground, background, backgroundFrame])
+  }, [
+    url,
+    needsComposite,
+    includePageGrey,
+    wantsBoard,
+    background,
+    backgroundFrame
+  ])
 
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     if (!cropInitialized.current) {
@@ -287,21 +299,44 @@ const DownloadImage: FC<IProps> = ({
                 <div className="flex items-center mt-3">
                   <div
                     className="mr-[12px] shrink-0 min-xs:tooltip"
-                    data-tip={t('downloadImage.background')}
+                    data-tip={t('downloadImage.boardBackground')}
                   >
                     <Image color="#66CC8A" />
                   </div>
+                  <span className="mr-2 text-xs text-slate-600">
+                    {t('downloadImage.boardBackground')}
+                  </span>
                   <input
                     type="checkbox"
                     className="toggle toggle-success toggle-sm"
-                    checked={includeBackground}
-                    aria-label={t('downloadImage.background') || undefined}
+                    checked={includeBoardBackground}
+                    aria-label={t('downloadImage.boardBackground') || undefined}
                     onChange={(e) => {
-                      setIncludeBackground(e.target.checked)
+                      setIncludeBoardBackground(e.target.checked)
                     }}
                   />
                 </div>
               )}
+              <div className="flex items-center mt-3">
+                <div
+                  className="mr-[12px] shrink-0 min-xs:tooltip"
+                  data-tip={t('downloadImage.pageGrey')}
+                >
+                  <Image color="#94a3b8" />
+                </div>
+                <span className="mr-2 text-xs text-slate-600">
+                  {t('downloadImage.pageGrey')}
+                </span>
+                <input
+                  type="checkbox"
+                  className="toggle toggle-success toggle-sm"
+                  checked={includePageGrey}
+                  aria-label={t('downloadImage.pageGrey') || undefined}
+                  onChange={(e) => {
+                    setIncludePageGrey(e.target.checked)
+                  }}
+                />
+              </div>
             </div>
 
             <div className="w-[48%] flex flex-wrap gap-x-4 gap-y-2 h-fit">

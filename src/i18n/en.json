@@ -416,7 +416,9 @@
     "rotate": "Rotate",
     "scale": "Scale",
     "size": "Size",
-    "background": "Background"
+    "background": "Background",
+    "boardBackground": "Board background",
+    "pageGrey": "Page grey fill"
   },
   "eraserConfig": {
     "eraser": "Eraser",
