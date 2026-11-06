@@ -70,7 +70,10 @@ const WidgetPanel = () => {
   const [showLogin, setShowLogin] = useState(false)
   const [loggedIn, setLoggedIn] = useState(() => isCloudLoggedIn())
   const [syncTab, setSyncTab] = useState<SyncTab>('local')
+  /** Checkbox batch selection (drives select-all / cloud actions). */
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  /** Single-click focus (green ring + 当前); independent of checkboxes. */
+  const [focusedId, setFocusedId] = useState('')
   const [cloudMetas, setCloudMetas] = useState<CloudWidgetMeta[]>([])
   const [cloudLoadedCode, setCloudLoadedCode] = useState('')
 
@@ -132,7 +135,10 @@ const WidgetPanel = () => {
       })
       return changed ? next : current
     })
-  }, [syncTab, filteredWidgets, cloudMetas])
+    if (focusedId && !activeIds.includes(focusedId)) {
+      setFocusedId('')
+    }
+  }, [syncTab, filteredWidgets, cloudMetas, focusedId, activeIds])
 
   const showToast = (message: string, type: 'error' | 'success' = 'error') => {
     setToast({ message, type })
@@ -232,6 +238,21 @@ const WidgetPanel = () => {
   const switchSyncTab = (next: SyncTab) => {
     setSyncTab(next)
     setSelected(new Set())
+    setFocusedId('')
+  }
+
+  const focusWidget = (id: string) => {
+    setFocusedId(id)
+  }
+
+  const widgetFrameClass = (id: string) => {
+    if (focusedId === id) {
+      return 'border-[#66CC8A] ring-2 ring-[#66CC8A]'
+    }
+    if (selected.has(id)) {
+      return 'border-[#66CC8A]/60 ring-1 ring-[#66CC8A]/40'
+    }
+    return 'border-slate-200'
   }
 
   const loadCloud = async () => {
@@ -537,112 +558,139 @@ const WidgetPanel = () => {
                     </p>
                   ) : (
                     <div className="flex gap-2 overflow-x-auto pb-1">
-                      {filteredWidgets.map((widget) => (
-                        <div
-                          key={widget.id}
-                          className={`group relative flex w-28 shrink-0 flex-col rounded-lg border bg-white p-1.5 shadow-sm ${
-                            selected.has(widget.id)
-                              ? 'border-[#66CC8A] ring-1 ring-[#66CC8A]/40'
-                              : 'border-slate-200'
-                          }`}
-                          draggable={editingId !== widget.id}
-                          onDragStart={(event) => onDragStart(event, widget.id)}
-                        >
-                          <div className="absolute left-1 top-1 z-[1]">
-                            <input
-                              type="checkbox"
-                              className="checkbox checkbox-xs bg-white"
-                              checked={selected.has(widget.id)}
-                              onChange={() => toggleSelected(widget.id)}
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            className="flex h-16 w-full items-center justify-center overflow-hidden rounded bg-slate-50"
-                            title={String(t('widget.insert'))}
-                            onClick={() => void insertAtCenter(widget.id)}
-                          >
-                            {widget.thumbnail ? (
-                              <img
-                                src={widget.thumbnail}
-                                alt={widget.title}
-                                className="max-h-full max-w-full object-contain"
-                                draggable={false}
-                              />
-                            ) : (
-                              <LayoutTemplate className="h-6 w-6 text-slate-300" />
-                            )}
-                          </button>
-                          {editingId === widget.id ? (
-                            <input
-                              className="mt-1 w-full rounded border border-slate-300 px-1 text-xs"
-                              value={draftTitle}
-                              autoFocus
-                              onChange={(e) => setDraftTitle(e.target.value)}
-                              onBlur={() => {
-                                renameWidget(widget.id, draftTitle)
-                                setEditingId(null)
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  renameWidget(widget.id, draftTitle)
-                                  setEditingId(null)
-                                }
-                                if (e.key === 'Escape') {
-                                  setEditingId(null)
-                                }
-                              }}
-                            />
-                          ) : (
-                            <div className="mt-1 flex items-center gap-0.5">
-                              <span
-                                className="flex-1 truncate text-xs text-slate-600"
-                                title={widget.title}
-                              >
-                                {widget.title}
-                              </span>
-                              <button
-                                type="button"
-                                className="rounded p-0.5 text-slate-400 opacity-0 hover:bg-slate-100 group-hover:opacity-100"
-                                title={String(t('widget.rename'))}
-                                onClick={() => {
-                                  setEditingId(widget.id)
-                                  setDraftTitle(widget.title)
-                                }}
-                              >
-                                <Pencil className="h-3 w-3" />
-                              </button>
-                              <button
-                                type="button"
-                                className="rounded p-0.5 text-slate-400 opacity-0 hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
-                                title={String(t('widget.delete'))}
-                                onClick={() => deleteWidget(widget.id)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </button>
-                            </div>
-                          )}
-                          <select
-                            className="mt-1 w-full rounded border border-slate-200 bg-slate-50 px-1 py-0.5 text-[10px] text-slate-500"
-                            value={widgetCategoryOf(widget)}
-                            title={String(t('widget.setCategory'))}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) =>
-                              setWidgetCategory(widget.id, e.target.value)
+                      {filteredWidgets.map((widget) => {
+                        const checked = selected.has(widget.id)
+                        const focused = focusedId === widget.id
+                        return (
+                          <div
+                            key={widget.id}
+                            className={`group relative flex w-28 shrink-0 flex-col rounded-lg border bg-white p-1.5 shadow-sm ${widgetFrameClass(
+                              widget.id
+                            )}`}
+                            draggable={editingId !== widget.id}
+                            onDragStart={(event) =>
+                              onDragStart(event, widget.id)
                             }
                           >
-                            <option value={WIDGET_UNCATEGORIZED}>
-                              {t('widget.categoryUncategorized')}
-                            </option>
-                            {categories.map((name) => (
-                              <option key={name} value={name}>
-                                {name}
+                            <div className="absolute left-1 top-1 z-[1]">
+                              <input
+                                type="checkbox"
+                                className="checkbox checkbox-xs bg-white"
+                                checked={checked}
+                                aria-label={
+                                  t('widget.select', {
+                                    title: widget.title
+                                  }) || undefined
+                                }
+                                onChange={() => toggleSelected(widget.id)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              className="flex h-16 w-full items-center justify-center overflow-hidden rounded bg-slate-50"
+                              title={String(t('widget.insertHint'))}
+                              onClick={(event) => {
+                                if (event.detail > 1) {
+                                  return
+                                }
+                                focusWidget(widget.id)
+                              }}
+                              onDoubleClick={() =>
+                                void insertAtCenter(widget.id)
+                              }
+                            >
+                              {widget.thumbnail ? (
+                                <img
+                                  src={widget.thumbnail}
+                                  alt={widget.title}
+                                  className="max-h-full max-w-full object-contain"
+                                  draggable={false}
+                                />
+                              ) : (
+                                <LayoutTemplate className="h-6 w-6 text-slate-300" />
+                              )}
+                            </button>
+                            {editingId === widget.id ? (
+                              <input
+                                className="mt-1 w-full rounded border border-slate-300 px-1 text-xs"
+                                value={draftTitle}
+                                autoFocus
+                                onChange={(e) => setDraftTitle(e.target.value)}
+                                onBlur={() => {
+                                  renameWidget(widget.id, draftTitle)
+                                  setEditingId(null)
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    renameWidget(widget.id, draftTitle)
+                                    setEditingId(null)
+                                  }
+                                  if (e.key === 'Escape') {
+                                    setEditingId(null)
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <div className="mt-1 flex items-center gap-0.5">
+                                <span
+                                  className="min-w-0 flex-1 truncate text-xs text-slate-600"
+                                  title={widget.title}
+                                >
+                                  {widget.title}
+                                </span>
+                                {focused && (
+                                  <span className="shrink-0 rounded-full bg-[#66CC8A] px-1 py-px text-[9px] leading-none text-white">
+                                    {t('widget.current')}
+                                  </span>
+                                )}
+                                <button
+                                  type="button"
+                                  className="rounded p-0.5 text-slate-400 opacity-0 hover:bg-slate-100 group-hover:opacity-100"
+                                  title={String(t('widget.rename'))}
+                                  onClick={() => {
+                                    setEditingId(widget.id)
+                                    setDraftTitle(widget.title)
+                                  }}
+                                >
+                                  <Pencil className="h-3 w-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  className="rounded p-0.5 text-slate-400 opacity-0 hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                                  title={String(t('widget.delete'))}
+                                  onClick={() => {
+                                    if (focusedId === widget.id) {
+                                      setFocusedId('')
+                                    }
+                                    deleteWidget(widget.id)
+                                  }}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </div>
+                            )}
+                            <select
+                              className="mt-1 w-full rounded border border-slate-200 bg-slate-50 px-1 py-0.5 text-[10px] text-slate-500"
+                              value={widgetCategoryOf(widget)}
+                              title={String(t('widget.setCategory'))}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) =>
+                                setWidgetCategory(widget.id, e.target.value)
+                              }
+                            >
+                              <option value={WIDGET_UNCATEGORIZED}>
+                                {t('widget.categoryUncategorized')}
                               </option>
-                            ))}
-                          </select>
-                        </div>
-                      ))}
+                              {categories.map((name) => (
+                                <option key={name} value={name}>
+                                  {name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )
+                      })}
                     </div>
                   )}
                 </>
@@ -731,43 +779,67 @@ const WidgetPanel = () => {
                     </p>
                   ) : (
                     <div className="flex gap-2 overflow-x-auto pb-1">
-                      {cloudMetas.map((meta) => (
-                        <div
-                          key={meta.id}
-                          className={`relative flex w-28 shrink-0 flex-col rounded-lg border bg-white p-1.5 shadow-sm ${
-                            selected.has(meta.id)
-                              ? 'border-[#66CC8A] ring-1 ring-[#66CC8A]/40'
-                              : 'border-slate-200'
-                          }`}
-                        >
-                          <div className="absolute left-1 top-1 z-[1]">
-                            <input
-                              type="checkbox"
-                              className="checkbox checkbox-xs bg-white"
-                              checked={selected.has(meta.id)}
-                              onChange={() => toggleSelected(meta.id)}
-                            />
-                          </div>
-                          <div className="flex h-16 w-full items-center justify-center overflow-hidden rounded bg-slate-50">
-                            {meta.thumbnail ? (
-                              <img
-                                src={meta.thumbnail}
-                                alt={meta.title}
-                                className="max-h-full max-w-full object-contain"
-                                draggable={false}
-                              />
-                            ) : (
-                              <LayoutTemplate className="h-6 w-6 text-slate-300" />
-                            )}
-                          </div>
-                          <span
-                            className="mt-1 truncate text-xs text-slate-600"
-                            title={meta.title}
+                      {cloudMetas.map((meta) => {
+                        const checked = selected.has(meta.id)
+                        const focused = focusedId === meta.id
+                        return (
+                          <div
+                            key={meta.id}
+                            className={`relative flex w-28 shrink-0 flex-col rounded-lg border bg-white p-1.5 shadow-sm ${widgetFrameClass(
+                              meta.id
+                            )}`}
                           >
-                            {meta.title}
-                          </span>
-                        </div>
-                      ))}
+                            <div className="absolute left-1 top-1 z-[1]">
+                              <input
+                                type="checkbox"
+                                className="checkbox checkbox-xs bg-white"
+                                checked={checked}
+                                aria-label={
+                                  t('widget.select', {
+                                    title: meta.title
+                                  }) || undefined
+                                }
+                                onChange={() => toggleSelected(meta.id)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              className="flex h-16 w-full items-center justify-center overflow-hidden rounded bg-slate-50"
+                              onClick={(event) => {
+                                if (event.detail > 1) {
+                                  return
+                                }
+                                focusWidget(meta.id)
+                              }}
+                            >
+                              {meta.thumbnail ? (
+                                <img
+                                  src={meta.thumbnail}
+                                  alt={meta.title}
+                                  className="max-h-full max-w-full object-contain"
+                                  draggable={false}
+                                />
+                              ) : (
+                                <LayoutTemplate className="h-6 w-6 text-slate-300" />
+                              )}
+                            </button>
+                            <div className="mt-1 flex items-center gap-0.5">
+                              <span
+                                className="min-w-0 flex-1 truncate text-xs text-slate-600"
+                                title={meta.title}
+                              >
+                                {meta.title}
+                              </span>
+                              {focused && (
+                                <span className="shrink-0 rounded-full bg-[#66CC8A] px-1 py-px text-[9px] leading-none text-white">
+                                  {t('widget.current')}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
                     </div>
                   )}
                 </>
