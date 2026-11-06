@@ -193,6 +193,11 @@ const FileList: FC<IProps> = ({ updateShow }) => {
     })
   }
 
+  /** Single-click: replace selection with this board (Ctrl/Cmd+click still toggles). */
+  const selectOnly = (id: string) => {
+    setSelected(new Set([id]))
+  }
+
   const toggleAll = () => {
     setSelected(allSelected ? new Set() : new Set(activeList))
   }
@@ -543,6 +548,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                           file.contentRevision
                         )}
                         onOpen={openBoard}
+                        onSelect={selectOnly}
                         onToggle={toggleSelected}
                         onRename={setRenameId}
                       />

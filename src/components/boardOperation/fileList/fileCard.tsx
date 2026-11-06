@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pencil } from 'lucide-react'
 import { IFile } from '@/store/files'
@@ -13,6 +13,7 @@ interface IProps {
   thumbnailUrl?: string
   pending: boolean
   onOpen: (id: string) => void
+  onSelect: (id: string) => void
   onToggle: (id: string) => void
   onRename: (id: string) => void
 }
@@ -24,10 +25,23 @@ const FileCard: FC<IProps> = ({
   thumbnailUrl,
   pending,
   onOpen,
+  onSelect,
   onToggle,
   onRename
 }) => {
   const { t } = useTranslation()
+
+  const handleCardClick = (event: MouseEvent<HTMLButtonElement>) => {
+    // Ignore the second click of a double-click so selection stays put.
+    if (event.detail > 1) {
+      return
+    }
+    if (event.ctrlKey || event.metaKey) {
+      onToggle(file.id)
+      return
+    }
+    onSelect(file.id)
+  }
 
   return (
     <div
@@ -41,7 +55,8 @@ const FileCard: FC<IProps> = ({
       <button
         type="button"
         className="flex h-full min-h-[220px] w-full flex-col text-left"
-        onClick={() => onOpen(file.id)}
+        onClick={handleCardClick}
+        onDoubleClick={() => onOpen(file.id)}
       >
         <div
           className={`flex h-40 min-h-[10rem] w-full shrink-0 items-center justify-center bg-slate-100 ${
