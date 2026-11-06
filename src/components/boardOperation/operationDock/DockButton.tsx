@@ -37,7 +37,7 @@ const DockButton: FC<IProps> = ({
         {children}
       </span>
       {showLabel && (
-        <span className="max-w-[4.5rem] truncate text-[10px] font-medium leading-tight text-slate-700">
+        <span className="max-w-[5.5rem] truncate whitespace-normal text-center text-[10px] font-medium leading-tight text-slate-700 xs:text-left">
           {label}
         </span>
       )}

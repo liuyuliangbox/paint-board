@@ -93,8 +93,8 @@
     "deleteFile": "Delete File",
     "saveFile": "Save File Data",
     "uploadFile": "Upload File Data",
-    "expandLegend": "Labels",
-    "collapseLegend": "Icons",
+    "expandLegend": "Show labels",
+    "collapseLegend": "Hide labels",
     "selectionActions": "Selection",
     "dock": {
       "undo": "Undo",

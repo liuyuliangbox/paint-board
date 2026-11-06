@@ -93,8 +93,8 @@
     "deleteFile": "ファイル削除",
     "saveFile": "ファイルデータ保存",
     "uploadFile": "ファイルデータアップロード",
-    "expandLegend": "説明",
-    "collapseLegend": "閉じる",
+    "expandLegend": "説明を表示",
+    "collapseLegend": "説明を隠す",
     "selectionActions": "選択操作",
     "dock": {
       "undo": "元に戻す",

@@ -93,8 +93,8 @@
     "deleteFile": "파일 삭제",
     "saveFile": "파일 데이터 저장",
     "uploadFile": "파일 데이터 업로드",
-    "expandLegend": "설명",
-    "collapseLegend": "접기",
+    "expandLegend": "설명 펼치기",
+    "collapseLegend": "설명 접기",
     "selectionActions": "선택 작업",
     "dock": {
       "undo": "실행 취소",

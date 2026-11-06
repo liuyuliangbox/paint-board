@@ -217,200 +217,214 @@ const OperationDock: FC<OperationDockProps> = ({
   const showSelection = hasSelection
   const showTouch = showTouchTools || touchUi
 
+  const legendToggle = (
+    <DockButton
+      label={
+        legendOpen
+          ? labelOf('operate.collapseLegend')
+          : labelOf('operate.expandLegend')
+      }
+      // Always show this label so mobile users can find the feature.
+      showLabel
+      active={legendOpen}
+      onClick={onToggleLegend}
+      className="w-full justify-center border border-[#66CC8A]/40 bg-white/80"
+    >
+      {legendOpen ? (
+        <ChevronDown strokeWidth={iconStroke} />
+      ) : (
+        <ChevronUp strokeWidth={iconStroke} />
+      )}
+    </DockButton>
+  )
+
   return (
-    <div className="fixed bottom-5 left-2/4 z-[12] -translate-x-2/4 xs:bottom-auto xs:right-5 xs:top-1/2 xs:translate-x-0 xs:-translate-y-1/2">
+    <div className="fixed bottom-5 left-2/4 z-[12] -translate-x-2/4 xs:bottom-auto xs:right-3 xs:top-1/2 xs:translate-x-0 xs:-translate-y-1/2">
       <div
         ref={dockRef}
-        className="relative flex max-w-[min(96vw,40rem)] items-center gap-0.5 rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1.5 py-1 shadow-md backdrop-blur xs:max-h-[70vh] xs:max-w-[7.5rem] xs:flex-col xs:overflow-y-auto xs:noScrollbar"
+        className={`relative flex items-center gap-0.5 rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1.5 py-1 shadow-md backdrop-blur xs:max-h-[75vh] xs:flex-col ${
+          legendOpen
+            ? 'max-w-[min(96vw,44rem)] xs:max-w-[8.5rem]'
+            : 'max-w-[min(96vw,40rem)] xs:max-w-[7.25rem]'
+        }`}
       >
-        <DockButton
-          label={
-            legendOpen
-              ? labelOf('operate.collapseLegend')
-              : labelOf('operate.expandLegend')
-          }
-          showLabel={showLabel}
-          active={legendOpen}
-          onClick={onToggleLegend}
-          className="order-last xs:order-none"
-        >
-          {legendOpen ? (
-            <ChevronDown strokeWidth={iconStroke} />
-          ) : (
-            <ChevronUp strokeWidth={iconStroke} />
-          )}
-        </DockButton>
+        {/* Keep legend control outside the scroll area on phones. */}
+        <div className="shrink-0 px-0.5 pb-0.5 xs:w-full xs:border-b xs:border-slate-200/80 xs:pb-1">
+          {legendToggle}
+        </div>
 
-        <Section tone="default" showLabel={showLabel}>
-          <DockButton
-            label={labelOf('operate.dock.undo')}
-            showLabel={showLabel}
-            onClick={onUndo}
-          >
-            <Undo2 strokeWidth={iconStroke} />
-          </DockButton>
-          <DockButton
-            label={labelOf('operate.dock.redo')}
-            showLabel={showLabel}
-            onClick={onRedo}
-          >
-            <Redo2 strokeWidth={iconStroke} />
-          </DockButton>
-          {showTouch && (
+        <div className="flex min-h-0 flex-1 items-center gap-0.5 overflow-x-auto noScrollbar xs:w-full xs:flex-col xs:overflow-x-hidden xs:overflow-y-auto">
+          <Section tone="default" showLabel={showLabel}>
             <DockButton
-              label={labelOf('operate.dock.pan')}
+              label={labelOf('operate.dock.undo')}
               showLabel={showLabel}
-              active={isPanMode}
-              onClick={onTogglePanMode}
+              onClick={onUndo}
             >
-              <Hand strokeWidth={iconStroke} />
+              <Undo2 strokeWidth={iconStroke} />
             </DockButton>
-          )}
-        </Section>
-
-        {showSelection && (
-          <Section
-            tone="selection"
-            showLabel={showLabel}
-            title={labelOf('operate.selectionActions')}
-          >
             <DockButton
-              label={labelOf('operate.dock.copy')}
+              label={labelOf('operate.dock.redo')}
               showLabel={showLabel}
-              onClick={onCopy}
+              onClick={onRedo}
             >
-              <Copy strokeWidth={iconStroke} />
-            </DockButton>
-            {canGroup && (
-              <DockButton
-                label={labelOf('operate.dock.group')}
-                showLabel={showLabel}
-                onClick={onGroup}
-              >
-                <Group strokeWidth={iconStroke} />
-              </DockButton>
-            )}
-            <DockButton
-              label={labelOf('operate.dock.widget')}
-              showLabel={showLabel}
-              onClick={onAddWidget}
-            >
-              <LayoutTemplate strokeWidth={iconStroke} />
+              <Redo2 strokeWidth={iconStroke} />
             </DockButton>
             {showTouch && (
               <DockButton
-                label={labelOf('operate.dock.duplicateMode')}
+                label={labelOf('operate.dock.pan')}
                 showLabel={showLabel}
-                active={duplicateDragEnabled}
-                onClick={onToggleDuplicateMode}
+                active={isPanMode}
+                onClick={onTogglePanMode}
               >
-                <span className="relative inline-flex">
-                  <Copy strokeWidth={iconStroke} size={18} />
-                  <span className="absolute -bottom-0.5 -right-0.5 text-[9px] font-bold leading-none text-[#66CC8A]">
-                    +
-                  </span>
-                </span>
+                <Hand strokeWidth={iconStroke} />
               </DockButton>
             )}
-            <DockButton
-              label={labelOf('operate.dock.delete')}
+          </Section>
+
+          {showSelection && (
+            <Section
+              tone="selection"
               showLabel={showLabel}
-              onClick={onDelete}
+              title={labelOf('operate.selectionActions')}
             >
-              <Trash2 strokeWidth={iconStroke} />
+              <DockButton
+                label={labelOf('operate.dock.copy')}
+                showLabel={showLabel}
+                onClick={onCopy}
+              >
+                <Copy strokeWidth={iconStroke} />
+              </DockButton>
+              {canGroup && (
+                <DockButton
+                  label={labelOf('operate.dock.group')}
+                  showLabel={showLabel}
+                  onClick={onGroup}
+                >
+                  <Group strokeWidth={iconStroke} />
+                </DockButton>
+              )}
+              <DockButton
+                label={labelOf('operate.dock.widget')}
+                showLabel={showLabel}
+                onClick={onAddWidget}
+              >
+                <LayoutTemplate strokeWidth={iconStroke} />
+              </DockButton>
+              {showTouch && (
+                <DockButton
+                  label={labelOf('operate.dock.duplicateMode')}
+                  showLabel={showLabel}
+                  active={duplicateDragEnabled}
+                  onClick={onToggleDuplicateMode}
+                >
+                  <span className="relative inline-flex">
+                    <Copy strokeWidth={iconStroke} size={18} />
+                    <span className="absolute -bottom-0.5 -right-0.5 text-[9px] font-bold leading-none text-[#66CC8A]">
+                      +
+                    </span>
+                  </span>
+                </DockButton>
+              )}
+              <DockButton
+                label={labelOf('operate.dock.delete')}
+                showLabel={showLabel}
+                onClick={onDelete}
+              >
+                <Trash2 strokeWidth={iconStroke} />
+              </DockButton>
+            </Section>
+          )}
+
+          <Section tone="default" showLabel={showLabel}>
+            <DockButton
+              label={labelOf('operate.dock.text')}
+              showLabel={showLabel}
+              onClick={onText}
+            >
+              <Type strokeWidth={iconStroke} />
+            </DockButton>
+            <DockButton
+              label={labelOf('operate.dock.image')}
+              showLabel={showLabel}
+              as="label"
+              htmlFor="image-upload-dock"
+            >
+              <ImageUp strokeWidth={iconStroke} />
+            </DockButton>
+            <input
+              type="file"
+              id="image-upload-dock"
+              accept=".jpeg, .jpg, .png"
+              className="hidden"
+              onChange={onUploadImage}
+            />
+            <DockButton
+              label={labelOf('operate.dock.clean')}
+              showLabel={showLabel}
+              as="label"
+              htmlFor="clean-modal"
+            >
+              <BrushCleaning strokeWidth={iconStroke} />
+            </DockButton>
+            <ExportImageMenu
+              hasSelection={hasSelection}
+              onExport={onExport}
+              onExportBoard={onExportBoard}
+              showLabel={showLabel}
+              label={labelOf('operate.dock.save')}
+            />
+            <DockButton
+              label={labelOf('operate.dock.layers')}
+              showLabel={showLabel}
+              onClick={onToggleObjectList}
+            >
+              <Layers strokeWidth={iconStroke} />
+            </DockButton>
+            <DockButton
+              label={labelOf('operate.dock.boards')}
+              showLabel={showLabel}
+              onClick={onOpenFiles}
+            >
+              <BookText strokeWidth={iconStroke} />
             </DockButton>
           </Section>
-        )}
 
-        <Section tone="default" showLabel={showLabel}>
-          <DockButton
-            label={labelOf('operate.dock.text')}
-            showLabel={showLabel}
-            onClick={onText}
-          >
-            <Type strokeWidth={iconStroke} />
-          </DockButton>
-          <DockButton
-            label={labelOf('operate.dock.image')}
-            showLabel={showLabel}
-            as="label"
-            htmlFor="image-upload-dock"
-          >
-            <ImageUp strokeWidth={iconStroke} />
-          </DockButton>
-          <input
-            type="file"
-            id="image-upload-dock"
-            accept=".jpeg, .jpg, .png"
-            className="hidden"
-            onChange={onUploadImage}
-          />
-          <DockButton
-            label={labelOf('operate.dock.clean')}
-            showLabel={showLabel}
-            as="label"
-            htmlFor="clean-modal"
-          >
-            <BrushCleaning strokeWidth={iconStroke} />
-          </DockButton>
-          <ExportImageMenu
-            hasSelection={hasSelection}
-            onExport={onExport}
-            onExportBoard={onExportBoard}
-            showLabel={showLabel}
-            label={labelOf('operate.dock.save')}
-          />
-          <DockButton
-            label={labelOf('operate.dock.layers')}
-            showLabel={showLabel}
-            onClick={onToggleObjectList}
-          >
-            <Layers strokeWidth={iconStroke} />
-          </DockButton>
-          <DockButton
-            label={labelOf('operate.dock.boards')}
-            showLabel={showLabel}
-            onClick={onOpenFiles}
-          >
-            <BookText strokeWidth={iconStroke} />
-          </DockButton>
-        </Section>
-
-        {!isMobile && (
-          <div className="relative">
-            <DockButton
-              label={labelOf('operate.dock.more')}
-              showLabel={showLabel}
-              active={moreOpen}
-              onClick={() => setMoreOpen((v) => !v)}
-            >
-              <Ellipsis strokeWidth={iconStroke} />
-            </DockButton>
-            {moreOpen && (
-              <div className="absolute bottom-full left-1/2 z-20 mb-2 min-w-[8rem] -translate-x-1/2 rounded-xl border border-slate-200 bg-[#eef1ff] p-1 shadow-lg xs:bottom-auto xs:left-auto xs:right-full xs:top-0 xs:mb-0 xs:mr-2 xs:translate-x-0">
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs hover:bg-slate-200"
-                  onClick={() => {
-                    setMoreOpen(false)
-                    onToggleFullscreen()
-                  }}
-                >
-                  {isFullscreen ? (
-                    <Shrink size={16} className="text-[#66CC8A]" />
-                  ) : (
-                    <Expand size={16} className="text-[#66CC8A]" />
-                  )}
-                  {t(
-                    isFullscreen
-                      ? 'operate.exitFullscreen'
-                      : 'operate.fullscreen'
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+          {!isMobile && (
+            <div className="relative">
+              <DockButton
+                label={labelOf('operate.dock.more')}
+                showLabel={showLabel}
+                active={moreOpen}
+                onClick={() => setMoreOpen((v) => !v)}
+              >
+                <Ellipsis strokeWidth={iconStroke} />
+              </DockButton>
+              {moreOpen && (
+                <div className="absolute bottom-full left-1/2 z-20 mb-2 min-w-[8rem] -translate-x-1/2 rounded-xl border border-slate-200 bg-[#eef1ff] p-1 shadow-lg xs:bottom-auto xs:left-auto xs:right-full xs:top-0 xs:mb-0 xs:mr-2 xs:translate-x-0">
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs hover:bg-slate-200"
+                    onClick={() => {
+                      setMoreOpen(false)
+                      onToggleFullscreen()
+                    }}
+                  >
+                    {isFullscreen ? (
+                      <Shrink size={16} className="text-[#66CC8A]" />
+                    ) : (
+                      <Expand size={16} className="text-[#66CC8A]" />
+                    )}
+                    {t(
+                      isFullscreen
+                        ? 'operate.exitFullscreen'
+                        : 'operate.fullscreen'
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
