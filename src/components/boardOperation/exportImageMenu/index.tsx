@@ -155,7 +155,7 @@ const ExportImageMenu = ({
         aria-expanded={open}
         aria-label={buttonLabel || undefined}
         title={showLabel ? undefined : buttonLabel || undefined}
-        className={`flex shrink-0 cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1.5 hover:bg-slate-200 ${
+        className={`flex shrink-0 cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1.5 hover:bg-slate-200 xs:w-full ${
           open ? 'bg-slate-200/80' : ''
         }`}
         onMouseEnter={() => {

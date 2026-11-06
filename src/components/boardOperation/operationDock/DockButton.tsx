@@ -23,12 +23,14 @@ const DockButton: FC<IProps> = ({
   htmlFor,
   className = ''
 }) => {
-  const base = `flex shrink-0 items-center justify-center gap-0.5 rounded-lg px-1.5 py-1.5 transition-colors ${
+  // Vertical phone rail: icon + text in one row per item.
+  // Horizontal desktop bar: same row layout when legend is open.
+  const base = `flex shrink-0 items-center justify-center gap-1 rounded-lg px-1.5 py-1.5 transition-colors ${
     disabled
       ? 'cursor-not-allowed opacity-40'
       : 'cursor-pointer hover:bg-slate-200'
   } ${active ? 'bg-[#66CC8A]/25 text-[#2d8f55]' : 'text-slate-700'} ${
-    showLabel ? 'min-w-[2.75rem] flex-col min-xs:flex-row min-xs:gap-1' : ''
+    showLabel ? 'justify-start xs:w-full' : ''
   } ${className}`
 
   const content = (
@@ -37,7 +39,7 @@ const DockButton: FC<IProps> = ({
         {children}
       </span>
       {showLabel && (
-        <span className="shrink-0 whitespace-nowrap text-center text-[11px] font-medium leading-tight text-slate-700 min-xs:text-left">
+        <span className="shrink-0 whitespace-nowrap text-[11px] font-medium leading-tight text-slate-700">
           {label}
         </span>
       )}

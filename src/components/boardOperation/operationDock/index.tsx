@@ -12,6 +12,8 @@ import {
   BookText,
   BrushCleaning,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
   Copy,
   Ellipsis,
@@ -36,6 +38,7 @@ import { readDockLegendOpen, writeDockLegendOpen } from './dockStorage'
 
 const isMobile = isMobileFn()
 const SWIPE_PX = 40
+const SIDE_MQ = '(max-width: 750px)'
 
 export interface OperationDockProps {
   hasSelection: boolean
@@ -71,7 +74,7 @@ const Section: FC<{
   }
   return (
     <div
-      className={`flex items-center gap-0.5 ${
+      className={`flex items-center gap-0.5 xs:w-full xs:flex-col ${
         tone === 'selection'
           ? 'rounded-xl bg-white/70 px-1 py-0.5 ring-1 ring-[#66CC8A]/35'
           : ''
@@ -152,7 +155,24 @@ const OperationDock: FC<OperationDockProps> = ({
       if (Math.hypot(dx, dy) < SWIPE_PX) {
         return
       }
-      // Dock stays at the bottom on phone and desktop: swipe up = labels on.
+      const sideLayout =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia(SIDE_MQ).matches
+
+      if (sideLayout) {
+        // Phone vertical rail: swipe left = open legend, right = collapse.
+        if (Math.abs(dx) < Math.abs(dy)) {
+          return
+        }
+        if (dx < -SWIPE_PX) {
+          setLegend(true)
+        } else if (dx > SWIPE_PX) {
+          setLegend(false)
+        }
+        return
+      }
+
+      // Desktop bottom bar: swipe up = open, down = collapse.
       if (Math.abs(dy) < Math.abs(dx)) {
         return
       }
@@ -206,28 +226,45 @@ const OperationDock: FC<OperationDockProps> = ({
       showLabel
       active={legendOpen}
       onClick={onToggleLegend}
-      className="border border-[#66CC8A]/50 bg-white shadow-sm"
+      className="border border-[#66CC8A]/50 bg-white shadow-sm xs:w-full"
     >
-      {legendOpen ? (
-        <ChevronDown strokeWidth={iconStroke} />
-      ) : (
-        <ChevronUp strokeWidth={iconStroke} />
-      )}
+      {/* Phone vertical rail uses left/right chevrons; desktop uses up/down. */}
+      <span className="hidden xs:inline-flex">
+        {legendOpen ? (
+          <ChevronRight strokeWidth={iconStroke} />
+        ) : (
+          <ChevronLeft strokeWidth={iconStroke} />
+        )}
+      </span>
+      <span className="inline-flex xs:hidden">
+        {legendOpen ? (
+          <ChevronDown strokeWidth={iconStroke} />
+        ) : (
+          <ChevronUp strokeWidth={iconStroke} />
+        )}
+      </span>
     </DockButton>
   )
 
   return (
-    <div className="pointer-events-none fixed bottom-4 left-1/2 z-[12] w-[min(96vw,44rem)] -translate-x-1/2">
+    <div
+      className={`pointer-events-none fixed z-[12] ${
+        // Phone: right vertical rail. Desktop: bottom horizontal bar.
+        'bottom-4 left-1/2 w-[min(96vw,44rem)] -translate-x-1/2 xs:bottom-auto xs:left-auto xs:right-2 xs:top-1/2 xs:w-auto xs:translate-x-0 xs:-translate-y-1/2'
+      }`}
+    >
       <div
         ref={dockRef}
-        className="pointer-events-auto relative flex max-h-[30vh] items-stretch gap-1 overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1.5 py-1 shadow-md backdrop-blur"
+        className={`pointer-events-auto relative flex overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1.5 py-1 shadow-md backdrop-blur max-h-[30vh] items-stretch gap-1 xs:max-h-[78vh] xs:flex-col xs:gap-1 ${
+          legendOpen ? 'xs:w-[9.25rem]' : 'xs:w-[3.75rem]'
+        }`}
       >
-        {/* Always pinned at the leading edge so “展开说明” stays visible. */}
-        <div className="flex shrink-0 items-center border-r border-slate-200/80 pr-1">
+        {/* Pinned so “展开说明” stays visible while the list scrolls. */}
+        <div className="flex shrink-0 items-center border-r border-slate-200/80 pr-1 xs:border-r-0 xs:border-b xs:pb-1 xs:pr-0">
           {legendToggle}
         </div>
 
-        <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto noScrollbar">
+        <div className="flex min-h-0 min-w-0 flex-1 items-center gap-0.5 overflow-x-auto noScrollbar xs:w-full xs:flex-col xs:overflow-x-hidden xs:overflow-y-auto">
           <Section tone="default">
             <DockButton
               label={labelOf('operate.dock.undo')}
