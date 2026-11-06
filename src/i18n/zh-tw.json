@@ -542,10 +542,10 @@
       "panBoard1": "平移畫板(1)",
       "panBoardCtrlDrag": "平移畫板(空白處)",
       "panBoard2": "平移畫板(2)",
-      "panBoardMobile": "平移畫板(雙指)",
+      "panBoardMobile": "平移畫板(空白雙指拖)",
       "zoomBoard1": "縮放畫板(1)",
       "zoomBoard2": "縮放畫板(2)",
-      "zoomBoardMobile": "縮放畫板(雙指)",
+      "zoomBoardMobile": "縮放畫板(雙指捏合)",
       "resetZoom": "重置畫板縮放",
       "undo": "撤銷",
       "undoMobile": "撤銷(移動端)",
@@ -570,7 +570,7 @@
       "moveLayer": "移動元素圖層",
       "longPressSelect": "觸屏長按選中元素",
       "longPressMarquee": "觸屏長按拖動框選",
-      "duplicateDragTouch": "開啟複製模式後拖動複製"
+      "duplicateDragTouch": "選中後雙指拖複製移動"
     },
     "toolOperations": {
       "switchDrawMode": "切換繪畫模式",
@@ -587,9 +587,9 @@
       "spaceDrag": "鼠標拖拽",
       "ctrlEmptyDrag": "在空白處拖拽",
       "arrows": "上 / 下 / 左 / 右",
-      "doubleFingerDrag": "雙指按壓後退拽",
+      "doubleFingerDrag": "空白處雙指拖拽",
       "mouseWheel": "鼠標滾輪",
-      "doubleFingerZoom": "雙指按壓後縮放",
+      "doubleFingerZoom": "雙指捏合",
       "doubleFingerTap": "雙指雙擊",
       "threeFingerTap": "三指雙擊",
       "mouseLeftClick": "鼠標左鍵",
@@ -598,7 +598,8 @@
       "handPanToggle": "點按底部手型按鈕後單指拖拽",
       "longPress": "長按",
       "longPressDrag": "長按後拖拽",
-      "duplicateModeToggle": "點按底部複製按鈕後拖動"
+      "duplicateModeToggle": "點按底部複製按鈕後單指拖動",
+      "twoFingerDupDrag": "選中對象上雙指拖拽"
     }
   },
   "touchUi": {

@@ -542,10 +542,10 @@
       "panBoard1": "보드 이동(1)",
       "panBoardCtrlDrag": "보드 이동(빈 영역)",
       "panBoard2": "보드 이동(2)",
-      "panBoardMobile": "보드 이동(두 손가락)",
+      "panBoardMobile": "보드 이동(빈 곳 두 손가락 드래그)",
       "zoomBoard1": "보드 확대/축소(1)",
       "zoomBoard2": "보드 확대/축소(2)",
-      "zoomBoardMobile": "확대/축소(두 손가락)",
+      "zoomBoardMobile": "확대/축소(핀치)",
       "resetZoom": "확대/축소 재설정",
       "undo": "실행 취소",
       "undoMobile": "실행 취소(모바일)",
@@ -570,7 +570,7 @@
       "moveLayer": "요소 레이어 이동",
       "longPressSelect": "길게 눌러 선택",
       "longPressMarquee": "길게 누르고 드래그하여 영역 선택",
-      "duplicateDragTouch": "복제 모드에서 드래그 복제"
+      "duplicateDragTouch": "선택 후 두 손가락 드래그로 복제 이동"
     },
     "toolOperations": {
       "switchDrawMode": "그리기 모드 전환",
@@ -587,9 +587,9 @@
       "spaceDrag": "마우스 클릭 후 드래그",
       "ctrlEmptyDrag": "빈 캔버스에서 드래그",
       "arrows": "위 / 아래 / 왼쪽 / 오른쪽",
-      "doubleFingerDrag": "두 손가락으로 누른 후 드래그",
+      "doubleFingerDrag": "빈 곳 두 손가락 드래그",
       "mouseWheel": "마우스 휠",
-      "doubleFingerZoom": "두 손가락으로 누른 후 축소",
+      "doubleFingerZoom": "핀치",
       "doubleFingerTap": "두 손가락으로 누른 후 클릭",
       "threeFingerTap": "세 손가락으로 누른 후 클릭",
       "mouseLeftClick": "마우스 왼쪽 클릭",
@@ -598,7 +598,8 @@
       "handPanToggle": "손 버튼 후 한 손가락 드래그",
       "longPress": "길게 누르기",
       "longPressDrag": "길게 누른 뒤 드래그",
-      "duplicateModeToggle": "복제 버튼 탭 후 드래그"
+      "duplicateModeToggle": "복제 버튼 후 한 손가락 드래그",
+      "twoFingerDupDrag": "선택 위 두 손가락 드래그"
     }
   },
   "touchUi": {

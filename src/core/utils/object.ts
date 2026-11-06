@@ -130,13 +130,30 @@ export const getObjectScenePosition = (obj: fabric.Object) => {
   }
 }
 
+export type DuplicateInPlaceItem = {
+  object: fabric.Object
+  left: number
+  top: number
+}
+
+/**
+ * Absolute positions for the current unlocked selection (ActiveSelection-safe).
+ * Used by Ctrl/Cmd drag and two-finger duplicate-drag.
+ */
+export const snapshotActiveObjectsForDuplicate = (
+  canvas: fabric.Canvas
+): DuplicateInPlaceItem[] => {
+  return filterUnlockedObjects(canvas.getActiveObjects()).map((object) => {
+    const { left, top } = getObjectScenePosition(object)
+    return { object, left, top }
+  })
+}
+
 /**
  * Leave copies at absolute positions while the current selection keeps moving.
  * Used by Ctrl/Cmd + drag duplicate.
  */
-export const cloneObjectsInPlace = (
-  items: Array<{ object: fabric.Object; left: number; top: number }>
-) => {
+export const cloneObjectsInPlace = (items: DuplicateInPlaceItem[]) => {
   return cloneFabricObjects(
     items.map((item) => item.object),
     (source) => {

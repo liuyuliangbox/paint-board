@@ -542,10 +542,10 @@
       "panBoard1": "ボード移動(1)",
       "panBoardCtrlDrag": "ボード移動(空白)",
       "panBoard2": "ボード移動(2)",
-      "panBoardMobile": "ボード移動(二本指)",
+      "panBoardMobile": "ボード移動(空白を二本指ドラッグ)",
       "zoomBoard1": "ボードズーム(1)",
       "zoomBoard2": "ボードズーム(2)",
-      "zoomBoardMobile": "ズーム(二本指)",
+      "zoomBoardMobile": "ズーム(ピンチ)",
       "resetZoom": "ズームリセット",
       "undo": "元に戻す",
       "undoMobile": "元に戻す(モバイル)",
@@ -570,7 +570,7 @@
       "moveLayer": "要素レイヤー移動",
       "longPressSelect": "長押しで選択",
       "longPressMarquee": "長押しドラッグで範囲選択",
-      "duplicateDragTouch": "複製モードでドラッグ複製"
+      "duplicateDragTouch": "選択後に二本指ドラッグで複製移動"
     },
     "toolOperations": {
       "switchDrawMode": "描画モード切替",
@@ -587,9 +587,9 @@
       "spaceDrag": "マウスクリックでドラッグ",
       "ctrlEmptyDrag": "空白でドラッグ",
       "arrows": "上 / 下 / 左 / 右",
-      "doubleFingerDrag": "二本指で押した後のドラッグ",
+      "doubleFingerDrag": "空白を二本指ドラッグ",
       "mouseWheel": "マウスホイール",
-      "doubleFingerZoom": "二本指で押した後のズーム",
+      "doubleFingerZoom": "ピンチ",
       "doubleFingerTap": "二本指で二回クリック",
       "threeFingerTap": "三本指で二回クリック",
       "mouseLeftClick": "マウス左クリック",
@@ -598,7 +598,8 @@
       "handPanToggle": "ハンドボタン後に一本指ドラッグ",
       "longPress": "長押し",
       "longPressDrag": "長押し後ドラッグ",
-      "duplicateModeToggle": "複製ボタンをタップしてからドラッグ"
+      "duplicateModeToggle": "複製ボタン後に一本指ドラッグ",
+      "twoFingerDupDrag": "選択上を二本指ドラッグ"
     }
   },
   "touchUi": {

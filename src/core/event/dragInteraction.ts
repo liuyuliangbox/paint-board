@@ -4,16 +4,13 @@ import useBoardStore from '@/store/board'
 import { ActionMode } from '@/constants'
 import {
   cloneObjectsInPlace,
+  DuplicateInPlaceItem,
   filterUnlockedObjects,
-  getObjectScenePosition,
-  isObjectLocked
+  isObjectLocked,
+  snapshotActiveObjectsForDuplicate
 } from '@/core/utils/object'
 
-type ObjectStart = {
-  object: fabric.Object
-  left: number
-  top: number
-}
+type ObjectStart = DuplicateInPlaceItem
 
 /**
  * Selection drag helpers:
@@ -122,12 +119,7 @@ export class DragInteraction {
       mouseEvent.metaKey ||
       useBoardStore.getState().duplicateDragEnabled
     if (wantsDuplicate) {
-      // ActiveSelection children use group-relative left/top — convert to
-      // canvas space so the copy stays under the original, not far away.
-      this.pendingDuplicate = activeObjects.map((object) => {
-        const { left, top } = getObjectScenePosition(object)
-        return { object, left, top }
-      })
+      this.pendingDuplicate = snapshotActiveObjectsForDuplicate(canvas)
     }
   }
 
