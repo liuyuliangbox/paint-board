@@ -148,7 +148,9 @@
     "empty": "This board has no elements yet",
     "hint": "Ctrl click · Shift range · Alt skip link · ↑↓ reorder · Delete",
     "link": "Link",
+    "linkSelection": "Link selection",
     "unlink": "Unlink",
+    "unlinkAll": "Unlink all",
     "linked": "Linked",
     "show": "Show",
     "hide": "Hide",
@@ -530,6 +532,7 @@
     "shortcutKey": "Shortcut Key",
     "boardOperations": {
       "panBoard1": "Pan Board (1)",
+      "panBoardCtrlDrag": "Pan Board (empty area)",
       "panBoard2": "Pan Board (2)",
       "panBoardMobile": "Pan Board (Mobile)",
       "zoomBoard1": "Zoom Board (1)",
@@ -568,7 +571,9 @@
       "brushTypeNote": "The letter on each button"
     },
     "keyboardShortcuts": {
+      "spaceKey": "Spacebar",
       "spaceDrag": "Mouse Click and Drag",
+      "ctrlEmptyDrag": "Drag on empty canvas",
       "arrows": "Up / Down / Left / Right",
       "doubleFingerDrag": "Double Finger Press and Drag",
       "mouseWheel": "Mouse Wheel",

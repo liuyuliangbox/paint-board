@@ -148,7 +148,9 @@
     "empty": "當前畫板還沒有元素",
     "hint": "Ctrl 點選 · Shift 範圍選 · Alt 不擴關聯 · ↑↓ 調層級 · Delete 刪除",
     "link": "關聯",
+    "linkSelection": "關聯選中項",
     "unlink": "取消關聯",
+    "unlinkAll": "取消全部關聯",
     "linked": "已關聯",
     "show": "顯示",
     "hide": "隱藏",
@@ -530,6 +532,7 @@
     "shortcutKey": "快捷鍵",
     "boardOperations": {
       "panBoard1": "平移畫板(1)",
+      "panBoardCtrlDrag": "平移畫板(空白處)",
       "panBoard2": "平移畫板(2)",
       "panBoardMobile": "平移畫板(移動端)",
       "zoomBoard1": "縮放畫板(1)",
@@ -568,7 +571,9 @@
       "brushTypeNote": "以按鈕上的字母為準"
     },
     "keyboardShortcuts": {
+      "spaceKey": "空格鍵",
       "spaceDrag": "鼠標拖拽",
+      "ctrlEmptyDrag": "在空白處拖拽",
       "arrows": "上 / 下 / 左 / 右",
       "doubleFingerDrag": "雙指按壓後退拽",
       "mouseWheel": "鼠標滾輪",

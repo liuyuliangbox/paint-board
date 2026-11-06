@@ -148,7 +148,9 @@
     "empty": "このボードには要素がありません",
     "hint": "Ctrl クリック · Shift 範囲 · Alt でリンク除外 · ↑↓ 順序 · Delete",
     "link": "リンク",
+    "linkSelection": "選択をリンク",
     "unlink": "リンク解除",
+    "unlinkAll": "すべてリンク解除",
     "linked": "リンク済み",
     "show": "表示",
     "hide": "非表示",
@@ -530,6 +532,7 @@
     "shortcutKey": "ショートカットキー",
     "boardOperations": {
       "panBoard1": "ボード移動(1)",
+      "panBoardCtrlDrag": "ボード移動(空白)",
       "panBoard2": "ボード移動(2)",
       "panBoardMobile": "ボード移動(モバイル)",
       "zoomBoard1": "ボードズーム(1)",
@@ -568,7 +571,9 @@
       "brushTypeNote": "ボタンの文字に従う"
     },
     "keyboardShortcuts": {
+      "spaceKey": "スペース",
       "spaceDrag": "マウスクリックでドラッグ",
+      "ctrlEmptyDrag": "空白でドラッグ",
       "arrows": "上 / 下 / 左 / 右",
       "doubleFingerDrag": "二本指で押した後のドラッグ",
       "mouseWheel": "マウスホイール",

@@ -24,9 +24,19 @@ const Shortcut = () => {
             <tr>
               <td>{t('helpInfo.boardOperations.panBoard1')}</td>
               <td>
-                <kbd className="kbd kbd-sm">Space</kbd>
+                <kbd className="kbd kbd-sm">
+                  {t('helpInfo.keyboardShortcuts.spaceKey')}
+                </kbd>
                 <span> + </span>
                 <span>{t('helpInfo.keyboardShortcuts.spaceDrag')}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>{t('helpInfo.boardOperations.panBoardCtrlDrag')}</td>
+              <td>
+                <kbd className="kbd kbd-sm">{metaKey}</kbd>
+                <span> + </span>
+                <span>{t('helpInfo.keyboardShortcuts.ctrlEmptyDrag')}</span>
               </td>
             </tr>
             <tr>

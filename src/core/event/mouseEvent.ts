@@ -3,11 +3,14 @@ import { paintBoard } from '@/core/paintBoard'
 import { isCanvasTextObject } from '@/core/element/text/placeholder'
 import { EraserCursor } from '@/core/element/eraser/cursor'
 import { DrawingHandler } from './draw/drawingHandler'
+import { beginCanvasPan, endCanvasPan } from './canvasPan'
 
 export class CanvasMouseEvent {
   drawingHandler: DrawingHandler
   isMouseDown = false
   isSpaceKeyDown = false
+  /** Ctrl/Cmd + drag on empty canvas pans (does not conflict with Ctrl-drag copy on objects). */
+  isCtrlEmptyPan = false
   private eraserCursor: EraserCursor
 
   constructor(eraserCursor: EraserCursor) {
@@ -21,12 +24,25 @@ export class CanvasMouseEvent {
 
     canvas?.on('mouse:down', (e) => {
       // Right-click is reserved for cross-mode select / marquee.
-      if ((e.e as MouseEvent | undefined)?.button === 2) {
+      const mouse = e.e as MouseEvent | undefined
+      if (mouse?.button === 2) {
         return
       }
 
       this.isMouseDown = true
+      this.isCtrlEmptyPan = false
       if (this.isSpaceKeyDown) {
+        return
+      }
+
+      // Ctrl/Cmd + drag blank area → pan the board.
+      // (Ctrl+drag on an object still means duplicate-while-move.)
+      const isCtrl = Boolean(mouse && (mouse.ctrlKey || mouse.metaKey))
+      if (isCtrl && !e.target && mouse?.button === 0) {
+        this.isCtrlEmptyPan = true
+        beginCanvasPan(canvas)
+        canvas.defaultCursor = 'grabbing'
+        canvas.setCursor('grabbing')
         return
       }
 
@@ -49,8 +65,8 @@ export class CanvasMouseEvent {
 
     canvas?.on('mouse:move', (e) => {
       if (this.isMouseDown) {
-        // Press space, drag the canvas, stop drawing.
-        if (this.isSpaceKeyDown) {
+        // Space-drag or Ctrl-drag on empty canvas pans the board.
+        if (this.isSpaceKeyDown || this.isCtrlEmptyPan) {
           canvas.relativePan(new fabric.Point(e.e.movementX, e.e.movementY))
           return
         }
@@ -69,6 +85,12 @@ export class CanvasMouseEvent {
 
     canvas?.on('mouse:up', (e) => {
       this.isMouseDown = false
+      if (this.isCtrlEmptyPan) {
+        this.isCtrlEmptyPan = false
+        endCanvasPan(canvas)
+        canvas.defaultCursor = 'default'
+        canvas.setCursor('default')
+      }
 
       if (e.absolutePointer) {
         this.drawingHandler.drawingEnd(e.absolutePointer)

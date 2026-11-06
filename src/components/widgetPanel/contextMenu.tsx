@@ -1,11 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutTemplate, Loader2 } from 'lucide-react'
+import { LayoutTemplate, Link2, Link2Off, Loader2 } from 'lucide-react'
 import useWidgetMenuStore from '@/store/widgetMenu'
 import useWidgetStore, { MAX_WIDGET_COUNT } from '@/store/widgets'
 import useBoardStore from '@/store/board'
 import { ActionMode } from '@/constants'
 import { paintBoard } from '@/core/paintBoard'
+import {
+  linkActiveObjects,
+  unlinkActiveObjects
+} from '@/core/element/layer/objectListActions'
+import { getLinkMenuState } from '@/core/element/layer/linkMenuState'
 import Toast from '@/components/toast'
 
 const WidgetContextMenu = () => {
@@ -19,6 +24,12 @@ const WidgetContextMenu = () => {
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+
+  const activeObjects = open ? paintBoard.canvas?.getActiveObjects() || [] : []
+  const linkState = useMemo(
+    () => getLinkMenuState(activeObjects),
+    [open, activeObjects.length]
+  )
 
   useEffect(() => {
     if (!open) {
@@ -47,8 +58,8 @@ const WidgetContextMenu = () => {
     return toast ? <Toast message={toast} type="error" /> : null
   }
 
-  const left = Math.min(x, window.innerWidth - 180)
-  const top = Math.min(y, window.innerHeight - 80)
+  const left = Math.min(x, window.innerWidth - 200)
+  const top = Math.min(y, window.innerHeight - 160)
 
   const onAdd = async () => {
     if (busy) {
@@ -80,11 +91,21 @@ const WidgetContextMenu = () => {
     }
   }
 
+  const onLink = () => {
+    linkActiveObjects()
+    closeMenu()
+  }
+
+  const onUnlink = () => {
+    unlinkActiveObjects()
+    closeMenu()
+  }
+
   return (
     <>
       <div
         ref={menuRef}
-        className="fixed z-[10000] min-w-[10rem] rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+        className="fixed z-[10000] min-w-[11rem] rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
         style={{ left, top }}
       >
         <button
@@ -100,6 +121,26 @@ const WidgetContextMenu = () => {
           )}
           {t('widget.addToWidgets')}
         </button>
+        {linkState.canLink && (
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
+            onClick={onLink}
+          >
+            <Link2 className="h-4 w-4 text-[#66CC8A]" />
+            {t(linkState.linkLabelKey)}
+          </button>
+        )}
+        {linkState.canUnlink && (
+          <button
+            type="button"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
+            onClick={onUnlink}
+          >
+            <Link2Off className="h-4 w-4 text-[#66CC8A]" />
+            {t(linkState.unlinkLabelKey)}
+          </button>
+        )}
       </div>
       {toast && <Toast message={toast} type="error" />}
     </>
