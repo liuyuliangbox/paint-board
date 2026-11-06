@@ -1,47 +1,53 @@
-# Widget sync Worker (R2)
+# Widget / Board sync Worker (R2)
 
-Manual cloud sync for reusable widgets. The browser sends a sync code (`X-Sync-Code`); the Worker stores data under `SHA-256(code)` in R2.
+Cloud sync for reusable widgets and boards. Browser calls require a login token; sync code (`X-Sync-Code`) selects the storage space.
 
-## API
+## Auth
 
-- `GET /api/widgets/sync` + `X-Sync-Code` → `{ categories, metas, items, updatedAt }`
-- `PUT /api/widgets/sync` + `X-Sync-Code` + JSON body → overwrite that sync space
-- CORS: origins listed in `ALLOWED_ORIGINS` (see `wrangler.toml`)
+1. Set secrets (required for login):
 
-## One-time Cloudflare setup
+```sh
+npx wrangler secret put SYNC_USER
+npx wrangler secret put SYNC_PASS
+# optional; defaults to SYNC_PASS
+npx wrangler secret put AUTH_SECRET
+```
 
-1. Create an R2 bucket named `paint-board-widgets` (Dashboard → R2, or CLI):
+2. `POST /api/auth/login` with `{ "username", "password" }` → `{ token, expiresIn }`
+3. All `/api/widgets/*` and `/api/boards/*` need `Authorization: Bearer <token>`
+
+Local app features work without login; only cloud actions need it.
+
+## Board API
+
+- `GET /api/boards/sync` — manifest (list + thumbnails)
+- `GET /api/boards/sync/item?id=` — one board
+- `PUT /api/boards/sync/item` — upsert one board (body = full board JSON)
+- `DELETE /api/boards/sync/items` — `{ ids: string[] }`
+
+## Widget API (per-item)
+
+- `GET /api/widgets/sync` — manifest only
+- `GET /api/widgets/sync/item?id=` — one widget payload
+- `PUT /api/widgets/sync/item` — `{ meta, item, categories? }`
+- `PUT /api/widgets/sync/manifest` — align metas/categories and prune orphans
+
+Header: `X-Sync-Code` (`pbw_` + UUID).
+
+## Limits
+
+- Single request body up to ~100MB
+- Per sync space: 20 boards, 50 widgets, ~2GB total
+
+## Deploy
 
 ```sh
 npx wrangler r2 bucket create paint-board-widgets
-```
-
-2. From this directory, install and deploy:
-
-```sh
 cd workers/widget-sync
 npm install
 npx wrangler deploy
 ```
 
-Use the same Cloudflare account as Pages (`CLOUDFLARE_ACCOUNT_ID` / logged-in wrangler).
+Point the frontend at the Worker URL via `.env.production` / `VITE_WIDGET_SYNC_URL`.
 
-3. Note the Worker URL after deploy, for example:
-
-`https://paint-board-widget-sync.<account>.workers.dev`
-
-4. Point the frontend at it:
-
-- Local: create `.env.local` with  
-  `VITE_WIDGET_SYNC_URL=https://paint-board-widget-sync.<account>.workers.dev`
-- Production (GitHub Actions Pages deploy): set repository **Variable**  
-  `VITE_WIDGET_SYNC_URL` to that same base URL (no trailing slash).
-
-5. If the site origin changes, update `[vars].ALLOWED_ORIGINS` in `wrangler.toml` and redeploy.
-
-## Front-end behaviour
-
-- **My sync code**: generated locally (`pbw_` + UUID), stored in `localStorage`.
-- **Target sync code**: optional input; upload/download use it when filled, otherwise my code.
-- Upload overwrites cloud for the target code.
-- Download merges into local: keep existing widgets, append cloud-only ids (same id keeps local). Then upload to your own code to grow your cloud copy.
+CORS origins: `ALLOWED_ORIGINS` in `wrangler.toml`.

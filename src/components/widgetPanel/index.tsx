@@ -27,7 +27,9 @@ import {
   regenerateMySyncCode,
   setMySyncCode
 } from '@/core/widget/widgetSync'
+import { isCloudLoggedIn, subscribeCloudAuth } from '@/core/auth/cloudAuth'
 import Toast from '@/components/toast'
+import CloudLoginModal from '@/components/cloudAuth/CloudLoginModal'
 
 const WidgetPanel = () => {
   const { t } = useTranslation()
@@ -58,6 +60,10 @@ const WidgetPanel = () => {
   const [mySyncCode, setMySyncCodeState] = useState(() => getMySyncCode())
   const [targetCode, setTargetCode] = useState('')
   const [syncBusy, setSyncBusy] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(() => isCloudLoggedIn())
+
+  useEffect(() => subscribeCloudAuth(() => setLoggedIn(isCloudLoggedIn())), [])
 
   useEffect(() => {
     if (!toast) {
@@ -170,6 +176,11 @@ const WidgetPanel = () => {
       showToast('widget.syncNotConfigured')
       return
     }
+    if (!isCloudLoggedIn()) {
+      setShowLogin(true)
+      showToast('cloudAuth.loginRequired')
+      return
+    }
     const code = resolveTargetCode()
     if (!isValidSyncCode(code)) {
       showToast('widget.syncInvalidCode')
@@ -190,8 +201,14 @@ const WidgetPanel = () => {
         await pullFromCloud(code)
         showToast('widget.syncPullSuccess', 'success')
       }
-    } catch {
-      showToast('widget.syncFailed')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : ''
+      if (message === 'unauthorized') {
+        setShowLogin(true)
+        showToast('cloudAuth.loginRequired')
+      } else {
+        showToast('widget.syncFailed')
+      }
     } finally {
       setSyncBusy(false)
     }
@@ -417,6 +434,11 @@ const WidgetPanel = () => {
                     {t('widget.syncNotConfigured')}
                   </p>
                 )}
+                {isWidgetSyncConfigured() && !loggedIn && (
+                  <p className="mb-1.5 text-[10px] text-amber-600">
+                    {t('cloudAuth.loginRequired')}
+                  </p>
+                )}
                 <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
                   <span className="text-[10px] text-slate-500">
                     {t('widget.syncMyCode')}
@@ -488,6 +510,12 @@ const WidgetPanel = () => {
       </div>
 
       {toast && <Toast message={toast.message} type={toast.type} />}
+      {showLogin && (
+        <CloudLoginModal
+          onClose={() => setShowLogin(false)}
+          onSuccess={() => setLoggedIn(true)}
+        />
+      )}
     </>
   )
 }

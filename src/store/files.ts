@@ -28,9 +28,19 @@ import {
   canAddBoard,
   createDefaultFile
 } from './fileModel'
-import { deleteThumbnail } from '@/core/thumbnail/thumbnailCache'
+import {
+  cachedThumbnail,
+  deleteThumbnail
+} from '@/core/thumbnail/thumbnailCache'
+import { scheduleBoardThumbnail } from '@/core/thumbnail/scheduleBoardThumbnail'
 import { boardDataChanged, nextContentRevision } from './boardRevision'
 import { boardTitleIssue, idsToDelete } from './boardRules'
+import {
+  deleteCloudBoards,
+  fetchCloudBoard,
+  upsertCloudBoard
+} from '@/core/board/boardSync'
+import { getMySyncCode } from '@/core/widget/widgetSync'
 
 export {
   BOARD_VERSION,
@@ -120,6 +130,15 @@ interface FileAction {
   deleteFiles: (ids: string[]) => void
   saveJSON: () => void
   uploadFile: (file: File | undefined) => Promise<boolean>
+  /** Upload selected local boards to my sync-code space (one request each). */
+  uploadBoardsToCloud: (
+    ids: string[],
+    thumbnails?: Record<string, string>
+  ) => Promise<number>
+  /** Download selected cloud boards into local (same id overwrites). */
+  downloadBoardsFromCloud: (code: string, ids: string[]) => Promise<number>
+  /** Delete selected boards from my cloud space only. */
+  deleteBoardsFromCloud: (ids: string[]) => Promise<void>
 }
 
 const initId = uuidv4()
@@ -464,6 +483,107 @@ const useFileStore = create<FileState & FileAction>()(
             resolve(false)
           }
         })
+      },
+      async uploadBoardsToCloud(ids, thumbnails) {
+        let uploaded = 0
+        for (const id of ids) {
+          const file = get().files.find((item) => item.id === id)
+          if (!file) {
+            continue
+          }
+          let thumb = thumbnails?.[id]
+          if (!thumb) {
+            const cached = cachedThumbnail(id)?.url
+            if (cached?.startsWith('data:')) {
+              thumb = cached
+            } else if (cached) {
+              try {
+                const blob = await (await fetch(cached)).blob()
+                thumb = await new Promise<string | undefined>((resolve) => {
+                  const reader = new FileReader()
+                  reader.onload = () =>
+                    resolve(String(reader.result || '') || undefined)
+                  reader.onerror = () => resolve(undefined)
+                  reader.readAsDataURL(blob)
+                })
+              } catch {
+                thumb = undefined
+              }
+            }
+          }
+          await upsertCloudBoard(file, thumb)
+          uploaded += 1
+        }
+        return uploaded
+      },
+      async downloadBoardsFromCloud(code, ids) {
+        let done = 0
+        for (const id of ids) {
+          const board = await fetchCloudBoard(code, id)
+          const existingIndex = get().files.findIndex(
+            (item) => item.id === board.id
+          )
+          if (existingIndex >= 0) {
+            markFileContentDirty(board.id)
+            const nextRevision = nextContentRevision(
+              get().files[existingIndex].contentRevision,
+              true
+            )
+            const { thumbnail: _thumb, ...rest } = board as IFile & {
+              thumbnail?: string
+            }
+            set(
+              produce((state: FileState) => {
+                state.files[existingIndex] = {
+                  ...rest,
+                  id: board.id,
+                  title: (board.title || '').trim() || board.id,
+                  contentRevision: nextRevision
+                }
+              })
+            )
+            if (get().currentId === board.id) {
+              paintBoard.discardAndLoad(board.id)
+            } else {
+              scheduleBoardThumbnail(board.id)
+            }
+            done += 1
+            continue
+          }
+          if (!canAddBoard(get().files.length)) {
+            break
+          }
+          let title = (board.title || '').trim() || `Board ${done + 1}`
+          const titles = get().files.map((item) => item.title)
+          if (boardTitleIssue(title, titles)) {
+            title = `${title} (${board.id.slice(0, 6)})`
+          }
+          const { thumbnail: _cloudThumb, ...rest } = board as IFile & {
+            thumbnail?: string
+          }
+          const imported: IFile = {
+            ...createDefaultFile(board.id, title),
+            ...rest,
+            id: board.id,
+            title,
+            contentRevision: 0
+          }
+          set(
+            produce((state: FileState) => {
+              state.files.unshift(imported)
+            })
+          )
+          scheduleBoardThumbnail(board.id)
+          done += 1
+        }
+        return done
+      },
+      async deleteBoardsFromCloud(ids) {
+        if (!ids.length) {
+          return
+        }
+        void getMySyncCode()
+        await deleteCloudBoards(ids)
       }
     }),
     {

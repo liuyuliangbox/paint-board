@@ -9,3 +9,8 @@ bucket_name = "paint-board-widgets"
 [vars]
 # Comma-separated browser origins allowed for CORS
 ALLOWED_ORIGINS = "https://paint-board.aridjaya.eu.org,http://localhost:5173,http://127.0.0.1:5173"
+
+# Set secrets via CLI (not committed):
+#   npx wrangler secret put SYNC_USER
+#   npx wrangler secret put SYNC_PASS
+#   npx wrangler secret put AUTH_SECRET   # optional; defaults to SYNC_PASS
