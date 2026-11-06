@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { paintBoard } from '@/core/paintBoard'
 import { useTranslation } from 'react-i18next'
 import {
   ChevronDown,
@@ -45,6 +46,7 @@ const WidgetPanel = () => {
     activeCategory,
     panelOpen,
     togglePanel,
+    setPanelOpen,
     setActiveCategory,
     addCategory,
     removeCategory,
@@ -76,8 +78,43 @@ const WidgetPanel = () => {
   const [focusedId, setFocusedId] = useState('')
   const [cloudMetas, setCloudMetas] = useState<CloudWidgetMeta[]>([])
   const [cloudLoadedCode, setCloudLoadedCode] = useState('')
+  const panelRef = useRef<HTMLDivElement>(null)
+  /** Only fire regenerate if pointerdown also started on that button. */
+  const regenerateArmedRef = useRef(false)
 
   useEffect(() => subscribeCloudAuth(() => setLoggedIn(isCloudLoggedIn())), [])
+
+  // Canvas interaction must not hit panel controls (click-through / release-over-button).
+  useEffect(() => {
+    if (!panelOpen) {
+      return
+    }
+    const onPointerDown = (event: PointerEvent) => {
+      const root = panelRef.current
+      if (root?.contains(event.target as Node)) {
+        return
+      }
+      const canvas = paintBoard.canvas
+      if (!canvas) {
+        return
+      }
+      const lower = canvas.getElement()
+      const upper = (canvas as unknown as { upperCanvasEl?: HTMLElement })
+        .upperCanvasEl
+      const target = event.target
+      if (
+        target === lower ||
+        target === upper ||
+        (lower && lower.contains(target as Node)) ||
+        (upper && upper.contains(target as Node))
+      ) {
+        setPanelOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', onPointerDown, true)
+    return () =>
+      document.removeEventListener('pointerdown', onPointerDown, true)
+  }, [panelOpen, setPanelOpen])
 
   useEffect(() => {
     if (!toast) {
@@ -383,11 +420,12 @@ const WidgetPanel = () => {
   return (
     <>
       <div
-        className={`fixed left-1/2 top-0 z-[20] -translate-x-1/2 ${
+        ref={panelRef}
+        className={`pointer-events-none fixed left-1/2 top-0 z-[20] -translate-x-1/2 ${
           panelOpen ? 'w-[min(96vw,56rem)]' : 'w-auto'
         }`}
       >
-        <div className="overflow-hidden rounded-b-xl border border-t-0 border-slate-200 bg-[#eef1ff]/95 shadow-md backdrop-blur">
+        <div className="pointer-events-auto overflow-hidden rounded-b-xl border border-t-0 border-slate-200 bg-[#eef1ff]/95 shadow-md backdrop-blur">
           <button
             type="button"
             className="flex w-full items-center justify-center gap-1.5 px-2.5 py-1 text-xs text-slate-600 hover:bg-white/50"
@@ -864,7 +902,24 @@ const WidgetPanel = () => {
                   <button
                     type="button"
                     className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100"
-                    onClick={onRegenerate}
+                    onPointerDown={(event) => {
+                      if (event.button === 0) {
+                        regenerateArmedRef.current = true
+                      }
+                    }}
+                    onPointerLeave={() => {
+                      regenerateArmedRef.current = false
+                    }}
+                    onPointerCancel={() => {
+                      regenerateArmedRef.current = false
+                    }}
+                    onClick={() => {
+                      if (!regenerateArmedRef.current) {
+                        return
+                      }
+                      regenerateArmedRef.current = false
+                      onRegenerate()
+                    }}
                   >
                     <RefreshCw className="h-3 w-3" />
                     {t('widget.syncRegenerate')}

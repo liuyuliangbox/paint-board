@@ -108,7 +108,8 @@ const useWidgetStore = create<WidgetState & WidgetAction>()(
       widgets: [],
       categories: [],
       activeCategory: WIDGET_CATEGORY_ALL,
-      panelOpen: true,
+      // Start closed so the open panel cannot intercept canvas clicks.
+      panelOpen: false,
       setPanelOpen(open) {
         set({ panelOpen: open })
       },
@@ -366,8 +367,7 @@ const useWidgetStore = create<WidgetState & WidgetAction>()(
       partialize: (state) => ({
         widgets: state.widgets,
         categories: state.categories,
-        activeCategory: state.activeCategory,
-        panelOpen: state.panelOpen
+        activeCategory: state.activeCategory
       }),
       merge: (persisted, current) => {
         const data = (persisted || {}) as Partial<WidgetState>
