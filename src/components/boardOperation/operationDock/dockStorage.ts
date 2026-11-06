@@ -1,10 +1,16 @@
 const LEGEND_KEY = 'PAINT-BOARD-DOCK-LEGEND'
 
+/** Default: legend open (show labels). Persist user choice in localStorage. */
 export const readDockLegendOpen = () => {
   try {
-    return localStorage.getItem(LEGEND_KEY) === '1'
+    const raw = localStorage.getItem(LEGEND_KEY)
+    if (raw === null) {
+      localStorage.setItem(LEGEND_KEY, '1')
+      return true
+    }
+    return raw !== '0'
   } catch {
-    return false
+    return true
   }
 }
 
