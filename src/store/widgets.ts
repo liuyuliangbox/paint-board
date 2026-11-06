@@ -103,7 +103,11 @@ const useWidgetStore = create<WidgetState & WidgetAction>()(
       },
       addCategory(name) {
         const next = name.trim()
-        if (!next || next === WIDGET_UNCATEGORIZED || next === WIDGET_CATEGORY_ALL) {
+        if (
+          !next ||
+          next === WIDGET_UNCATEGORIZED ||
+          next === WIDGET_CATEGORY_ALL
+        ) {
           return false
         }
         const { categories } = get()
@@ -128,7 +132,9 @@ const useWidgetStore = create<WidgetState & WidgetAction>()(
         }
         set(
           produce((state: WidgetState) => {
-            state.categories = state.categories.filter((item) => item !== target)
+            state.categories = state.categories.filter(
+              (item) => item !== target
+            )
             state.widgets.forEach((widget) => {
               if (normalizeCategory(widget.category) === target) {
                 widget.category = WIDGET_UNCATEGORIZED

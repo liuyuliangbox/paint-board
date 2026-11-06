@@ -20,9 +20,10 @@ const cloneObjectJson = (object: fabric.Object) => {
         top,
         evented: true
       })
-      const json = cloned.toDatalessObject(
-        CANVAS_CUSTOM_PROPERTIES
-      ) as Record<string, unknown>
+      const json = cloned.toDatalessObject(CANVAS_CUSTOM_PROPERTIES) as Record<
+        string,
+        unknown
+      >
       resolve(json)
     }, CANVAS_CUSTOM_PROPERTIES)
   })
@@ -37,7 +38,8 @@ const reassignIds = (value: unknown): unknown => {
   }
   const next: Record<string, unknown> = {}
   for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
-    next[key] = key === 'id' && typeof child === 'string' ? uuidv4() : reassignIds(child)
+    next[key] =
+      key === 'id' && typeof child === 'string' ? uuidv4() : reassignIds(child)
   }
   return next
 }

@@ -2,10 +2,7 @@ import { fabric } from 'fabric'
 import { paintBoard } from '@/core/paintBoard'
 import useBoardStore from '@/store/board'
 import { ActionMode } from '@/constants'
-import {
-  filterUnlockedObjects,
-  isObjectLocked
-} from '@/core/utils/object'
+import { filterUnlockedObjects, isObjectLocked } from '@/core/utils/object'
 import useWidgetMenuStore from '@/store/widgetMenu'
 
 const DRAG_THRESHOLD = 4
@@ -252,9 +249,7 @@ export class RightClickSelect {
       ) {
         this.resumeDrawingMode = false
         useBoardStore.getState().updateMode(ActionMode.SELECT)
-        useWidgetMenuStore
-          .getState()
-          .openMenu(e.clientX, e.clientY)
+        useWidgetMenuStore.getState().openMenu(e.clientX, e.clientY)
         canvas.requestRenderAll()
         return
       }
