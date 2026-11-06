@@ -615,7 +615,9 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                   <span className="text-sm text-slate-500">
                     {t('fileBoard.selected', { count: selected.size })}
                     <span className="mx-1.5">·</span>
-                    {t('fileBoard.syncCloudCount', { count: cloudMetas.length })}
+                    {t('fileBoard.syncCloudCount', {
+                      count: cloudMetas.length
+                    })}
                   </span>
                   <div className="ml-auto flex items-center gap-1">
                     {selected.size > 0 && (
