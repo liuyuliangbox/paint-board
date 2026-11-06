@@ -13,7 +13,10 @@ export function drawBackgroundImage(
     }
 
     const img = new Image()
-    img.crossOrigin = 'anonymous'
+    // data:/blob: URLs are same-origin; setting crossOrigin can break loading.
+    if (!imageUrl.startsWith('data:') && !imageUrl.startsWith('blob:')) {
+      img.crossOrigin = 'anonymous'
+    }
 
     img.onload = () => {
       try {

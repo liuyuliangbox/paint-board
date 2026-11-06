@@ -15,25 +15,15 @@ import {
   type MeasurableObject
 } from './bounds'
 import { EXPORT_TOO_LARGE_ERROR } from './exportError'
+import {
+  hasPaintableBackground,
+  type ExportBackground,
+  type ExportBackgroundFrame
+} from './exportBackground'
 
 export type ExportScope = 'viewport' | 'content' | 'selection'
-
-export interface ExportBackground {
-  sort: string[]
-  color: string | null
-  imageUrl: string
-  imageOpacity: number
-  cameraFrame: string | null
-  cameraOpacity: number
-}
-
-/** Where the full canvas background sits relative to the exported image. */
-export interface ExportBackgroundFrame {
-  width: number
-  height: number
-  offsetX: number
-  offsetY: number
-}
+export type { ExportBackground, ExportBackgroundFrame }
+export { hasPaintableBackground }
 
 export interface ExportImageResult {
   url: string
@@ -50,24 +40,29 @@ const paintBackground = async (
   const layers = [...background.sort].reverse()
   for (let i = 0; i < layers.length; i++) {
     const type = layers[i]
-    if (type === 'image' && background.imageUrl) {
-      await drawBackgroundImage(
-        ctx,
-        background.imageUrl,
-        background.imageOpacity,
-        width,
-        height
-      )
-    } else if (type === 'color' && background.color) {
-      drawBackground(ctx, background.color, width, height)
-    } else if (type === 'camera' && background.cameraFrame) {
-      await drawBackgroundImage(
-        ctx,
-        background.cameraFrame,
-        background.cameraOpacity,
-        width,
-        height
-      )
+    try {
+      if (type === 'image' && background.imageUrl) {
+        await drawBackgroundImage(
+          ctx,
+          background.imageUrl,
+          background.imageOpacity,
+          width,
+          height
+        )
+      } else if (type === 'color' && background.color) {
+        drawBackground(ctx, background.color, width, height)
+      } else if (type === 'camera' && background.cameraFrame) {
+        await drawBackgroundImage(
+          ctx,
+          background.cameraFrame,
+          background.cameraOpacity,
+          width,
+          height
+        )
+      }
+    } catch (error) {
+      // Skip a failed layer so color/camera can still composite.
+      console.error('Failed to paint export background layer', type, error)
     }
   }
 }
@@ -291,15 +286,21 @@ const exportViewport = (
     outputWidth,
     outputHeight
   )
+  // Fabric's lower canvas is always transparent. Background is a separate
+  // board layer (color / image / camera) — not the page slate behind the canvas.
+  // Only offer compositing when there is something to paint.
+  const canPaint = hasPaintableBackground(background)
   return {
     url: output.toDataURL('image/png'),
-    background,
-    backgroundFrame: {
-      width: lower.width,
-      height: lower.height,
-      offsetX: -view.left * ratioX,
-      offsetY: -view.top * ratioY
-    }
+    background: canPaint ? background : null,
+    backgroundFrame: canPaint
+      ? {
+          width: lower.width,
+          height: lower.height,
+          offsetX: -view.left * ratioX,
+          offsetY: -view.top * ratioY
+        }
+      : null
   }
 }
 
