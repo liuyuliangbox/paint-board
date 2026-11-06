@@ -19,9 +19,6 @@ jobs:
   deploy:
     name: deploy-worker
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: workers/widget-sync
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,13 +28,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Worker dependencies
-        run: npm install
-
       - name: Deploy Worker
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: workers/widget-sync
-          command: deploy
+        working-directory: workers/widget-sync
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        # Avoid local npm peer conflicts; match Pages deploy style.
+        run: npx --yes wrangler@4.28.0 deploy
