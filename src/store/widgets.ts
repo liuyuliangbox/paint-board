@@ -307,10 +307,7 @@ const useWidgetStore = create<WidgetState & WidgetAction>()(
         }
 
         const categorySet = new Set<string>()
-        for (const name of [
-          ...localCategories,
-          ...(bundle.categories || [])
-        ]) {
+        for (const name of [...localCategories, ...(bundle.categories || [])]) {
           const next = name.trim()
           if (
             !next ||
