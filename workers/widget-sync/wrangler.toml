@@ -1,0 +1,11 @@
+name = "paint-board-widget-sync"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+
+[[r2_buckets]]
+binding = "WIDGETS"
+bucket_name = "paint-board-widgets"
+
+[vars]
+# Comma-separated browser origins allowed for CORS
+ALLOWED_ORIGINS = "https://paint-board.aridjaya.eu.org,http://localhost:5173,http://127.0.0.1:5173"

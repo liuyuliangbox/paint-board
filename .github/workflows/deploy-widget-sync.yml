@@ -1,0 +1,43 @@
+name: Deploy widget sync Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'workers/widget-sync/**'
+      - '.github/workflows/deploy-widget-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-widget-sync
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: deploy-worker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: workers/widget-sync
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Worker dependencies
+        run: npm install
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/widget-sync
+          command: deploy

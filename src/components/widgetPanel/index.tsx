@@ -3,9 +3,13 @@ import { useTranslation } from 'react-i18next'
 import {
   ChevronDown,
   ChevronUp,
+  CloudDownload,
+  CloudUpload,
+  Copy,
   FolderPlus,
   LayoutTemplate,
   Pencil,
+  RefreshCw,
   Trash2,
   X
 } from 'lucide-react'
@@ -16,6 +20,13 @@ import useWidgetStore, {
   widgetCategoryOf
 } from '@/store/widgets'
 import { insertWidgetObjects } from '@/core/widget/widget'
+import {
+  getMySyncCode,
+  isValidSyncCode,
+  isWidgetSyncConfigured,
+  regenerateMySyncCode,
+  setMySyncCode
+} from '@/core/widget/widgetSync'
 import Toast from '@/components/toast'
 
 const WidgetPanel = () => {
@@ -32,13 +43,21 @@ const WidgetPanel = () => {
     renameWidget,
     setWidgetCategory,
     deleteWidget,
-    getWidgetObjects
+    getWidgetObjects,
+    pushToCloud,
+    pullFromCloud
   } = useWidgetStore()
-  const [toast, setToast] = useState<string | null>(null)
+  const [toast, setToast] = useState<{
+    message: string
+    type: 'error' | 'success'
+  } | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draftTitle, setDraftTitle] = useState('')
   const [addingCategory, setAddingCategory] = useState(false)
   const [draftCategory, setDraftCategory] = useState('')
+  const [mySyncCode, setMySyncCodeState] = useState(() => getMySyncCode())
+  const [targetCode, setTargetCode] = useState('')
+  const [syncBusy, setSyncBusy] = useState(false)
 
   useEffect(() => {
     if (!toast) {
@@ -72,15 +91,27 @@ const WidgetPanel = () => {
     return counts
   }, [widgets, categories])
 
+  const resolveTargetCode = () => {
+    const trimmed = targetCode.trim()
+    if (!trimmed) {
+      return mySyncCode
+    }
+    return trimmed
+  }
+
+  const showToast = (message: string, type: 'error' | 'success' = 'error') => {
+    setToast({ message, type })
+  }
+
   const insertAtCenter = async (id: string) => {
     const objects = await getWidgetObjects(id)
     if (!objects?.length) {
-      setToast('widget.insertFailed')
+      showToast('widget.insertFailed')
       return
     }
     const ok = await insertWidgetObjects(objects)
     if (!ok) {
-      setToast('widget.insertFailed')
+      showToast('widget.insertFailed')
     }
   }
 
@@ -93,10 +124,77 @@ const WidgetPanel = () => {
   const submitCategory = () => {
     const ok = addCategory(draftCategory)
     if (!ok) {
-      setToast('widget.categoryAddFailed')
+      showToast('widget.categoryAddFailed')
     }
     setDraftCategory('')
     setAddingCategory(false)
+  }
+
+  const copyMyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(mySyncCode)
+      showToast('widget.syncCopied', 'success')
+    } catch {
+      showToast('widget.syncFailed')
+    }
+  }
+
+  const onRegenerate = () => {
+    if (!window.confirm(String(t('widget.syncRegenerateConfirm')))) {
+      return
+    }
+    const next = regenerateMySyncCode()
+    setMySyncCodeState(next)
+  }
+
+  const onSetAsMine = () => {
+    const next = targetCode.trim()
+    if (!isValidSyncCode(next)) {
+      showToast('widget.syncInvalidCode')
+      return
+    }
+    if (!window.confirm(String(t('widget.syncSetAsMineConfirm')))) {
+      return
+    }
+    try {
+      setMySyncCode(next)
+      setMySyncCodeState(next)
+      setTargetCode('')
+    } catch {
+      showToast('widget.syncInvalidCode')
+    }
+  }
+
+  const runSync = async (mode: 'push' | 'pull') => {
+    if (!isWidgetSyncConfigured()) {
+      showToast('widget.syncNotConfigured')
+      return
+    }
+    const code = resolveTargetCode()
+    if (!isValidSyncCode(code)) {
+      showToast('widget.syncInvalidCode')
+      return
+    }
+    if (
+      mode === 'pull' &&
+      !window.confirm(String(t('widget.syncPullConfirm')))
+    ) {
+      return
+    }
+    setSyncBusy(true)
+    try {
+      if (mode === 'push') {
+        await pushToCloud(code)
+        showToast('widget.syncPushSuccess', 'success')
+      } else {
+        await pullFromCloud(code)
+        showToast('widget.syncPullSuccess', 'success')
+      }
+    } catch {
+      showToast('widget.syncFailed')
+    } finally {
+      setSyncBusy(false)
+    }
   }
 
   const tabs = [
@@ -309,12 +407,82 @@ const WidgetPanel = () => {
                   ))}
                 </div>
               )}
+
+              <div className="mt-2 rounded-lg border border-slate-200/80 bg-white/70 px-2.5 py-2">
+                <div className="mb-1.5 text-[11px] font-medium text-slate-600">
+                  {t('widget.syncTitle')}
+                </div>
+                <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                  <span className="text-[10px] text-slate-500">
+                    {t('widget.syncMyCode')}
+                  </span>
+                  <code className="max-w-[14rem] truncate rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-700">
+                    {mySyncCode}
+                  </code>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100"
+                    onClick={() => void copyMyCode()}
+                  >
+                    <Copy className="h-3 w-3" />
+                    {t('widget.syncCopy')}
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100"
+                    onClick={onRegenerate}
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                    {t('widget.syncRegenerate')}
+                  </button>
+                </div>
+                <div className="mb-1.5 flex flex-wrap items-center gap-1.5">
+                  <span className="text-[10px] text-slate-500">
+                    {t('widget.syncTargetCode')}
+                  </span>
+                  <input
+                    className="min-w-[12rem] flex-1 rounded border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[10px]"
+                    value={targetCode}
+                    placeholder={String(t('widget.syncTargetPlaceholder'))}
+                    onChange={(e) => setTargetCode(e.target.value)}
+                    disabled={syncBusy}
+                  />
+                  <button
+                    type="button"
+                    className="rounded px-1.5 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                    disabled={syncBusy || !targetCode.trim()}
+                    onClick={onSetAsMine}
+                  >
+                    {t('widget.syncSetAsMine')}
+                  </button>
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded bg-[#66CC8A] px-2 py-1 text-[11px] text-white hover:bg-[#57b87a] disabled:opacity-50"
+                    disabled={syncBusy}
+                    onClick={() => void runSync('push')}
+                  >
+                    <CloudUpload className="h-3.5 w-3.5" />
+                    {syncBusy ? t('widget.syncBusy') : t('widget.syncPush')}
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                    disabled={syncBusy}
+                    onClick={() => void runSync('pull')}
+                  >
+                    <CloudDownload className="h-3.5 w-3.5" />
+                    {t('widget.syncPull')}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {toast && <Toast message={toast} type="error" />}
+      {toast && <Toast message={toast.message} type={toast.type} />}
     </>
   )
 }

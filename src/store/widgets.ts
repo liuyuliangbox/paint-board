@@ -9,11 +9,19 @@ import {
   readPersistedWidgets,
   writePersistedWidgets,
   loadWidgetPayload,
+  resetWidgetPersistenceCache,
+  widgetBlobKey,
   type StoredWidgetMeta,
   type StoredWidgetPayload
 } from './widgetRecord'
 import { captureSelectionObjects } from '@/core/widget/widget'
 import { renderWidgetThumbnail } from '@/core/widget/widgetThumbnail'
+import {
+  getMySyncCode,
+  pullWidgets,
+  pushWidgets,
+  setLastSyncedAt
+} from '@/core/widget/widgetSync'
 
 export const MAX_WIDGET_COUNT = 50
 export const MAX_WIDGET_CATEGORY_COUNT = 20
@@ -83,6 +91,10 @@ interface WidgetAction {
   setWidgetCategory: (id: string, category: string) => void
   deleteWidget: (id: string) => void
   getWidgetObjects: (id: string) => Promise<unknown[] | null>
+  /** Upload local widgets to cloud. Uses my sync code when code omitted. */
+  pushToCloud: (code?: string) => Promise<number>
+  /** Replace local widgets with cloud data for the given (or my) sync code. */
+  pullFromCloud: (code?: string) => Promise<number>
 }
 
 const useWidgetStore = create<WidgetState & WidgetAction>()(
@@ -238,6 +250,80 @@ const useWidgetStore = create<WidgetState & WidgetAction>()(
         }
         payloadCache.set(id, payload)
         return payload.objects
+      },
+      async pushToCloud(code) {
+        const target = (code || getMySyncCode()).trim()
+        const { widgets, categories } = get()
+        const items: Record<string, StoredWidgetPayload> = {}
+        for (const meta of widgets) {
+          let payload = payloadCache.get(meta.id)
+          if (!payload) {
+            const loaded = await loadWidgetPayload(meta.id, widgetDb)
+            if (!loaded) {
+              throw new Error(`missing_payload:${meta.id}`)
+            }
+            payload = loaded
+          }
+          payloadCache.set(meta.id, payload)
+          items[meta.id] = {
+            objects: payload.objects,
+            thumbnail: payload.thumbnail || meta.thumbnail
+          }
+        }
+        const metas: StoredWidgetMeta[] = widgets.map((meta) => ({
+          ...meta,
+          thumbnail: items[meta.id]?.thumbnail || meta.thumbnail
+        }))
+        return pushWidgets(target, { categories, metas, items })
+      },
+      async pullFromCloud(code) {
+        const target = (code || getMySyncCode()).trim()
+        const bundle = await pullWidgets(target)
+        const previousIds = get().widgets.map((widget) => widget.id)
+
+        payloadCache.clear()
+        resetWidgetPersistenceCache()
+        for (const id of previousIds) {
+          await widgetDb.del(widgetBlobKey(id))
+        }
+
+        const nextMetas: StoredWidgetMeta[] = []
+        for (const meta of bundle.metas.slice(0, MAX_WIDGET_COUNT)) {
+          const item = bundle.items[meta.id]
+          if (!item) {
+            continue
+          }
+          const thumbnail = item.thumbnail || meta.thumbnail
+          payloadCache.set(meta.id, {
+            objects: item.objects,
+            thumbnail
+          })
+          nextMetas.push({
+            ...meta,
+            category: normalizeCategory(meta.category),
+            thumbnail
+          })
+        }
+
+        const nextCategories = (bundle.categories || [])
+          .map((name) => name.trim())
+          .filter(
+            (name) =>
+              name &&
+              name !== WIDGET_UNCATEGORIZED &&
+              name !== WIDGET_CATEGORY_ALL
+          )
+          .slice(0, MAX_WIDGET_CATEGORY_COUNT)
+
+        set({
+          widgets: nextMetas,
+          categories: nextCategories,
+          activeCategory: WIDGET_CATEGORY_ALL
+        })
+
+        const syncedAt = bundle.updatedAt || Date.now()
+        setLastSyncedAt(syncedAt)
+        return syncedAt
       }
     }),
     {

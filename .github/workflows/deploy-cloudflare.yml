@@ -34,6 +34,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
+        env:
+          VITE_WIDGET_SYNC_URL: ${{ vars.VITE_WIDGET_SYNC_URL }}
         run: pnpm build
 
       - name: Deploy to Cloudflare Pages
