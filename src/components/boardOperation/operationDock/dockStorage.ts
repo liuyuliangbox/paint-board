@@ -1,4 +1,5 @@
-const LEGEND_KEY = 'PAINT-BOARD-DOCK-LEGEND'
+/** Bump key when default behavior changes so old collapsed cache does not stick. */
+const LEGEND_KEY = 'PAINT-BOARD-DOCK-LEGEND-V2'
 
 /** Default: legend open (show labels). Persist user choice in localStorage. */
 export const readDockLegendOpen = () => {

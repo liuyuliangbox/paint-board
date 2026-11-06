@@ -36,7 +36,6 @@ import { readDockLegendOpen, writeDockLegendOpen } from './dockStorage'
 
 const isMobile = isMobileFn()
 const SWIPE_PX = 40
-const SIDE_MQ = '(max-width: 750px)'
 
 export interface OperationDockProps {
   hasSelection: boolean
@@ -65,26 +64,20 @@ export interface OperationDockProps {
 const Section: FC<{
   tone?: 'default' | 'selection'
   children: ReactNode
-  showLabel: boolean
   title?: string
-}> = ({ tone = 'default', children, showLabel, title }) => {
+}> = ({ tone = 'default', children, title }) => {
   if (!children) {
     return null
   }
   return (
     <div
-      className={`flex items-center gap-0.5 xs:flex-col ${
+      className={`flex items-center gap-0.5 ${
         tone === 'selection'
           ? 'rounded-xl bg-white/70 px-1 py-0.5 ring-1 ring-[#66CC8A]/35'
           : ''
       }`}
       aria-label={title}
     >
-      {showLabel && tone === 'selection' && title && (
-        <span className="hidden px-1 text-[9px] font-medium text-[#2d8f55] xs:block">
-          {title}
-        </span>
-      )}
       {children}
     </div>
   )
@@ -159,22 +152,7 @@ const OperationDock: FC<OperationDockProps> = ({
       if (Math.hypot(dx, dy) < SWIPE_PX) {
         return
       }
-      const sideLayout =
-        typeof window.matchMedia === 'function' &&
-        window.matchMedia(SIDE_MQ).matches
-
-      if (sideLayout) {
-        if (Math.abs(dx) < Math.abs(dy)) {
-          return
-        }
-        if (dx < -SWIPE_PX) {
-          setLegend(true)
-        } else if (dx > SWIPE_PX) {
-          setLegend(false)
-        }
-        return
-      }
-
+      // Dock stays at the bottom on phone and desktop: swipe up = labels on.
       if (Math.abs(dy) < Math.abs(dx)) {
         return
       }
@@ -224,11 +202,11 @@ const OperationDock: FC<OperationDockProps> = ({
           ? labelOf('operate.collapseLegend')
           : labelOf('operate.expandLegend')
       }
-      // Always show this label so mobile users can find the feature.
+      // Always show this control with text (not only after legend opens).
       showLabel
       active={legendOpen}
       onClick={onToggleLegend}
-      className="w-full justify-center border border-[#66CC8A]/40 bg-white/80"
+      className="border border-[#66CC8A]/50 bg-white shadow-sm"
     >
       {legendOpen ? (
         <ChevronDown strokeWidth={iconStroke} />
@@ -239,22 +217,18 @@ const OperationDock: FC<OperationDockProps> = ({
   )
 
   return (
-    <div className="fixed bottom-5 left-2/4 z-[12] -translate-x-2/4 xs:bottom-auto xs:right-3 xs:top-1/2 xs:translate-x-0 xs:-translate-y-1/2">
+    <div className="pointer-events-none fixed bottom-4 left-1/2 z-[12] w-[min(96vw,44rem)] -translate-x-1/2">
       <div
         ref={dockRef}
-        className={`relative flex items-center gap-0.5 rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1.5 py-1 shadow-md backdrop-blur xs:max-h-[75vh] xs:flex-col ${
-          legendOpen
-            ? 'max-w-[min(96vw,44rem)] xs:max-w-[8.5rem]'
-            : 'max-w-[min(96vw,40rem)] xs:max-w-[7.25rem]'
-        }`}
+        className="pointer-events-auto relative flex max-h-[30vh] items-stretch gap-1 overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1.5 py-1 shadow-md backdrop-blur"
       >
-        {/* Keep legend control outside the scroll area on phones. */}
-        <div className="shrink-0 px-0.5 pb-0.5 xs:w-full xs:border-b xs:border-slate-200/80 xs:pb-1">
+        {/* Always pinned at the leading edge so “展开说明” stays visible. */}
+        <div className="flex shrink-0 items-center border-r border-slate-200/80 pr-1">
           {legendToggle}
         </div>
 
-        <div className="flex min-h-0 flex-1 items-center gap-0.5 overflow-x-auto noScrollbar xs:w-full xs:flex-col xs:overflow-x-hidden xs:overflow-y-auto">
-          <Section tone="default" showLabel={showLabel}>
+        <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto noScrollbar">
+          <Section tone="default">
             <DockButton
               label={labelOf('operate.dock.undo')}
               showLabel={showLabel}
@@ -284,7 +258,6 @@ const OperationDock: FC<OperationDockProps> = ({
           {showSelection && (
             <Section
               tone="selection"
-              showLabel={showLabel}
               title={labelOf('operate.selectionActions')}
             >
               <DockButton
@@ -335,7 +308,7 @@ const OperationDock: FC<OperationDockProps> = ({
             </Section>
           )}
 
-          <Section tone="default" showLabel={showLabel}>
+          <Section tone="default">
             <DockButton
               label={labelOf('operate.dock.text')}
               showLabel={showLabel}
@@ -400,7 +373,7 @@ const OperationDock: FC<OperationDockProps> = ({
                 <Ellipsis strokeWidth={iconStroke} />
               </DockButton>
               {moreOpen && (
-                <div className="absolute bottom-full left-1/2 z-20 mb-2 min-w-[8rem] -translate-x-1/2 rounded-xl border border-slate-200 bg-[#eef1ff] p-1 shadow-lg xs:bottom-auto xs:left-auto xs:right-full xs:top-0 xs:mb-0 xs:mr-2 xs:translate-x-0">
+                <div className="absolute bottom-full left-1/2 z-20 mb-2 min-w-[8rem] -translate-x-1/2 rounded-xl border border-slate-200 bg-[#eef1ff] p-1 shadow-lg">
                   <button
                     type="button"
                     className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs hover:bg-slate-200"

@@ -154,8 +154,8 @@ const ExportImageMenu = ({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={buttonLabel || undefined}
-        title={buttonLabel || undefined}
-        className={`flex cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1.5 hover:bg-slate-200 ${
+        title={showLabel ? undefined : buttonLabel || undefined}
+        className={`flex shrink-0 cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1.5 hover:bg-slate-200 ${
           open ? 'bg-slate-200/80' : ''
         }`}
         onMouseEnter={() => {
@@ -174,7 +174,7 @@ const ExportImageMenu = ({
       >
         <Save strokeWidth={2} color="#66CC8A" size={18} />
         {showLabel && (
-          <span className="max-w-[4.5rem] truncate text-[10px] font-medium leading-tight text-slate-700">
+          <span className="shrink-0 whitespace-nowrap text-[11px] font-medium leading-tight text-slate-700">
             {buttonLabel}
           </span>
         )}

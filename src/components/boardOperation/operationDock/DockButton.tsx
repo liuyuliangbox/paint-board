@@ -23,12 +23,12 @@ const DockButton: FC<IProps> = ({
   htmlFor,
   className = ''
 }) => {
-  const base = `flex shrink-0 items-center gap-1 rounded-lg px-1.5 py-1.5 transition-colors ${
+  const base = `flex shrink-0 items-center justify-center gap-0.5 rounded-lg px-1.5 py-1.5 transition-colors ${
     disabled
       ? 'cursor-not-allowed opacity-40'
       : 'cursor-pointer hover:bg-slate-200'
   } ${active ? 'bg-[#66CC8A]/25 text-[#2d8f55]' : 'text-slate-700'} ${
-    showLabel ? 'min-w-0' : ''
+    showLabel ? 'min-w-[2.75rem] flex-col min-xs:flex-row min-xs:gap-1' : ''
   } ${className}`
 
   const content = (
@@ -37,21 +37,19 @@ const DockButton: FC<IProps> = ({
         {children}
       </span>
       {showLabel && (
-        <span className="max-w-[5.5rem] truncate whitespace-normal text-center text-[10px] font-medium leading-tight text-slate-700 xs:text-left">
+        <span className="shrink-0 whitespace-nowrap text-center text-[11px] font-medium leading-tight text-slate-700 min-xs:text-left">
           {label}
         </span>
       )}
     </>
   )
 
+  // Only use native title tooltips when labels are hidden.
+  const tip = showLabel ? undefined : label
+
   if (as === 'label') {
     return (
-      <label
-        htmlFor={htmlFor}
-        className={base}
-        aria-label={label}
-        title={label}
-      >
+      <label htmlFor={htmlFor} className={base} aria-label={label} title={tip}>
         {content}
       </label>
     )
@@ -65,7 +63,7 @@ const DockButton: FC<IProps> = ({
         className={base}
         aria-label={label}
         aria-disabled={disabled || undefined}
-        title={label}
+        title={tip}
         onClick={disabled ? undefined : onClick}
         onKeyDown={(event) => {
           if (disabled) {
@@ -89,7 +87,7 @@ const DockButton: FC<IProps> = ({
       aria-label={label}
       aria-pressed={active || undefined}
       disabled={disabled}
-      title={label}
+      title={tip}
       onClick={onClick}
     >
       {content}
