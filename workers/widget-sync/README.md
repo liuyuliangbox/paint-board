@@ -25,11 +25,12 @@ Local app features work without login; only cloud actions need it.
 - `PUT /api/boards/sync/item` — upsert one board (body = full board JSON)
 - `DELETE /api/boards/sync/items` — `{ ids: string[] }`
 
-## Widget API (per-item)
+## Widget API (per-item / selective)
 
 - `GET /api/widgets/sync` — manifest only
 - `GET /api/widgets/sync/item?id=` — one widget payload
-- `PUT /api/widgets/sync/item` — `{ meta, item, categories? }`
+- `PUT /api/widgets/sync/item` — `{ meta, item, categories? }` upsert (does not delete others)
+- `DELETE /api/widgets/sync/items` — `{ ids: string[] }`
 - `PUT /api/widgets/sync/manifest` — align metas/categories and prune orphans
 
 Header: `X-Sync-Code` (`pbw_` + UUID).

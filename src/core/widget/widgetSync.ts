@@ -11,6 +11,10 @@ export const LAST_SYNCED_AT_KEY = 'PAINT-BOARD-WIDGET-LAST-SYNCED-AT'
 const SYNC_CODE_RE =
   /^pbw_[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
+export interface CloudWidgetMeta extends StoredWidgetMeta {
+  size?: number
+}
+
 export interface WidgetSyncBundle {
   categories: string[]
   metas: StoredWidgetMeta[]
@@ -75,63 +79,62 @@ export const getWidgetSyncBaseUrl = (): string => {
 
 export const isWidgetSyncConfigured = () => Boolean(getWidgetSyncBaseUrl())
 
-export const pushWidgets = async (
-  code: string,
-  bundle: Omit<WidgetSyncBundle, 'updatedAt'> & { updatedAt?: number }
-): Promise<number> => {
-  const updatedAt = bundle.updatedAt || Date.now()
-  for (const meta of bundle.metas) {
-    const item = bundle.items[meta.id]
-    if (!item) {
-      throw new Error(`missing_payload:${meta.id}`)
-    }
-    await cloudFetch('/api/widgets/sync/item', {
-      method: 'PUT',
-      syncCode: code,
-      body: {
-        meta,
-        item,
-        categories: bundle.categories
-      }
-    })
-  }
-  await cloudFetch('/api/widgets/sync/manifest', {
-    method: 'PUT',
-    syncCode: code,
-    body: {
-      categories: bundle.categories,
-      metas: bundle.metas,
-      keepIds: bundle.metas.map((meta) => meta.id)
-    }
-  })
-  setLastSyncedAt(updatedAt)
-  return updatedAt
-}
-
-export const pullWidgets = async (code: string): Promise<WidgetSyncBundle> => {
-  const manifest = (await cloudFetch('/api/widgets/sync', {
+export const listCloudWidgets = async (
+  code: string
+): Promise<{
+  categories: string[]
+  metas: CloudWidgetMeta[]
+  updatedAt: number
+}> => {
+  const data = (await cloudFetch('/api/widgets/sync', {
     method: 'GET',
     syncCode: code
   })) as {
     categories?: string[]
-    metas?: StoredWidgetMeta[]
+    metas?: CloudWidgetMeta[]
     updatedAt?: number
   }
-  const metas = Array.isArray(manifest.metas) ? manifest.metas : []
-  const items: Record<string, StoredWidgetPayload> = {}
-  for (const meta of metas) {
-    const item = (await cloudFetch(
-      `/api/widgets/sync/item?id=${encodeURIComponent(meta.id)}`,
-      { method: 'GET', syncCode: code }
-    )) as StoredWidgetPayload
-    if (item) {
-      items[meta.id] = item
-    }
-  }
   return {
-    categories: Array.isArray(manifest.categories) ? manifest.categories : [],
-    metas,
-    items,
-    updatedAt: Number(manifest.updatedAt) || 0
+    categories: Array.isArray(data.categories) ? data.categories : [],
+    metas: Array.isArray(data.metas) ? data.metas : [],
+    updatedAt: Number(data.updatedAt) || 0
   }
+}
+
+export const fetchCloudWidget = async (
+  code: string,
+  id: string
+): Promise<StoredWidgetPayload> => {
+  const item = (await cloudFetch(
+    `/api/widgets/sync/item?id=${encodeURIComponent(id)}`,
+    { method: 'GET', syncCode: code }
+  )) as StoredWidgetPayload
+  if (!item || !Array.isArray(item.objects)) {
+    throw new Error('not_found')
+  }
+  return item
+}
+
+export const upsertCloudWidget = async (
+  meta: StoredWidgetMeta,
+  item: StoredWidgetPayload,
+  categories?: string[]
+) => {
+  await cloudFetch('/api/widgets/sync/item', {
+    method: 'PUT',
+    syncCode: getMySyncCode(),
+    body: {
+      meta,
+      item,
+      categories
+    }
+  })
+}
+
+export const deleteCloudWidgets = async (ids: string[]) => {
+  await cloudFetch('/api/widgets/sync/items', {
+    method: 'DELETE',
+    syncCode: getMySyncCode(),
+    body: { ids }
+  })
 }

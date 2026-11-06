@@ -533,6 +533,47 @@ const handleBoardItemPut = async (request: Request, env: Env) => {
   return json({ ok: true, updatedAt, size }, 200, corsHeaders(request, env))
 }
 
+const handleWidgetItemsDelete = async (request: Request, env: Env) => {
+  const code = readSyncCode(request)
+  if (!code) {
+    return json({ error: 'invalid_sync_code' }, 400, corsHeaders(request, env))
+  }
+  let body: { ids?: string[] }
+  try {
+    body = (await request.json()) as { ids?: string[] }
+  } catch {
+    return json({ error: 'invalid_json' }, 400, corsHeaders(request, env))
+  }
+  const ids = Array.isArray(body.ids) ? body.ids.filter(Boolean) : []
+  if (!ids.length) {
+    return json({ error: 'missing_ids' }, 400, corsHeaders(request, env))
+  }
+  const remove = new Set(ids)
+  const hash = await hashSyncCode(code)
+  const manifest = await readWidgetManifest(env, hash)
+  for (const id of remove) {
+    await env.WIDGETS.delete(widgetItemKey(hash, id))
+  }
+  const metas = manifest.metas.filter((meta) => !remove.has(meta.id))
+  const totalBytes = metas.reduce((sum, meta) => sum + (meta.size || 0), 0)
+  const updatedAt = Date.now()
+  await env.WIDGETS.put(
+    widgetManifestKey(hash),
+    JSON.stringify({
+      categories: manifest.categories,
+      metas,
+      updatedAt,
+      totalBytes
+    } satisfies WidgetManifest),
+    { httpMetadata: { contentType: 'application/json' } }
+  )
+  return json(
+    { ok: true, updatedAt, removed: ids.length },
+    200,
+    corsHeaders(request, env)
+  )
+}
+
 const handleBoardItemsDelete = async (request: Request, env: Env) => {
   const code = readSyncCode(request)
   if (!code) {
@@ -624,6 +665,12 @@ export default {
     if (path.endsWith('/api/widgets/sync/manifest')) {
       if (request.method === 'PUT') {
         return handleWidgetManifestPut(request, env)
+      }
+    }
+
+    if (path.endsWith('/api/widgets/sync/items')) {
+      if (request.method === 'DELETE') {
+        return handleWidgetItemsDelete(request, env)
       }
     }
 
