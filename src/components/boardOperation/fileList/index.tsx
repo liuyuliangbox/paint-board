@@ -94,7 +94,10 @@ const FileList: FC<IProps> = ({ updateShow }) => {
     tab === 'local' ? files.map((file) => file.id) : cloudMetas.map((m) => m.id)
   const allSelected =
     activeList.length > 0 && activeList.every((id) => selected.has(id))
-  const deleteTargets = idsToDelete(files, [...selected], currentId)
+  // Checkbox batch, or the focused/current board when nothing is checked.
+  const deleteSourceIds =
+    selected.size > 0 ? [...selected] : currentId ? [currentId] : []
+  const deleteTargets = idsToDelete(files, deleteSourceIds, currentId)
   const resolvedCloudCode = cloudCode.trim() || mySyncCode
   const isOwnCloudSpace =
     Boolean(cloudLoadedCode) && cloudLoadedCode === mySyncCode
@@ -492,6 +495,17 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                       >
                         <FileUp size={18} color="#66CC8A" />
                       </button>
+                      {deleteTargets.length > 0 && (
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm min-xs:tooltip"
+                          data-tip={t('operate.deleteFile')}
+                          aria-label={t('operate.deleteFile') || undefined}
+                          onClick={() => setConfirmDelete(true)}
+                        >
+                          <Trash2 size={18} color="#66CC8A" />
+                        </button>
+                      )}
                     </>
                   ) : (
                     <>
@@ -676,7 +690,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
       {confirmDelete && (
         <DeleteFileModal
           count={deleteTargets.length}
-          keepCurrent={deleteTargets.length < selected.size}
+          keepCurrent={deleteTargets.length < deleteSourceIds.length}
           onConfirm={confirmBatchDelete}
           onClose={() => setConfirmDelete(false)}
         />
