@@ -1,11 +1,8 @@
+import { DEFAULT_DRAW_COLORS } from './drawColors'
+
 export const FREEHAND_STROKE_COLOR_LIMIT = 6
 
-export const DEFAULT_FREEHAND_STROKE_COLORS = [
-  '#000000',
-  '#65CC8A',
-  '#FF6363',
-  '#3A59D1'
-]
+export const DEFAULT_FREEHAND_STROKE_COLORS = [...DEFAULT_DRAW_COLORS]
 
 export const DEFAULT_FREEHAND_STROKE_COLOR_INDEX = 2
 

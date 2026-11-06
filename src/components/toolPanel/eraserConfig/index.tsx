@@ -17,7 +17,7 @@ const EraserConfig = () => {
           </div>
           <input
             type="range"
-            min="5"
+            min="1"
             max="50"
             step="1"
             value={eraserWidth}

@@ -8,20 +8,27 @@ const obj = (linkId?: string) =>
   } as any)
 
 describe('getLinkMenuState', () => {
-  it('allows link for two or more objects', () => {
+  it('allows link for two or more unlinked objects', () => {
     expect(getLinkMenuState([obj(), obj()]).canLink).toBe(true)
     expect(getLinkMenuState([obj()]).canLink).toBe(false)
   })
 
-  it('offers unlink when any selected object is linked', () => {
-    const state = getLinkMenuState([obj('a'), obj()])
-    expect(state.canUnlink).toBe(true)
-    expect(state.unlinkLabelKey).toBe('objectList.unlinkAll')
-  })
-
-  it('uses single-group unlink label when all share one link', () => {
+  it('hides link when selection is already one complete link group', () => {
     const state = getLinkMenuState([obj('a'), obj('a')])
+    expect(state.canLink).toBe(false)
     expect(state.canUnlink).toBe(true)
     expect(state.unlinkLabelKey).toBe('objectList.unlink')
+  })
+
+  it('keeps link+unlink for mixed or multi-group selections', () => {
+    const mixed = getLinkMenuState([obj('a'), obj()])
+    expect(mixed.canLink).toBe(true)
+    expect(mixed.canUnlink).toBe(true)
+    expect(mixed.unlinkLabelKey).toBe('objectList.unlinkAll')
+
+    const multi = getLinkMenuState([obj('a'), obj('b')])
+    expect(multi.canLink).toBe(true)
+    expect(multi.canUnlink).toBe(true)
+    expect(multi.unlinkLabelKey).toBe('objectList.unlinkAll')
   })
 })

@@ -16,7 +16,7 @@ const DrawWidthConfig = () => {
         </div>
         <input
           type="range"
-          min="5"
+          min="1"
           max="30"
           step="1"
           value={drawWidth}

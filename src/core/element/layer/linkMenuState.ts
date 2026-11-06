@@ -12,8 +12,9 @@ export type LinkMenuState = {
 
 /**
  * Decide which link actions to show for a mixed canvas selection.
- * - Link (≥2): always allowed; stamps one new linkId on the whole selection.
- * - Unlink: if any selected object already has a linkId.
+ * - Already one complete link group → only Unlink (no redundant Link).
+ * - Otherwise Link when ≥2 objects (join / re-associate).
+ * - Unlink when any selected object already has a linkId.
  * - Mixed / multi-group: use "unlink all" wording.
  */
 export const getLinkMenuState = (objects: fabric.Object[]): LinkMenuState => {
@@ -27,7 +28,7 @@ export const getLinkMenuState = (objects: fabric.Object[]): LinkMenuState => {
   const singleGroup = uniqueLinks.size === 1 && allLinked
 
   return {
-    canLink: visible.length >= 2,
+    canLink: visible.length >= 2 && !singleGroup,
     canUnlink: linkedCount > 0,
     linkLabelKey: 'objectList.linkSelection',
     unlinkLabelKey: singleGroup ? 'objectList.unlink' : 'objectList.unlinkAll'

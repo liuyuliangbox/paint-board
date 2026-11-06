@@ -20,6 +20,11 @@ import { produce } from 'immer'
 import { fabric } from 'fabric'
 import { reindexDrawColorSelection } from './drawColor'
 import {
+  DEFAULT_DRAW_COLORS,
+  LEGACY_DEFAULT_DRAW_COLORS,
+  sameColorList
+} from './drawColors'
+import {
   DEFAULT_FREEHAND_STROKE_COLOR_INDEX,
   DEFAULT_FREEHAND_STROKE_COLORS,
   FREEHAND_STROKE_COLOR_LIMIT
@@ -96,7 +101,7 @@ const useDrawStore = create<DrawState & DrawAction>()(
       drawWidth: 10,
       currentDrawColor: 0,
       currentMultiColor: [0, 1],
-      drawColors: ['#000000', '#65CC8A', '#FF6363', '#3A59D1'],
+      drawColors: [...DEFAULT_DRAW_COLORS],
       lineType: DrawLineType.Solid,
       shadowBlur: 0,
       shadowColor: '#000000',
@@ -463,7 +468,28 @@ const useDrawStore = create<DrawState & DrawAction>()(
       }
     }),
     {
-      name: 'PAINT-BOARD-DRAW-STORE'
+      name: 'PAINT-BOARD-DRAW-STORE',
+      version: 1,
+      migrate: (persisted, version) => {
+        if (!persisted || typeof persisted !== 'object') {
+          return persisted as unknown as DrawState & DrawAction
+        }
+        const state = { ...(persisted as Record<string, unknown>) }
+        if (version < 1) {
+          if (sameColorList(state.drawColors, LEGACY_DEFAULT_DRAW_COLORS)) {
+            state.drawColors = [...DEFAULT_DRAW_COLORS]
+          }
+          if (
+            sameColorList(
+              state.freehandStrokeColors,
+              LEGACY_DEFAULT_DRAW_COLORS
+            )
+          ) {
+            state.freehandStrokeColors = [...DEFAULT_FREEHAND_STROKE_COLORS]
+          }
+        }
+        return state as unknown as DrawState & DrawAction
+      }
     }
   )
 )
