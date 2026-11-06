@@ -111,8 +111,11 @@
       "save": "Export",
       "layers": "Layers",
       "boards": "Boards",
-      "more": "More"
-    }
+      "more": "More",
+      "landscape": "Landscape",
+      "portrait": "Portrait"
+    },
+    "landscapeHint": "Rotate your phone to landscape"
   },
   "widget": {
     "panelTitle": "Widgets",

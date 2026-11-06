@@ -111,8 +111,11 @@
       "save": "書き出し",
       "layers": "レイヤー",
       "boards": "ボード",
-      "more": "その他"
-    }
+      "more": "その他",
+      "landscape": "横向き",
+      "portrait": "縦向き"
+    },
+    "landscapeHint": "端末を横向きにしてください"
   },
   "widget": {
     "panelTitle": "ウィジェット",

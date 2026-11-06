@@ -17,6 +17,12 @@ import {
 import { exportErrorMessageKey } from '@/core/export/exportError'
 import useWidgetStore, { MAX_WIDGET_COUNT } from '@/store/widgets'
 import { useTouchUi } from '@/hooks/useTouchUi'
+import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
+import {
+  enterLandscapeLayout,
+  exitLandscapeLayout
+} from '@/utils/screenOrientation'
+import { canvasSizeForOrientation } from '@/utils/canvasOrientation'
 
 import FileList from './fileList'
 import ObjectList from './objectList'
@@ -28,6 +34,7 @@ import OperationDock from './operationDock'
 
 const BoardOperation = () => {
   const { touchUi } = useTouchUi()
+  const { landscape } = useLandscapeLayout()
   const {
     isPanMode,
     duplicateDragEnabled,
@@ -37,9 +44,11 @@ const BoardOperation = () => {
   const { cameraOpacity, openCamera } = useCameraStore()
   const currentFile = useCurrentFile()
   const saveJSON = useFileStore((state) => state.saveJSON)
+  const updateCanvasSize = useFileStore((state) => state.updateCanvasSize)
   const [showFile, updateShowFile] = useState(false)
   const [showObjectList, updateShowObjectList] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [layoutHint, setLayoutHint] = useState<string | null>(null)
 
   const [exportImage, setExportImage] = useState<ExportImageResult | null>(null)
   const [showDownloadModal, setShowDownloadModal] = useState(false)
@@ -69,6 +78,26 @@ const BoardOperation = () => {
       console.error('fullscreen error:', err)
     }
   }, [])
+
+  const toggleLandscapeLayout = useCallback(async () => {
+    if (landscape) {
+      await exitLandscapeLayout()
+      const portrait = canvasSizeForOrientation(false)
+      updateCanvasSize(portrait.width, portrait.height)
+      return
+    }
+    const result = await enterLandscapeLayout()
+    if (result.ok) {
+      const next = canvasSizeForOrientation(true)
+      updateCanvasSize(next.width, next.height)
+      setLayoutHint(null)
+      return
+    }
+    if (result.hintKey) {
+      setLayoutHint(result.hintKey)
+      window.setTimeout(() => setLayoutHint(null), 2800)
+    }
+  }, [landscape, updateCanvasSize])
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -209,9 +238,12 @@ const BoardOperation = () => {
         onToggleFullscreen={() => void toggleFullscreen()}
         onTogglePanMode={() => togglePanMode()}
         onToggleDuplicateMode={() => toggleDuplicateDragEnabled()}
+        isLandscapeLayout={landscape}
+        onToggleLandscapeLayout={() => void toggleLandscapeLayout()}
       />
       {exportError && <Toast message={exportError} type="error" />}
       {dropNotice && <Toast message={dropNotice} type="warning" />}
+      {layoutHint && <Toast message={layoutHint} type="warning" />}
       {widgetNotice && (
         <Toast
           message={widgetNotice}

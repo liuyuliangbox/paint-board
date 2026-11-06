@@ -111,8 +111,11 @@
       "save": "导出",
       "layers": "图层",
       "boards": "画板",
-      "more": "更多"
-    }
+      "more": "更多",
+      "landscape": "横版",
+      "portrait": "竖版"
+    },
+    "landscapeHint": "请将手机横过来使用"
   },
   "widget": {
     "panelTitle": "小组件",

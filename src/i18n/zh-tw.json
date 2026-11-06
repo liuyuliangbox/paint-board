@@ -111,8 +111,11 @@
       "save": "匯出",
       "layers": "圖層",
       "boards": "畫板",
-      "more": "更多"
-    }
+      "more": "更多",
+      "landscape": "橫版",
+      "portrait": "豎版"
+    },
+    "landscapeHint": "請將手機橫過來使用"
   },
   "widget": {
     "panelTitle": "小組件",

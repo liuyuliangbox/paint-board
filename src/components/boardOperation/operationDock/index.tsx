@@ -23,6 +23,8 @@ import {
   ImageUp,
   Layers,
   LayoutTemplate,
+  RectangleHorizontal,
+  RectangleVertical,
   Redo2,
   Shrink,
   Trash2,
@@ -62,6 +64,9 @@ export interface OperationDockProps {
   onToggleFullscreen: () => void
   onTogglePanMode: () => void
   onToggleDuplicateMode: () => void
+  /** Viewport currently landscape (after rotate / orientation.lock). */
+  isLandscapeLayout: boolean
+  onToggleLandscapeLayout: () => void
 }
 
 const Section: FC<{
@@ -107,7 +112,9 @@ const OperationDock: FC<OperationDockProps> = ({
   onOpenFiles,
   onToggleFullscreen,
   onTogglePanMode,
-  onToggleDuplicateMode
+  onToggleDuplicateMode,
+  isLandscapeLayout,
+  onToggleLandscapeLayout
 }) => {
   const { t } = useTranslation()
   const labelOf = (key: string) => String(t(key))
@@ -426,6 +433,23 @@ const OperationDock: FC<OperationDockProps> = ({
               onClick={onOpenFiles}
             >
               <BookText strokeWidth={iconStroke} />
+            </DockButton>
+            <DockButton
+              label={
+                isLandscapeLayout
+                  ? labelOf('operate.dock.portrait')
+                  : labelOf('operate.dock.landscape')
+              }
+              showLabel={showLabel}
+              layout={layout}
+              active={isLandscapeLayout}
+              onClick={onToggleLandscapeLayout}
+            >
+              {isLandscapeLayout ? (
+                <RectangleVertical strokeWidth={iconStroke} />
+              ) : (
+                <RectangleHorizontal strokeWidth={iconStroke} />
+              )}
             </DockButton>
           </Section>
 

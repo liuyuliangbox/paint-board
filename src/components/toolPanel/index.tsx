@@ -52,8 +52,8 @@ const ToolPanel: FC = () => {
   return (
     <div
       ref={panelRef}
-      className={`fixed top-7 left-7 flex flex-col card shadow-xl overflow-visible z-[3] bg-[#eef1ff] max-h-[80%] max-w-[85%] ${
-        showPanel ? 'p-4' : ''
+      className={`fixed top-7 left-7 z-[3] flex max-h-[80%] max-w-[85%] flex-col overflow-visible bg-[#eef1ff] card shadow-xl landscape:max-h-[min(72vh,22rem)] landscape:max-w-[min(92vw,28rem)] ${
+        showPanel ? 'p-4 landscape:p-3' : ''
       }`}
     >
       {/* toggle main panel display button */}
@@ -77,7 +77,7 @@ const ToolPanel: FC = () => {
         />
       </label>
       {showPanel && (
-        <div className="max-h-[100%] overflow-y-auto noScrollbar p-1">
+        <div className="max-h-full overflow-y-auto noScrollbar p-1 landscape:max-h-[min(64vh,18rem)]">
           {/* switch mode tabs */}
           <div className="tabs tabs-sm tabs-boxed bg-[#333C4D]">
             {modeSwitch.map(({ type, text, keyboard }) => (
