@@ -659,6 +659,16 @@ export class PaintBoard {
       this.canvas.setHeight(window.innerHeight * height)
     }
   }, 500)
+
+  /** Apply width + height together (avoids staggered debounce from separate sliders). */
+  updateCanvasSize(width: number, height: number, fileId: string) {
+    this.updateCanvasWidth.cancel()
+    this.updateCanvasHeight.cancel()
+    if (this.canvas && this.canvasFileId === fileId) {
+      this.canvas.setWidth(window.innerWidth * width)
+      this.canvas.setHeight(window.innerHeight * height)
+    }
+  }
 }
 
 export const paintBoard = new PaintBoard()

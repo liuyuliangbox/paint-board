@@ -117,6 +117,7 @@ interface FileAction {
   updateTransform: (newTransform: number[], fileId?: string) => void
   updateCanvasWidth: (width: number, fileId?: string) => void
   updateCanvasHeight: (height: number, fileId?: string) => void
+  updateCanvasSize: (width: number, height: number, fileId?: string) => void
   updateBackgroundColor: (colorIndex: number, color: string) => void
   updateCurrentBackgroundColor: (colorIndex: number) => void
   deleteBackgroundColor: (colorIndex: number) => void
@@ -272,6 +273,26 @@ const useFileStore = create<FileState & FileAction>()(
             file.canvasHeight = height
           },
           () => paintBoard.updateCanvasHeight(height, targetId)
+        )
+      },
+      updateCanvasSize(width, height, fileId) {
+        const targetId = fileId || get().currentId
+        const current = get().files.find((file) => file.id === targetId)
+        if (
+          !current ||
+          (current.canvasWidth === width && current.canvasHeight === height)
+        ) {
+          return
+        }
+        updateFileById(
+          get,
+          set,
+          targetId,
+          (file) => {
+            file.canvasWidth = width
+            file.canvasHeight = height
+          },
+          () => paintBoard.updateCanvasSize(width, height, targetId)
         )
       },
       updateCurrentBackgroundColor(colorIndex) {

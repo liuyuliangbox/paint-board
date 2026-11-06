@@ -50,7 +50,9 @@
   },
   "canvasSize": {
     "width": "Width",
-    "height": "Height"
+    "height": "Height",
+    "switchToLandscape": "Landscape",
+    "switchToPortrait": "Portrait"
   },
   "drawType": {
     "freeStyle": "FreeStyle",
@@ -546,7 +548,7 @@
       "panBoardHand": "Pan Board (Hand Mode)",
       "zoomBoard1": "Zoom Board (1)",
       "zoomBoard2": "Zoom Board (2)",
-      "zoomBoardMobile": "Zoom Board (Two-Finger Pinch)",
+      "zoomBoardMobile": "Zoom Board (Pinch on Empty)",
       "resetZoom": "Reset Board Zoom",
       "undo": "Undo",
       "undoMobile": "Undo (Mobile)",
@@ -565,12 +567,14 @@
       "pasteClipboard": "Paste Clipboard",
       "duplicateSelected": "Duplicate Selected Elements",
       "duplicateDrag": "Duplicate While Dragging",
-      "duplicateDragTouch": "Two-Finger Drag Selection to Duplicate",
+      "duplicateDragTouch": "Drag to Duplicate in Duplicate Mode",
       "constrainMove": "Constrain Move to Axis",
       "nudgeSelected": "Nudge Selected Elements",
       "clearSelection": "Clear Selection",
       "deleteSelected": "Delete Selected Elements",
-      "moveLayer": "Move Element Layer"
+      "moveLayer": "Move Element Layer",
+      "moveSelectedTouch": "Move Selection (Two-Finger Drag)",
+      "scaleSelectedTouch": "Scale Selection (Two-Finger Pinch)"
     },
     "toolOperations": {
       "switchDrawMode": "Switch to Draw Mode",
@@ -590,7 +594,7 @@
       "doubleFingerDrag": "Two-finger drag on empty area",
       "handPanToggle": "Tap hand button, then one-finger drag",
       "mouseWheel": "Mouse Wheel",
-      "doubleFingerZoom": "Two-finger pinch",
+      "doubleFingerZoom": "Two-finger pinch on empty area",
       "doubleFingerTap": "Double Finger Tap",
       "threeFingerTap": "Three Finger Tap",
       "longPress": "Long Press",
@@ -598,8 +602,9 @@
       "mouseLeftClick": "Mouse Left Click",
       "mouseRightClick": "Mouse Right Click",
       "mouseRightDrag": "Mouse Right Click and Drag",
-      "duplicateModeToggle": "Tap duplicate button, then one-finger drag",
-      "twoFingerDupDrag": "Two-finger drag on selection"
+      "duplicateModeToggle": "Tap duplicate button, then drag",
+      "twoFingerMoveSelection": "Two-finger drag on selection",
+      "twoFingerScaleSelection": "Two-finger pinch on selection"
     }
   },
   "touchUi": {

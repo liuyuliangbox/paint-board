@@ -373,8 +373,14 @@ const FileList: FC<IProps> = ({ updateShow }) => {
 
   return (
     <>
-      <div className="modal modal-open z-[70]">
-        <div className="modal-box flex h-[min(88vh,920px)] w-[94vw] max-w-5xl flex-col overflow-hidden p-0">
+      <div
+        className="modal modal-open z-[70]"
+        onClick={() => updateShow(false)}
+      >
+        <div
+          className="modal-box flex h-[min(88vh,920px)] w-[94vw] max-w-5xl flex-col overflow-hidden p-0"
+          onClick={(event) => event.stopPropagation()}
+        >
           <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
             <h3 className="font-fredokaOne text-2xl">{t('fileBoard.title')}</h3>
             <div className="flex items-center gap-1">
@@ -680,10 +686,10 @@ const FileList: FC<IProps> = ({ updateShow }) => {
             </>
           )}
         </div>
+        {/* daisyUI backdrop uses z-index:-1; with a raised modal z-index it
+            becomes untouchable, so closing is handled on the modal itself. */}
         <form method="dialog" className="modal-backdrop">
-          <button type="button" onClick={() => updateShow(false)}>
-            close
-          </button>
+          <button type="button">close</button>
         </form>
       </div>
       {showUploadFail && <Toast message="tip.uploadFileFail" type="error" />}

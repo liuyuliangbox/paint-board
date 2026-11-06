@@ -7,28 +7,27 @@ import useBoardStore from '@/store/board'
 import useFileStore from '@/store/files'
 import { beginCanvasPan, endCanvasPan } from '../canvasPan'
 import { syncRoughShapePadding } from '@/core/element/shape/utils/roughGroup'
-import {
-  cloneObjectsInPlace,
-  isObjectLocked,
-  snapshotActiveObjectsForDuplicate
-} from '@/core/utils/object'
+import { isObjectLocked } from '@/core/utils/object'
 import { ActionMode } from '@/constants'
 import {
   classifyTwoFingerGesture,
   TwoFingerGestureMode
 } from './twoFingerGesture'
 
-type DragKind = 'canvas' | 'selection'
+type TargetKind = 'canvas' | 'selection'
 
 type FabricCanvasInternal = fabric.Canvas & {
   _currentTransform?: unknown | null
 }
 
+const MIN_OBJECT_SCALE = 0.05
+
 /**
  * Two-finger canvas gestures:
- * - pinch (distance change) → zoom only
- * - drag on blank → pan only
- * - drag on current selection → duplicate once, then move selection
+ * - pinch on selection → scale selection
+ * - pinch on empty → zoom canvas
+ * - drag on selection → move selection
+ * - drag on empty → pan canvas
  */
 export class CanvasTransformHandler {
   isDragging = false
@@ -39,11 +38,12 @@ export class CanvasTransformHandler {
   lastPan?: fabric.Point
   private hitTestBypass = false
   private gestureMode: TwoFingerGestureMode = 'pending'
-  private dragKind: DragKind | null = null
+  private targetKind: TargetKind | null = null
   private selectionHitAtStart = false
-  private selectionMoved = false
-  private selectionDupStarted = false
+  private selectionChanged = false
   private lastMidScreen?: fabric.Point
+  private selectionStartScaleX = 1
+  private selectionStartScaleY = 1
 
   reset() {
     this.endHitTestBypass()
@@ -54,11 +54,12 @@ export class CanvasTransformHandler {
     this.startScale = 1
     this.lastPan = undefined
     this.gestureMode = 'pending'
-    this.dragKind = null
+    this.targetKind = null
     this.selectionHitAtStart = false
-    this.selectionMoved = false
-    this.selectionDupStarted = false
+    this.selectionChanged = false
     this.lastMidScreen = undefined
+    this.selectionStartScaleX = 1
+    this.selectionStartScaleY = 1
   }
 
   private beginHitTestBypass() {
@@ -89,7 +90,7 @@ export class CanvasTransformHandler {
     return mode === ActionMode.SELECT || mode === ActionMode.Board
   }
 
-  private midHitsActiveSelection(
+  private pointHitsActiveSelection(
     canvas: fabric.Canvas,
     clientX: number,
     clientY: number
@@ -115,6 +116,29 @@ export class CanvasTransformHandler {
     return Boolean(active.containsPoint?.(point, null, true))
   }
 
+  /** True if midpoint or either finger is on the current selection. */
+  private touchesHitActiveSelection(canvas: fabric.Canvas, touches: TouchList) {
+    const touch1 = touches[0]
+    const touch2 = touches[1]
+    const midX = (touch1.clientX + touch2.clientX) / 2
+    const midY = (touch1.clientY + touch2.clientY) / 2
+    return (
+      this.pointHitsActiveSelection(canvas, midX, midY) ||
+      this.pointHitsActiveSelection(canvas, touch1.clientX, touch1.clientY) ||
+      this.pointHitsActiveSelection(canvas, touch2.clientX, touch2.clientY)
+    )
+  }
+
+  private captureSelectionScale(canvas: fabric.Canvas) {
+    const active = canvas.getActiveObject()
+    if (!active || isObjectLocked(active)) {
+      this.targetKind = 'canvas'
+      return
+    }
+    this.selectionStartScaleX = active.scaleX ?? 1
+    this.selectionStartScaleY = active.scaleY ?? 1
+  }
+
   transformStart(touches: TouchList) {
     const canvas = paintBoard.canvas
     if (!canvas || touches.length !== 2) {
@@ -132,22 +156,14 @@ export class CanvasTransformHandler {
     this.startY = (touch1.pageY + touch2.pageY) / 2
     this.startScale = canvas.getZoom()
     this.gestureMode = 'pending'
-    this.dragKind = null
+    this.targetKind = null
     this.isDragging = false
     this.lastPan = undefined
     this.lastMidScreen = new fabric.Point(this.startX, this.startY)
-    this.selectionMoved = false
-    this.selectionDupStarted = false
+    this.selectionChanged = false
+    this.selectionHitAtStart = this.touchesHitActiveSelection(canvas, touches)
 
-    const midClientX = (touch1.clientX + touch2.clientX) / 2
-    const midClientY = (touch1.clientY + touch2.clientY) / 2
-    this.selectionHitAtStart = this.midHitsActiveSelection(
-      canvas,
-      midClientX,
-      midClientY
-    )
-
-    // Second finger: stop any single-finger object drag Fabric started.
+    // Second finger: stop any single-finger object drag / scale Fabric started.
     this.abortFabricObjectDrag(canvas)
   }
 
@@ -179,36 +195,34 @@ export class CanvasTransformHandler {
       this.isDragging = true
       this.lastMidScreen = new fabric.Point(x, y)
       this.lastPan = new fabric.Point(x - this.startX, y - this.startY)
-
-      if (next === 'pinch') {
-        this.dragKind = null
-        this.beginHitTestBypass()
-      } else {
-        this.dragKind = this.selectionHitAtStart ? 'selection' : 'canvas'
-        this.beginHitTestBypass()
-        this.abortFabricObjectDrag(canvas)
-        if (this.dragKind === 'selection') {
-          void this.ensureSelectionDuplicated(canvas)
-        }
+      this.targetKind = this.selectionHitAtStart ? 'selection' : 'canvas'
+      this.beginHitTestBypass()
+      this.abortFabricObjectDrag(canvas)
+      if (next === 'pinch' && this.targetKind === 'selection') {
+        this.captureSelectionScale(canvas)
       }
     }
 
     if (this.gestureMode === 'pinch') {
-      this.applyPinchZoom(canvas, currentDistance)
+      if (this.targetKind === 'selection') {
+        this.applySelectionPinch(canvas, currentDistance)
+      } else {
+        this.applyCanvasZoom(canvas, currentDistance)
+      }
       return
     }
 
-    if (this.gestureMode === 'drag' && this.dragKind === 'canvas') {
+    if (this.gestureMode === 'drag' && this.targetKind === 'selection') {
+      this.applySelectionMove(canvas, x, y)
+      return
+    }
+
+    if (this.gestureMode === 'drag') {
       this.applyCanvasPan(canvas, x, y)
-      return
-    }
-
-    if (this.gestureMode === 'drag' && this.dragKind === 'selection') {
-      this.applySelectionDrag(canvas, x, y)
     }
   }
 
-  private applyPinchZoom(canvas: fabric.Canvas, currentDistance: number) {
+  private applyCanvasZoom(canvas: fabric.Canvas, currentDistance: number) {
     let zoom = this.startScale * (currentDistance / this.startDistance)
     zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom))
     if (!useBoardStore.getState().isObjectCaching) {
@@ -225,6 +239,25 @@ export class CanvasTransformHandler {
     if (fileId && transform) {
       this.saveTransform(fileId, [...transform])
     }
+  }
+
+  private applySelectionPinch(canvas: fabric.Canvas, currentDistance: number) {
+    const active = canvas.getActiveObject()
+    if (!active || isObjectLocked(active)) {
+      this.targetKind = 'canvas'
+      this.applyCanvasZoom(canvas, currentDistance)
+      return
+    }
+
+    const ratio = currentDistance / this.startDistance
+    const scaleX = Math.max(MIN_OBJECT_SCALE, this.selectionStartScaleX * ratio)
+    const scaleY = Math.max(MIN_OBJECT_SCALE, this.selectionStartScaleY * ratio)
+    const center = active.getCenterPoint()
+    active.set({ scaleX, scaleY })
+    active.setPositionByOrigin(center, 'center', 'center')
+    active.setCoords()
+    this.selectionChanged = true
+    canvas.requestRenderAll()
   }
 
   private applyCanvasPan(canvas: fabric.Canvas, x: number, y: number) {
@@ -252,23 +285,10 @@ export class CanvasTransformHandler {
     }
   }
 
-  private async ensureSelectionDuplicated(canvas: fabric.Canvas) {
-    if (this.selectionDupStarted) {
-      return
-    }
-    this.selectionDupStarted = true
-    const snapshot = snapshotActiveObjectsForDuplicate(canvas)
-    if (!snapshot.length) {
-      this.dragKind = 'canvas'
-      return
-    }
-    await cloneObjectsInPlace(snapshot)
-  }
-
-  private applySelectionDrag(canvas: fabric.Canvas, x: number, y: number) {
+  private applySelectionMove(canvas: fabric.Canvas, x: number, y: number) {
     const active = canvas.getActiveObject()
     if (!active || isObjectLocked(active)) {
-      this.dragKind = 'canvas'
+      this.targetKind = 'canvas'
       this.applyCanvasPan(canvas, x, y)
       return
     }
@@ -292,7 +312,7 @@ export class CanvasTransformHandler {
       top: (active.top ?? 0) + dy
     })
     active.setCoords()
-    this.selectionMoved = true
+    this.selectionChanged = true
     canvas.requestRenderAll()
   }
 
@@ -300,23 +320,25 @@ export class CanvasTransformHandler {
     const canvas = paintBoard.canvas
     if (
       canvas &&
-      this.gestureMode === 'drag' &&
-      this.dragKind === 'selection' &&
-      this.selectionMoved
+      this.targetKind === 'selection' &&
+      this.selectionChanged &&
+      (this.gestureMode === 'drag' || this.gestureMode === 'pinch')
     ) {
       const active = canvas.getActiveObject()
       if (active) {
-        canvas.fire('object:modified', { target: active, action: 'drag' })
+        canvas.fire('object:modified', {
+          target: active,
+          action: this.gestureMode === 'pinch' ? 'scale' : 'drag'
+        })
       }
     }
 
     this.endHitTestBypass()
     this.isDragging = false
     this.gestureMode = 'pending'
-    this.dragKind = null
+    this.targetKind = null
     this.selectionHitAtStart = false
-    this.selectionMoved = false
-    this.selectionDupStarted = false
+    this.selectionChanged = false
     this.lastMidScreen = undefined
     this.lastPan = undefined
   }

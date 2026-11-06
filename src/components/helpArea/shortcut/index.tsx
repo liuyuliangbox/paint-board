@@ -206,8 +206,16 @@ const Shortcut = () => {
               </td>
             </tr>
             <tr>
+              <td>{t('helpInfo.elementOperations.moveSelectedTouch')}</td>
+              <td>{t('helpInfo.keyboardShortcuts.twoFingerMoveSelection')}</td>
+            </tr>
+            <tr>
+              <td>{t('helpInfo.elementOperations.scaleSelectedTouch')}</td>
+              <td>{t('helpInfo.keyboardShortcuts.twoFingerScaleSelection')}</td>
+            </tr>
+            <tr>
               <td>{t('helpInfo.elementOperations.duplicateDragTouch')}</td>
-              <td>{t('helpInfo.keyboardShortcuts.twoFingerDupDrag')}</td>
+              <td>{t('helpInfo.keyboardShortcuts.duplicateModeToggle')}</td>
             </tr>
             <tr>
               <td>{t('helpInfo.elementOperations.constrainMove')}</td>

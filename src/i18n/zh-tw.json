@@ -50,7 +50,9 @@
   },
   "canvasSize": {
     "width": "寬度",
-    "height": "高度"
+    "height": "高度",
+    "switchToLandscape": "切換橫版",
+    "switchToPortrait": "切換豎版"
   },
   "drawType": {
     "freeStyle": "自由繪畫",
@@ -545,7 +547,7 @@
       "panBoardMobile": "平移畫板(空白雙指拖)",
       "zoomBoard1": "縮放畫板(1)",
       "zoomBoard2": "縮放畫板(2)",
-      "zoomBoardMobile": "縮放畫板(雙指捏合)",
+      "zoomBoardMobile": "縮放畫板(空白雙指捏合)",
       "resetZoom": "重置畫板縮放",
       "undo": "撤銷",
       "undoMobile": "撤銷(移動端)",
@@ -570,7 +572,9 @@
       "moveLayer": "移動元素圖層",
       "longPressSelect": "觸屏長按選中元素",
       "longPressMarquee": "觸屏長按拖動框選",
-      "duplicateDragTouch": "選中後雙指拖複製移動"
+      "duplicateDragTouch": "開啟複製模式後拖動複製",
+      "moveSelectedTouch": "雙指拖移動選中元素",
+      "scaleSelectedTouch": "雙指捏合縮放選中元素"
     },
     "toolOperations": {
       "switchDrawMode": "切換繪畫模式",
@@ -589,7 +593,7 @@
       "arrows": "上 / 下 / 左 / 右",
       "doubleFingerDrag": "空白處雙指拖拽",
       "mouseWheel": "鼠標滾輪",
-      "doubleFingerZoom": "雙指捏合",
+      "doubleFingerZoom": "空白處雙指捏合",
       "doubleFingerTap": "雙指雙擊",
       "threeFingerTap": "三指雙擊",
       "mouseLeftClick": "鼠標左鍵",
@@ -598,8 +602,9 @@
       "handPanToggle": "點按底部手型按鈕後單指拖拽",
       "longPress": "長按",
       "longPressDrag": "長按後拖拽",
-      "duplicateModeToggle": "點按底部複製按鈕後單指拖動",
-      "twoFingerDupDrag": "選中對象上雙指拖拽"
+      "duplicateModeToggle": "點按底部複製按鈕後拖動",
+      "twoFingerMoveSelection": "選中對象上雙指拖拽",
+      "twoFingerScaleSelection": "選中對象上雙指捏合"
     }
   },
   "touchUi": {
