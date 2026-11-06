@@ -92,7 +92,27 @@
     "addFile": "ファイル追加",
     "deleteFile": "ファイル削除",
     "saveFile": "ファイルデータ保存",
-    "uploadFile": "ファイルデータアップロード"
+    "uploadFile": "ファイルデータアップロード",
+    "expandLegend": "説明",
+    "collapseLegend": "閉じる",
+    "selectionActions": "選択操作",
+    "dock": {
+      "undo": "元に戻す",
+      "redo": "やり直し",
+      "pan": "移動",
+      "copy": "コピー",
+      "group": "グループ",
+      "widget": "部品",
+      "duplicateMode": "ドラッグ複製",
+      "delete": "削除",
+      "text": "文字",
+      "image": "画像",
+      "clean": "消去",
+      "save": "書き出し",
+      "layers": "レイヤー",
+      "boards": "ボード",
+      "more": "その他"
+    }
   },
   "widget": {
     "panelTitle": "ウィジェット",

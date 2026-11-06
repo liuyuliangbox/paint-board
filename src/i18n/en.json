@@ -92,7 +92,27 @@
     "addFile": "Add File",
     "deleteFile": "Delete File",
     "saveFile": "Save File Data",
-    "uploadFile": "Upload File Data"
+    "uploadFile": "Upload File Data",
+    "expandLegend": "Labels",
+    "collapseLegend": "Icons",
+    "selectionActions": "Selection",
+    "dock": {
+      "undo": "Undo",
+      "redo": "Redo",
+      "pan": "Pan",
+      "copy": "Copy",
+      "group": "Group",
+      "widget": "Widget",
+      "duplicateMode": "Dup drag",
+      "delete": "Delete",
+      "text": "Text",
+      "image": "Image",
+      "clean": "Clear",
+      "save": "Export",
+      "layers": "Layers",
+      "boards": "Boards",
+      "more": "More"
+    }
   },
   "widget": {
     "panelTitle": "Widgets",

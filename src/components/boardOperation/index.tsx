@@ -5,11 +5,8 @@ import useFileStore, {
   useCurrentFile
 } from '@/store/files'
 import useCameraStore from '@/store/camera'
-import { useTranslation } from 'react-i18next'
-import { ActionMode } from '@/constants'
 import { canGroupActiveObjects } from '@/core/element/group/groupSelection'
 import { paintBoard } from '@/core/paintBoard'
-import { isMobile as isMobileFn } from '@/utils'
 import { ImageElement } from '@/core/element/image'
 import { captureCameraFrame } from '@/core/camera/renderer'
 import {
@@ -18,45 +15,30 @@ import {
   ExportScope
 } from '@/core/export/exportCanvasImage'
 import { exportErrorMessageKey } from '@/core/export/exportError'
-
-import {
-  Undo2,
-  Redo2,
-  Type,
-  Copy,
-  Group,
-  Trash2,
-  ImageUp,
-  BrushCleaning,
-  Expand,
-  Shrink,
-  X,
-  Menu,
-  BookText,
-  Layers,
-  LayoutTemplate
-} from 'lucide-react'
 import useWidgetStore, { MAX_WIDGET_COUNT } from '@/store/widgets'
+import { useTouchUi } from '@/hooks/useTouchUi'
 
 import FileList from './fileList'
 import ObjectList from './objectList'
 import DownloadImage from './downloadImage'
-import ExportImageMenu from './exportImageMenu'
 import UploadImage from '@/components/uploadImage/lazy'
 import Toast from '@/components/toast'
 import { subscribeImageDropNotice } from '@/core/event/imageDrop'
-
-const isMobile = isMobileFn()
+import OperationDock from './operationDock'
 
 const BoardOperation = () => {
-  const { t } = useTranslation()
-  const { mode } = useBoardStore()
+  const { touchUi } = useTouchUi()
+  const {
+    isPanMode,
+    duplicateDragEnabled,
+    togglePanMode,
+    toggleDuplicateDragEnabled
+  } = useBoardStore()
   const { cameraOpacity, openCamera } = useCameraStore()
   const currentFile = useCurrentFile()
   const saveJSON = useFileStore((state) => state.saveJSON)
-  const [showFile, updateShowFile] = useState(false) // show file list draw
+  const [showFile, updateShowFile] = useState(false)
   const [showObjectList, updateShowObjectList] = useState(false)
-  const [showOperation, setShowOperation] = useState(true) // mobile: show all operation
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   const [exportImage, setExportImage] = useState<ExportImageResult | null>(null)
@@ -76,7 +58,6 @@ const BoardOperation = () => {
   const setWidgetPanelOpen = useWidgetStore((state) => state.setPanelOpen)
   const widgetCount = useWidgetStore((state) => state.widgets.length)
 
-  // toggle fullscreen mode
   const toggleFullscreen = useCallback(async () => {
     try {
       if (!document.fullscreenElement) {
@@ -89,11 +70,6 @@ const BoardOperation = () => {
     }
   }, [])
 
-  /**
-   * listen fullscreen event
-   * 1. browser behavior
-   * 2. toggleFullscreen trigger
-   */
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement)
@@ -104,20 +80,6 @@ const BoardOperation = () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
   }, [])
-
-  const groupObject = () => {
-    paintBoard.groupObject()
-  }
-
-  // copy activity object
-  const copyObject = () => {
-    paintBoard.copyObject()
-  }
-
-  // delete activity object
-  const deleteObject = () => {
-    paintBoard.deleteObject()
-  }
 
   const saveSelectionAsWidget = async () => {
     if (widgetCount >= MAX_WIDGET_COUNT) {
@@ -133,22 +95,6 @@ const BoardOperation = () => {
     }
   }
 
-  // click undo
-  const undo = () => {
-    paintBoard.history?.undo()
-  }
-
-  // click redo
-  const redo = () => {
-    paintBoard.history?.redo()
-  }
-
-  // load IText object
-  const inputText = () => {
-    paintBoard.textElement?.loadText({})
-  }
-
-  // upload image file
   const uploadImageFile = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) {
@@ -158,11 +104,9 @@ const BoardOperation = () => {
     const reader = new FileReader()
     reader.onload = (fEvent) => {
       const data = fEvent.target?.result
-      if (data) {
-        if (data && typeof data === 'string') {
-          setUploadImageURL(data)
-          setShowUploadModal(true)
-        }
+      if (data && typeof data === 'string') {
+        setUploadImageURL(data)
+        setShowUploadModal(true)
       }
       e.target.value = ''
     }
@@ -210,7 +154,6 @@ const BoardOperation = () => {
     }
   }, [])
 
-  // save as image
   const saveImage = async (scope: ExportScope) => {
     const canvas = paintBoard.canvas
     if (!canvas || exportingRef.current) {
@@ -244,142 +187,29 @@ const BoardOperation = () => {
 
   return (
     <>
-      <div className="fixed bottom-5 left-2/4 -translate-x-2/4 xs:right-5 xs:left-auto xs:translate-x-0">
-        <div className="flex items-center bg-[#eef1ff] rounded-full xs:flex-col xs:justify-normal xs:max-h-[70vh] xs:overflow-y-auto xs:noScrollbar">
-          {showOperation && (
-            <>
-              <div
-                onClick={undo}
-                className="min-xs:tooltip cursor-pointer py-1.5 pl-3 pr-2 rounded-l-full hover:bg-slate-200 xs:pl-2 xs:rounded-l-none xs:rounded-t-full"
-                data-tip={t('operate.undo')}
-              >
-                <Undo2 strokeWidth={2} color="#66CC8A" />
-              </div>
-              <div
-                onClick={redo}
-                className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
-                data-tip={t('operate.redo')}
-              >
-                <Redo2 strokeWidth={2} color="#66CC8A" />
-              </div>
-              {[ActionMode.SELECT, ActionMode.Board].includes(mode) && (
-                <>
-                  <div
-                    onClick={copyObject}
-                    className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
-                    data-tip={t('operate.copy')}
-                  >
-                    <Copy strokeWidth={2} color="#66CC8A" />
-                  </div>
-                  {canGroup && (
-                    <div
-                      onClick={groupObject}
-                      className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
-                      data-tip={t('operate.group')}
-                    >
-                      <Group strokeWidth={2} color="#66CC8A" />
-                    </div>
-                  )}
-                  {hasSelection && (
-                    <div
-                      onClick={() => void saveSelectionAsWidget()}
-                      className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
-                      data-tip={t('widget.addToWidgets')}
-                    >
-                      <LayoutTemplate strokeWidth={2} color="#66CC8A" />
-                    </div>
-                  )}
-                  <div
-                    onClick={deleteObject}
-                    className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
-                    data-tip={t('operate.delete')}
-                  >
-                    <Trash2 strokeWidth={2} color="#66CC8A" />
-                  </div>
-                </>
-              )}
-              <div
-                data-tip={t('operate.text')}
-                className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
-                onClick={inputText}
-              >
-                <Type strokeWidth={2} color="#66CC8A" />
-              </div>
-              <div
-                className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
-                data-tip={t('operate.image')}
-              >
-                <label htmlFor="image-upload" className="cursor-pointer">
-                  <ImageUp strokeWidth={2} color="#66CC8A" />
-                </label>
-                <input
-                  type="file"
-                  id="image-upload"
-                  accept=".jpeg, .jpg, .png"
-                  className="hidden"
-                  onChange={uploadImageFile}
-                />
-              </div>
-              <label
-                htmlFor="clean-modal"
-                className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
-                data-tip={t('operate.clean')}
-              >
-                <BrushCleaning strokeWidth={2} color="#66CC8A" />
-              </label>
-              <ExportImageMenu
-                hasSelection={hasSelection}
-                onExport={saveImage}
-                onExportBoard={saveJSON}
-              />
-              {!isMobile && (
-                <div
-                  onClick={toggleFullscreen}
-                  className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
-                  data-tip={t(
-                    isFullscreen
-                      ? 'operate.exitFullscreen'
-                      : 'operate.fullscreen'
-                  )}
-                >
-                  {isFullscreen ? (
-                    <Shrink strokeWidth={2} color="#66CC8A" />
-                  ) : (
-                    <Expand strokeWidth={2} color="#66CC8A" />
-                  )}
-                </div>
-              )}
-              <div
-                onClick={() => updateShowObjectList((open) => !open)}
-                className="min-xs:tooltip cursor-pointer py-1.5 px-2 hover:bg-slate-200"
-                data-tip={t('operate.objectList')}
-              >
-                <Layers strokeWidth={2} color="#66CC8A" />
-              </div>
-              <div
-                className="min-xs:tooltip cursor-pointer py-1.5 pl-2 pr-3 rounded-r-full hover:bg-slate-200 xs:pr-2 xs:rounded-r-none xs:rounded-b-full"
-                data-tip={t('operate.fileList')}
-                onClick={() => updateShowFile(true)}
-              >
-                <BookText strokeWidth={2} color="#66CC8A" />
-              </div>
-            </>
-          )}
-          <label className="btn btn-neutral btn-circle swap swap-rotate w-7 h-7 min-h-0 my-1.5 mx-2 min-xs:hidden">
-            <input
-              type="checkbox"
-              onChange={() => setShowOperation((v) => !v)}
-            />
-            <X strokeWidth={2.5} color="#fff" size={20} className="swap-on" />
-            <Menu
-              strokeWidth={2.5}
-              color="#fff"
-              size={20}
-              className="swap-off"
-            />
-          </label>
-        </div>
-      </div>
+      <OperationDock
+        hasSelection={hasSelection}
+        canGroup={canGroup}
+        isFullscreen={isFullscreen}
+        isPanMode={isPanMode}
+        duplicateDragEnabled={duplicateDragEnabled}
+        showTouchTools={touchUi}
+        onUndo={() => paintBoard.history?.undo()}
+        onRedo={() => paintBoard.history?.redo()}
+        onCopy={() => paintBoard.copyObject()}
+        onDelete={() => paintBoard.deleteObject()}
+        onGroup={() => paintBoard.groupObject()}
+        onAddWidget={() => void saveSelectionAsWidget()}
+        onText={() => paintBoard.textElement?.loadText({})}
+        onUploadImage={uploadImageFile}
+        onExport={saveImage}
+        onExportBoard={saveJSON}
+        onToggleObjectList={() => updateShowObjectList((open) => !open)}
+        onOpenFiles={() => updateShowFile(true)}
+        onToggleFullscreen={() => void toggleFullscreen()}
+        onTogglePanMode={() => togglePanMode()}
+        onToggleDuplicateMode={() => toggleDuplicateDragEnabled()}
+      />
       {exportError && <Toast message={exportError} type="error" />}
       {dropNotice && <Toast message={dropNotice} type="warning" />}
       {widgetNotice && (

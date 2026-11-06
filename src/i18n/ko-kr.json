@@ -92,7 +92,27 @@
     "addFile": "파일 추가",
     "deleteFile": "파일 삭제",
     "saveFile": "파일 데이터 저장",
-    "uploadFile": "파일 데이터 업로드"
+    "uploadFile": "파일 데이터 업로드",
+    "expandLegend": "설명",
+    "collapseLegend": "접기",
+    "selectionActions": "선택 작업",
+    "dock": {
+      "undo": "실행 취소",
+      "redo": "다시 실행",
+      "pan": "이동",
+      "copy": "복사",
+      "group": "그룹",
+      "widget": "위젯",
+      "duplicateMode": "드래그 복제",
+      "delete": "삭제",
+      "text": "텍스트",
+      "image": "이미지",
+      "clean": "지우기",
+      "save": "내보내기",
+      "layers": "레이어",
+      "boards": "보드",
+      "more": "더보기"
+    }
   },
   "widget": {
     "panelTitle": "위젯",

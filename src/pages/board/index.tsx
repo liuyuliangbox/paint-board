@@ -23,7 +23,6 @@ import CleanModal from '@/components/cleanModal'
 import BoardOperation from '@/components/boardOperation'
 import WidgetPanel from '@/components/widgetPanel'
 import WidgetContextMenu from '@/components/widgetPanel/contextMenu'
-import SelectionTouchBar from '@/components/boardOperation/selectionTouchBar'
 import BackgroundColor from '@/components/background/backgroundColor'
 import BackgroundImage from '@/components/background/backgroundImage'
 import BackgroundCamera from '@/components/background/backgroundCamera'
@@ -126,7 +125,6 @@ const Board: React.FC = () => {
         <>
           <WidgetPanel />
           <WidgetContextMenu />
-          <SelectionTouchBar />
           <ToolPanel />
           <HelpArea />
           <CleanModal />

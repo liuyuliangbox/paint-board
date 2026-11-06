@@ -92,7 +92,27 @@
     "addFile": "添加文件",
     "deleteFile": "删除文件",
     "saveFile": "保存文件数据",
-    "uploadFile": "上传文件数据"
+    "uploadFile": "上传文件数据",
+    "expandLegend": "说明书",
+    "collapseLegend": "收起",
+    "selectionActions": "选中操作",
+    "dock": {
+      "undo": "撤销",
+      "redo": "重做",
+      "pan": "平移",
+      "copy": "复制",
+      "group": "组合",
+      "widget": "组件",
+      "duplicateMode": "拖复制",
+      "delete": "删除",
+      "text": "文字",
+      "image": "图片",
+      "clean": "清空",
+      "save": "导出",
+      "layers": "图层",
+      "boards": "画板",
+      "more": "更多"
+    }
   },
   "widget": {
     "panelTitle": "小组件",

@@ -9,12 +9,22 @@ interface IProps {
   hasSelection: boolean
   onExport: (scope: ExportScope) => void
   onExportBoard: () => void
+  /** When true, show function name next to the icon (dock legend mode). */
+  showLabel?: boolean
+  label?: string
 }
 
 const HOVER_CLOSE_DELAY = 200
 
-const ExportImageMenu = ({ hasSelection, onExport, onExportBoard }: IProps) => {
+const ExportImageMenu = ({
+  hasSelection,
+  onExport,
+  onExportBoard,
+  showLabel = false,
+  label
+}: IProps) => {
   const { t } = useTranslation()
+  const buttonLabel = label || t('operate.save')
   const anchorRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const closeTimer = useRef<number | undefined>(undefined)
@@ -143,8 +153,11 @@ const ExportImageMenu = ({ hasSelection, onExport, onExportBoard }: IProps) => {
         role="button"
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={t('operate.save') || undefined}
-        className="cursor-pointer py-1.5 px-2 hover:bg-slate-200"
+        aria-label={buttonLabel || undefined}
+        title={buttonLabel || undefined}
+        className={`flex cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1.5 hover:bg-slate-200 ${
+          open ? 'bg-slate-200/80' : ''
+        }`}
         onMouseEnter={() => {
           if (canHover.current) {
             openMenu()
@@ -159,7 +172,12 @@ const ExportImageMenu = ({ hasSelection, onExport, onExportBoard }: IProps) => {
           setOpen((value) => !value)
         }}
       >
-        <Save strokeWidth={2} color="#66CC8A" />
+        <Save strokeWidth={2} color="#66CC8A" size={18} />
+        {showLabel && (
+          <span className="max-w-[4.5rem] truncate text-[10px] font-medium leading-tight text-slate-700">
+            {buttonLabel}
+          </span>
+        )}
       </div>
       {open &&
         createPortal(
