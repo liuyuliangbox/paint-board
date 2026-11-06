@@ -9,8 +9,6 @@ import {
   readPersistedWidgets,
   writePersistedWidgets,
   loadWidgetPayload,
-  resetWidgetPersistenceCache,
-  widgetBlobKey,
   type StoredWidgetMeta,
   type StoredWidgetPayload
 } from './widgetRecord'
@@ -93,7 +91,7 @@ interface WidgetAction {
   getWidgetObjects: (id: string) => Promise<unknown[] | null>
   /** Upload local widgets to cloud. Uses my sync code when code omitted. */
   pushToCloud: (code?: string) => Promise<number>
-  /** Replace local widgets with cloud data for the given (or my) sync code. */
+  /** Merge cloud widgets into local (keep local; add cloud-only ids). */
   pullFromCloud: (code?: string) => Promise<number>
 }
 
@@ -279,16 +277,18 @@ const useWidgetStore = create<WidgetState & WidgetAction>()(
       async pullFromCloud(code) {
         const target = (code || getMySyncCode()).trim()
         const bundle = await pullWidgets(target)
-        const previousIds = get().widgets.map((widget) => widget.id)
+        const { widgets: localWidgets, categories: localCategories } = get()
+        const localIds = new Set(localWidgets.map((widget) => widget.id))
 
-        payloadCache.clear()
-        resetWidgetPersistenceCache()
-        for (const id of previousIds) {
-          await widgetDb.del(widgetBlobKey(id))
-        }
-
-        const nextMetas: StoredWidgetMeta[] = []
-        for (const meta of bundle.metas.slice(0, MAX_WIDGET_COUNT)) {
+        // Keep local widgets; append cloud-only ids (same id keeps local).
+        const mergedMetas = [...localWidgets]
+        for (const meta of bundle.metas) {
+          if (mergedMetas.length >= MAX_WIDGET_COUNT) {
+            break
+          }
+          if (localIds.has(meta.id)) {
+            continue
+          }
           const item = bundle.items[meta.id]
           if (!item) {
             continue
@@ -298,26 +298,45 @@ const useWidgetStore = create<WidgetState & WidgetAction>()(
             objects: item.objects,
             thumbnail
           })
-          nextMetas.push({
+          mergedMetas.push({
             ...meta,
             category: normalizeCategory(meta.category),
             thumbnail
           })
+          localIds.add(meta.id)
         }
 
-        const nextCategories = (bundle.categories || [])
-          .map((name) => name.trim())
-          .filter(
-            (name) =>
-              name &&
-              name !== WIDGET_UNCATEGORIZED &&
-              name !== WIDGET_CATEGORY_ALL
-          )
-          .slice(0, MAX_WIDGET_CATEGORY_COUNT)
+        const categorySet = new Set<string>()
+        for (const name of [
+          ...localCategories,
+          ...(bundle.categories || [])
+        ]) {
+          const next = name.trim()
+          if (
+            !next ||
+            next === WIDGET_UNCATEGORIZED ||
+            next === WIDGET_CATEGORY_ALL
+          ) {
+            continue
+          }
+          categorySet.add(next)
+          if (categorySet.size >= MAX_WIDGET_CATEGORY_COUNT) {
+            break
+          }
+        }
+        for (const meta of mergedMetas) {
+          const cat = normalizeCategory(meta.category)
+          if (
+            cat !== WIDGET_UNCATEGORIZED &&
+            categorySet.size < MAX_WIDGET_CATEGORY_COUNT
+          ) {
+            categorySet.add(cat)
+          }
+        }
 
         set({
-          widgets: nextMetas,
-          categories: nextCategories,
+          widgets: mergedMetas,
+          categories: [...categorySet],
           activeCategory: WIDGET_CATEGORY_ALL
         })
 

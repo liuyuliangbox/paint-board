@@ -43,4 +43,5 @@ Use the same Cloudflare account as Pages (`CLOUDFLARE_ACCOUNT_ID` / logged-in wr
 
 - **My sync code**: generated locally (`pbw_` + UUID), stored in `localStorage`.
 - **Target sync code**: optional input; upload/download use it when filled, otherwise my code.
-- Upload overwrites cloud for the target code; download replaces local IndexedDB widgets.
+- Upload overwrites cloud for the target code.
+- Download merges into local: keep existing widgets, append cloud-only ids (same id keeps local). Then upload to your own code to grow your cloud copy.
