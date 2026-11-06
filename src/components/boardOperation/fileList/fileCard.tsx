@@ -8,49 +8,52 @@ const finePointerHidden =
 
 interface IProps {
   file: IFile
-  selected: boolean
+  /** Checkbox batch selection (drives select-all). */
+  checked: boolean
+  /** Currently focused/open board (green ring + 当前). */
   current: boolean
   thumbnailUrl?: string
   pending: boolean
+  /** Single-click: focus as current without closing the list. */
+  onFocus: (id: string) => void
+  /** Double-click: open board and close the list. */
   onOpen: (id: string) => void
-  onSelect: (id: string) => void
-  onToggle: (id: string) => void
+  /** Checkbox: toggle batch selection. */
+  onCheck: (id: string) => void
   onRename: (id: string) => void
 }
 
 const FileCard: FC<IProps> = ({
   file,
-  selected,
+  checked,
   current,
   thumbnailUrl,
   pending,
+  onFocus,
   onOpen,
-  onSelect,
-  onToggle,
+  onCheck,
   onRename
 }) => {
   const { t } = useTranslation()
 
   const handleCardClick = (event: MouseEvent<HTMLButtonElement>) => {
-    // Ignore the second click of a double-click so selection stays put.
+    // Ignore the second click of a double-click so focus is not applied twice.
     if (event.detail > 1) {
       return
     }
-    if (event.ctrlKey || event.metaKey) {
-      onToggle(file.id)
-      return
-    }
-    onSelect(file.id)
+    onFocus(file.id)
   }
+
+  const frameClass = current
+    ? 'border-primary ring-2 ring-primary'
+    : checked
+    ? 'border-primary/60 ring-1 ring-primary/40'
+    : 'border-slate-200'
 
   return (
     <div
       data-board-id={file.id}
-      className={`group relative flex h-[220px] min-h-[220px] w-full shrink-0 flex-col overflow-hidden rounded-2xl border bg-white ${
-        current || selected
-          ? 'border-primary ring-2 ring-primary'
-          : 'border-slate-200'
-      }`}
+      className={`group relative flex h-[220px] min-h-[220px] w-full shrink-0 flex-col overflow-hidden rounded-2xl border bg-white ${frameClass}`}
     >
       <button
         type="button"
@@ -88,16 +91,16 @@ const FileCard: FC<IProps> = ({
       </button>
       <label
         className={`absolute left-2 top-2 z-10 flex h-7 w-7 cursor-pointer items-center justify-center rounded-md bg-white/90 ${
-          selected ? '' : finePointerHidden
+          checked ? '' : finePointerHidden
         }`}
         onClick={(event) => event.stopPropagation()}
       >
         <input
           type="checkbox"
           className="checkbox checkbox-primary checkbox-sm"
-          checked={selected}
+          checked={checked}
           aria-label={t('fileBoard.select', { title: file.title }) || undefined}
-          onChange={() => onToggle(file.id)}
+          onChange={() => onCheck(file.id)}
           onClick={(event) => event.stopPropagation()}
         />
       </label>

@@ -193,15 +193,21 @@ const FileList: FC<IProps> = ({ updateShow }) => {
     })
   }
 
-  /** Single-click: replace selection with this board (Ctrl/Cmd+click still toggles). */
-  const selectOnly = (id: string) => {
-    setSelected(new Set([id]))
-  }
-
   const toggleAll = () => {
     setSelected(allSelected ? new Set() : new Set(activeList))
   }
 
+  /** Single-click: switch current board (绿框 + 当前), keep the list open. */
+  const focusBoard = (id: string) => {
+    if (id === currentId) {
+      return
+    }
+    updateOpenCamera(false)
+    void paintBoard.switchFile(id)
+    updateMode(ActionMode.DRAW)
+  }
+
+  /** Double-click: open board and close the list. */
   const openBoard = (id: string) => {
     if (id !== currentId) {
       updateOpenCamera(false)
@@ -543,16 +549,16 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                       <FileCard
                         key={file.id}
                         file={file}
-                        selected={selected.has(file.id)}
+                        checked={selected.has(file.id)}
                         current={file.id === currentId}
                         thumbnailUrl={cachedThumbnail(file.id)?.url}
                         pending={isThumbnailPending(
                           file.id,
                           file.contentRevision
                         )}
+                        onFocus={focusBoard}
                         onOpen={openBoard}
-                        onSelect={selectOnly}
-                        onToggle={toggleSelected}
+                        onCheck={toggleSelected}
                         onRename={setRenameId}
                       />
                     )
