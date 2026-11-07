@@ -60,9 +60,9 @@
  */
 .pb-panel-fill {
   box-sizing: border-box;
+  align-self: flex-start;
   height: var(--pb-panel-max-h);
   max-height: var(--pb-panel-max-h);
-  align-self: flex-start;
   margin-top: var(--pb-panel-inset);
   margin-bottom: auto;
 }
