@@ -67,10 +67,16 @@ const ToolPanel: FC = () => {
       ref={panelRef}
       className="fixed left-7 top-7 z-[3] landscape:left-3 landscape:top-3"
     >
-      {/* Toggle stays outside the open panel so overflow never clips it. */}
+      {/*
+        Toggle stays outside the open panel so overflow never clips it.
+        Portrait: float on the panel corner. Landscape: stay in flow — the
+        shell is already edge-inset and negative offsets clip the control.
+      */}
       <label
         className={`btn btn-neutral btn-circle swap swap-rotate h-7 w-7 min-h-0 ${
-          showPanel ? 'absolute -left-3 -top-3 z-10' : 'relative'
+          showPanel && !landscape
+            ? 'absolute -left-3 -top-3 z-10'
+            : 'relative mb-1'
         }`}
       >
         <input
@@ -93,7 +99,11 @@ const ToolPanel: FC = () => {
       </label>
       {showPanel && (
         <div
-          className={`pb-panel-shell pb-panel-open flex max-w-[85%] flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl landscape:max-w-[min(48vw,22rem)] landscape:p-2`}
+          className={`pb-panel-shell flex max-w-[85%] flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl landscape:max-w-[min(48vw,22rem)] landscape:p-2 ${
+            // Portrait: fill the band above the rail. Landscape: cap height only
+            // so the draw form does not stretch over the bottom dock.
+            landscape ? '' : 'pb-panel-open'
+          }`}
         >
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto noScrollbar p-0.5">
             {/* switch mode tabs */}
