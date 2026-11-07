@@ -1,5 +1,6 @@
 import { fabric } from 'fabric'
 import { isMobile } from '@/utils/index'
+import useBoardStore from '@/store/board'
 import {
   advanceBrushPress,
   beginBrushPress,
@@ -11,6 +12,8 @@ import {
 let isDisableDraw = isMobile()
 let pressed = false
 let press: BrushPressState = createBrushPressState()
+
+const drawingBlocked = () => isDisableDraw || useBoardStore.getState().isPanMode
 
 const resetPress = () => {
   pressed = false
@@ -61,7 +64,7 @@ class BrushMouseMixin {
   private _initBrushMouse() {
     fabric.util.object.extend(this.canvas, {
       _onMouseDownInDrawingMode: function (this: DrawingCanvas, event: Event) {
-        if (isDisableDraw) {
+        if (drawingBlocked()) {
           return
         }
         // Right-click select must not start a brush/eraser stroke.
@@ -80,7 +83,7 @@ class BrushMouseMixin {
         )
       },
       _onMouseMoveInDrawingMode: function (this: DrawingCanvas, event: Event) {
-        if (isDisableDraw) {
+        if (drawingBlocked()) {
           return
         }
         if ('buttons' in event && (event as MouseEvent).buttons === 2) {
@@ -119,7 +122,7 @@ class BrushMouseMixin {
         startStrokeAtPress(this, event)
       },
       _onMouseUpInDrawingMode: function (this: DrawingCanvas, event: Event) {
-        if (isDisableDraw) {
+        if (drawingBlocked()) {
           return
         }
 

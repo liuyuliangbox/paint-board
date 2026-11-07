@@ -2,6 +2,7 @@ import { fabric } from 'fabric'
 import { ActionMode } from '@/constants'
 import { DrawType } from '@/constants/draw'
 import { paintBoard } from '@/core/paintBoard'
+import { brushMouseMixin } from '@/core/fabricMixin/brushMouse'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { alignGuideLine } from '@/core/fabricMixin/alignGuideLine'
@@ -110,6 +111,9 @@ const useBoardStore = create<BoardState & BoardAction>()(
         } else {
           paintBoard.handleMode()
         }
+        brushMouseMixin.updateIsDisableDraw(
+          enabled || (paintBoard.evnet?.touchEvent?.touches ?? 0) >= 2
+        )
       },
       togglePanMode() {
         get().setPanMode(!get().isPanMode)

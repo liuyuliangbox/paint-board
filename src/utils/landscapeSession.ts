@@ -318,8 +318,10 @@ const exitOwnedFullscreenWhenPortrait = () => {
 }
 
 /**
- * After OS back: unlock, never re-enter FS, apply canvas for current viewport;
- * if still landscape wait for portrait then apply portrait ratios.
+ * After OS back: fullscreen is already gone (often while still landscape — the
+ * case that flips “desktop site”). Unlock immediately, bake portrait canvas
+ * ratios (live or synthetic), never re-enter FS. If still landscape, stay in
+ * `recovering` so the chrome still shows 竖版 for a deliberate finish.
  */
 const recoverFromFullscreenLoss = async () => {
   const gen = ++state.generation
@@ -327,6 +329,7 @@ const recoverFromFullscreenLoss = async () => {
   setActiveViewportListening(false)
   state.ownsFullscreen = false
   setMode('recovering')
+
   unlockOrientation()
   await lockOrientation('portrait')
   await waitMs(80)
@@ -334,34 +337,49 @@ const recoverFromFullscreenLoss = async () => {
     return
   }
 
-  if (applyCanvasNow(false)) {
+  // Prefer live portrait measure; otherwise force portrait aspect so the next
+  // real portrait resize reapplies cleanly (avoid leftover landscape %).
+  if (!applyCanvasNow(false)) {
+    applyPortraitFallback()
+  }
+
+  if (!isViewportLandscape()) {
     setHint(null)
     finishToIdle()
     return
   }
 
-  applyCanvasNow(true)
-  setHint('operate.portraitHint', 3600)
-  const wait = await waitForViewport(false)
+  setHint('operate.portraitHint')
+  const wait = await waitForViewport(false, 4500)
   if (gen !== state.generation) {
     return
   }
   if (wait.matched) {
     state.applyCanvas?.(false, wait.width, wait.height)
-  } else {
-    applyPortraitFallback()
-  }
-  setHint(null)
-  finishToIdle()
-}
-
-/** While session is active, physical rotate to portrait completes exit. */
-const onActiveViewportCheck = () => {
-  if (state.mode !== 'active') {
+    setHint(null)
+    finishToIdle()
     return
   }
+
+  // Still landscape: keep recovering + 竖版 button; rotate or tap 竖版 to finish.
+  // Hint stays until idle — do not auto-clear on a timer.
+  setHint('operate.portraitHint')
+  setActiveViewportListening(true)
+}
+
+/** Physical rotate to portrait completes exit (active) or recover (recovering). */
+const onActiveViewportCheck = () => {
   if (!isViewportLandscape()) {
-    void endLandscapeSession({ fromPhysicalRotate: true })
+    if (state.mode === 'active') {
+      void endLandscapeSession({ fromPhysicalRotate: true })
+      return
+    }
+    if (state.mode === 'recovering') {
+      if (applyCanvasNow(false)) {
+        setHint(null)
+        finishToIdle()
+      }
+    }
   }
 }
 

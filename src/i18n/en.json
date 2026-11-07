@@ -126,7 +126,7 @@
       "portrait": "Portrait"
     },
     "landscapeHint": "Rotate your phone to landscape",
-    "portraitHint": "Rotate back to portrait to leave landscape mode (avoids desktop-site chrome)"
+    "portraitHint": "Back exits fullscreen first. Tap Portrait to finish, or rotate the phone upright"
   },
   "widget": {
     "panelTitle": "Widgets",

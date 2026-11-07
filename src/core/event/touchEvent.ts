@@ -1,5 +1,6 @@
 import { paintBoard } from '@/core/paintBoard'
 import { brushMouseMixin } from '@/core/fabricMixin/brushMouse'
+import useBoardStore from '@/store/board'
 import {
   CanvasTransformHandler,
   TwoFingerDoubleHandler,
@@ -54,7 +55,10 @@ export class CanvasTouchEvent {
     const touches = e.touches
     this.touches = touches.length
 
-    brushMouseMixin.updateIsDisableDraw(touches.length >= 2)
+    // Pan mode or multi-touch: block Fabric brush strokes.
+    brushMouseMixin.updateIsDisableDraw(
+      touches.length >= 2 || useBoardStore.getState().isPanMode
+    )
 
     this.canvasTransformHandler.transformStart(touches)
   }
@@ -68,6 +72,10 @@ export class CanvasTouchEvent {
     const touches = e.touches
     this.touches = touches.length
 
+    if (useBoardStore.getState().isPanMode) {
+      brushMouseMixin.updateIsDisableDraw(true)
+    }
+
     this.canvasTransformHandler.transformMove(touches)
   }
   touchEndFn = (e: TouchEvent) => {
@@ -79,7 +87,8 @@ export class CanvasTouchEvent {
     this.touches = 0
 
     if (e.touches.length === 0) {
-      brushMouseMixin.updateIsDisableDraw(false)
+      // Stay disabled while hand-pan remains on; otherwise drawing resumes.
+      brushMouseMixin.updateIsDisableDraw(useBoardStore.getState().isPanMode)
     }
   }
 
