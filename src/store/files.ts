@@ -13,7 +13,8 @@ import {
   shouldPersistFiles,
   markFileHydrationFailed,
   markFilePersistFailed,
-  waitForHydration
+  waitForHydration,
+  consumeForceFreshBoards
 } from './fileHydration'
 import {
   readPersistedFiles,
@@ -59,13 +60,17 @@ const fileDb = {
 
 const storage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
-    const primary = (await get(name)) || null
+    // User chose “clear corrupted data”: skip IDB even if it is empty/broken.
+    if (consumeForceFreshBoards()) {
+      return null
+    }
     try {
+      const primary = (await get(name)) || null
       return await readPersistedFiles(primary, fileDb, name)
     } catch (error) {
       try {
         const backup = (await get(FILE_LIST_BACKUP_KEY)) || null
-        if (backup && backup !== primary) {
+        if (backup) {
           return await readPersistedFiles(backup, fileDb, name)
         }
       } catch {

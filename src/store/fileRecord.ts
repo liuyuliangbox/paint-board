@@ -254,14 +254,23 @@ export const isBoardStorageKey = (key: IDBValidKey) => {
  * Does not touch widgets or other app keys.
  * Always removes the known list/backup keys first so a hung or empty
  * key scan cannot leave the corrupt envelope behind.
+ * Individual delete failures are ignored so a half-dead IndexedDB still
+ * lets the user recover via force-fresh reload.
  */
 export const clearPersistedBoardKeys = async (
   listKeys: () => Promise<IDBValidKey[]>,
   remove: (key: IDBValidKey) => Promise<void>
 ) => {
+  const safeRemove = async (key: IDBValidKey) => {
+    try {
+      await remove(key)
+    } catch {
+      // Missing / locked / broken IDB must not abort recovery.
+    }
+  }
   await Promise.all([
-    remove(FILE_LIST_STORAGE_KEY),
-    remove(FILE_LIST_BACKUP_KEY)
+    safeRemove(FILE_LIST_STORAGE_KEY),
+    safeRemove(FILE_LIST_BACKUP_KEY)
   ])
   let allKeys: IDBValidKey[] = []
   try {
@@ -269,6 +278,8 @@ export const clearPersistedBoardKeys = async (
   } catch {
     // Known keys already removed; a scan failure must not block recovery.
   }
-  await Promise.all(allKeys.filter(isBoardStorageKey).map((key) => remove(key)))
+  await Promise.all(
+    allKeys.filter(isBoardStorageKey).map((key) => safeRemove(key))
+  )
   resetFilePersistenceCache()
 }

@@ -70,4 +70,24 @@ describe('file hydration', () => {
     expect(shouldPersistFiles()).toBe(true)
     expect(listener).toBeUndefined()
   })
+
+  it('consumes force-fresh flag only once', async () => {
+    const store = new Map<string, string>()
+    vi.stubGlobal('sessionStorage', {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        store.set(key, value)
+      },
+      removeItem: (key: string) => {
+        store.delete(key)
+      }
+    })
+    const { consumeForceFreshBoards, markForceFreshBoards } = await import(
+      './fileHydration'
+    )
+    markForceFreshBoards()
+    expect(consumeForceFreshBoards()).toBe(true)
+    expect(consumeForceFreshBoards()).toBe(false)
+    vi.unstubAllGlobals()
+  })
 })

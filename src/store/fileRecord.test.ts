@@ -188,4 +188,21 @@ describe('file records', () => {
     expect(store.has(FILE_LIST_STORAGE_KEY)).toBe(false)
     expect(store.has(FILE_LIST_BACKUP_KEY)).toBe(false)
   })
+
+  it('finishes even when individual deletes throw', async () => {
+    const store = new Map<string, string>([
+      [FILE_LIST_STORAGE_KEY, 'corrupt'],
+      [fileBlobKey('a'), 'blob']
+    ])
+    await clearPersistedBoardKeys(
+      async () => [...store.keys()],
+      async (key) => {
+        if (String(key) === FILE_LIST_STORAGE_KEY) {
+          throw new Error('idb locked')
+        }
+        store.delete(String(key))
+      }
+    )
+    expect(store.has(fileBlobKey('a'))).toBe(false)
+  })
 })

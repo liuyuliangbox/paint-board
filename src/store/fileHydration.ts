@@ -4,6 +4,30 @@ let filePersistFailed = false
 const failureListeners = new Set<() => void>()
 const persistListeners = new Set<() => void>()
 
+/** sessionStorage flag: next load skips IndexedDB board read and starts blank. */
+export const FORCE_FRESH_BOARDS_KEY = 'PAINT-BOARD-FORCE-FRESH-BOARDS'
+
+export const markForceFreshBoards = () => {
+  try {
+    sessionStorage.setItem(FORCE_FRESH_BOARDS_KEY, '1')
+  } catch {
+    // Private mode / blocked storage — caller still best-effort clears IDB.
+  }
+}
+
+/** True once; removes the flag so later reloads hydrate normally. */
+export const consumeForceFreshBoards = () => {
+  try {
+    if (sessionStorage.getItem(FORCE_FRESH_BOARDS_KEY) === '1') {
+      sessionStorage.removeItem(FORCE_FRESH_BOARDS_KEY)
+      return true
+    }
+  } catch {
+    // ignore
+  }
+  return false
+}
+
 export const markFileHydrationFailed = () => {
   fileHydrationFailed = true
   const pending = [...failureListeners]

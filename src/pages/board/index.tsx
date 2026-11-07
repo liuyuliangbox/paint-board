@@ -36,7 +36,6 @@ const Board: React.FC = () => {
   const [hydrationFailed, setHydrationFailed] = useState(false)
   const [persistFailed, setPersistFailed] = useState(false)
   const [clearingStorage, setClearingStorage] = useState(false)
-  const [clearStorageError, setClearStorageError] = useState(false)
   const [offerTemplates, setOfferTemplates] = useState<BoardTemplate[] | null>(
     null
   )
@@ -132,26 +131,20 @@ const Board: React.FC = () => {
             if (clearingStorage) {
               return
             }
-            setClearStorageError(false)
             setClearingStorage(true)
             void clearCorruptedBoardStorage()
-              .then(() => {
-                // Same-URL assign can be a no-op; force a real document reload.
-                window.location.reload()
-              })
               .catch((error) => {
-                console.error(
-                  '[paint-board] clearCorruptedBoardStorage failed',
+                // Designed not to throw; still reload so the user is never stuck.
+                console.warn(
+                  '[paint-board] clearCorruptedBoardStorage unexpected error',
                   error
                 )
-                setClearStorageError(true)
-                setClearingStorage(false)
+              })
+              .finally(() => {
+                window.location.reload()
               })
           }}
         />
-      )}
-      {clearStorageError && (
-        <Toast message="tip.clearCorruptBoardsFail" type="error" />
       )}
       {persistFailed && <Toast message="tip.filePersistFail" type="error" />}
       {canvasLoaded && (
