@@ -107,7 +107,7 @@
     "dock": {
       "undo": "실행 취소",
       "redo": "다시 실행",
-      "pan": "이동",
+      "pan": "한 손 이동",
       "select": "선택",
       "pointerTools": "이동과 선택",
       "copy": "복사",
@@ -205,6 +205,7 @@
     "element": "요소",
     "multiSelect": "다중 선택",
     "multiSelectHint": "다중 선택 켜짐: 탭으로 토글, 다시 탭하여 끔",
+    "multiSelectCanvasHint": "켜면 탭으로 추가/해제, 길게 눌러 드래그하면 영역 선택",
     "moveUp": "위로 이동",
     "moveDown": "아래로 이동"
   },

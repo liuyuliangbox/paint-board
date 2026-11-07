@@ -36,7 +36,7 @@ const UiLegendToggle: FC = () => {
       } ${
         narrowPortrait
           ? 'bottom-3 left-1/2 -translate-x-1/2'
-          : 'bottom-3 right-3 landscape:right-3'
+          : 'bottom-3 left-3 landscape:left-3 landscape:right-auto'
       }`}
     >
       <div className="pointer-events-auto flex items-center gap-1.5">

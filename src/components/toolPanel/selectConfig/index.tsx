@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { paintBoard } from '@/core/paintBoard'
 import { ELEMENT_CUSTOM_TYPE } from '@/constants'
+import useBoardStore from '@/store/board'
+import { useTouchUi } from '@/hooks/useTouchUi'
 
 import { Info } from 'lucide-react'
 import LayerConfig from './layerConfig'
@@ -18,6 +20,9 @@ import OutlineStrokeConfig from './outlineStrokeConfig'
 
 const SelectConfig = () => {
   const { t } = useTranslation()
+  const { coarse } = useTouchUi()
+  const isTouchMultiSelect = useBoardStore((s) => s.isTouchMultiSelect)
+  const toggleTouchMultiSelect = useBoardStore((s) => s.toggleTouchMultiSelect)
   const [refreshCount, setRefresh] = useState(0) // refresh data
 
   useEffect(() => {
@@ -30,11 +35,34 @@ const SelectConfig = () => {
 
   const activeObject = paintBoard.canvas?.getActiveObject()
 
+  const multiSelectToggle = coarse ? (
+    <div className="mt-2 flex flex-col gap-1">
+      <button
+        type="button"
+        className={`btn btn-sm gap-1 ${
+          isTouchMultiSelect ? 'btn-primary' : 'btn-neutral'
+        }`}
+        aria-pressed={isTouchMultiSelect}
+        onClick={() => toggleTouchMultiSelect()}
+      >
+        {t('objectList.multiSelect')}
+      </button>
+      <span className="text-[11px] leading-snug text-slate-500">
+        {isTouchMultiSelect
+          ? t('objectList.multiSelectHint')
+          : t('objectList.multiSelectCanvasHint')}
+      </span>
+    </div>
+  ) : null
+
   if (!activeObject) {
     return (
-      <div className="mt-3 flex w-56">
-        <Info size={16} className="mr-1 shrink-0" />
-        <span className="text-sm">{t('tip.unselectedElementTip')}</span>
+      <div className="mt-3 flex w-56 flex-col gap-2">
+        {multiSelectToggle}
+        <div className="flex">
+          <Info size={16} className="mr-1 shrink-0" />
+          <span className="text-sm">{t('tip.unselectedElementTip')}</span>
+        </div>
       </div>
     )
   }
@@ -42,6 +70,7 @@ const SelectConfig = () => {
   return (
     // `contents` lets each block flow into landscape multi-columns.
     <div className="form-control landscape:contents">
+      {multiSelectToggle}
       <OpacityConfig refreshCount={refreshCount} />
 
       <EraserConfig refreshCount={refreshCount} />

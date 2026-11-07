@@ -107,7 +107,7 @@
     "dock": {
       "undo": "Undo",
       "redo": "Redo",
-      "pan": "Pan",
+      "pan": "1-finger pan",
       "select": "Select",
       "pointerTools": "Pointer tools",
       "copy": "Copy",
@@ -187,6 +187,7 @@
     "hint": "Ctrl click · Shift range · Alt skip link · ↑↓ reorder · Delete",
     "multiSelect": "Multi-select",
     "multiSelectHint": "Multi-select on: tap to toggle; tap again to turn off",
+    "multiSelectCanvasHint": "When on, tap objects to add/remove; long-press drag to marquee",
     "moveUp": "Move up",
     "moveDown": "Move down",
     "link": "Link",

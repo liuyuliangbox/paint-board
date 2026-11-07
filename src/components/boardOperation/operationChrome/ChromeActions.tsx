@@ -116,17 +116,28 @@ const ChromeActions: FC<{
       >
         <BookText strokeWidth={2} />
       </ChromeButton>
-      <ChromeButton
-        label={labelOf(
-          isFullscreen ? 'operate.exitFullscreen' : 'operate.fullscreen'
-        )}
-        showLabel={showLabel}
-        layout={layout}
-        active={isFullscreen}
-        onClick={onToggleFullscreen}
-      >
-        {isFullscreen ? <Shrink strokeWidth={2} /> : <Expand strokeWidth={2} />}
-      </ChromeButton>
+      {/*
+        Mobile: orientation lock already uses fullscreen under the hood.
+        A separate fullscreen control often flips to landscape / “desktop site”
+        chrome and is easy to trigger by mistake — hide it on phones.
+      */}
+      {!isMobile && (
+        <ChromeButton
+          label={labelOf(
+            isFullscreen ? 'operate.exitFullscreen' : 'operate.fullscreen'
+          )}
+          showLabel={showLabel}
+          layout={layout}
+          active={isFullscreen}
+          onClick={onToggleFullscreen}
+        >
+          {isFullscreen ? (
+            <Shrink strokeWidth={2} />
+          ) : (
+            <Expand strokeWidth={2} />
+          )}
+        </ChromeButton>
+      )}
     </>
   )
 }

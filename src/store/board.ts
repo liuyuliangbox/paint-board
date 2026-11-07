@@ -18,6 +18,11 @@ interface BoardState {
   isPanMode: boolean
   /** Touch duplicate-while-drag (desktop still uses Ctrl/Cmd+drag). */
   duplicateDragEnabled: boolean
+  /**
+   * Touch sticky multi-select (canvas). Desktop uses Shift.
+   * Cleared when leaving SELECT mode.
+   */
+  isTouchMultiSelect: boolean
 }
 
 interface BoardAction {
@@ -30,6 +35,8 @@ interface BoardAction {
   togglePanMode: () => void
   setDuplicateDragEnabled: (enabled: boolean) => void
   toggleDuplicateDragEnabled: () => void
+  setTouchMultiSelect: (enabled: boolean) => void
+  toggleTouchMultiSelect: () => void
 }
 
 const initLanguage = getInitLanguage()
@@ -44,6 +51,7 @@ const useBoardStore = create<BoardState & BoardAction>()(
       openGuideLine: false,
       isPanMode: false,
       duplicateDragEnabled: false,
+      isTouchMultiSelect: false,
       updateMode: (mode) => {
         const oldMode = get().mode
         if (oldMode !== mode) {
@@ -51,7 +59,9 @@ const useBoardStore = create<BoardState & BoardAction>()(
           set({
             mode,
             isPanMode: false,
-            duplicateDragEnabled: false
+            duplicateDragEnabled: false,
+            isTouchMultiSelect:
+              mode === ActionMode.SELECT ? get().isTouchMultiSelect : false
           })
           paintBoard.handleMode(mode)
         }
@@ -91,7 +101,9 @@ const useBoardStore = create<BoardState & BoardAction>()(
       setPanMode(enabled) {
         set({
           isPanMode: enabled,
-          ...(enabled ? { duplicateDragEnabled: false } : {})
+          ...(enabled
+            ? { duplicateDragEnabled: false, isTouchMultiSelect: false }
+            : {})
         })
         if (enabled) {
           paintBoard.syncPanModeCursor()
@@ -115,6 +127,15 @@ const useBoardStore = create<BoardState & BoardAction>()(
       },
       toggleDuplicateDragEnabled() {
         get().setDuplicateDragEnabled(!get().duplicateDragEnabled)
+      },
+      setTouchMultiSelect(enabled) {
+        set({
+          isTouchMultiSelect: enabled,
+          ...(enabled ? { isPanMode: false } : {})
+        })
+      },
+      toggleTouchMultiSelect() {
+        get().setTouchMultiSelect(!get().isTouchMultiSelect)
       }
     }),
     {

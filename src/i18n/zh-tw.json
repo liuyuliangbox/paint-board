@@ -107,7 +107,7 @@
     "dock": {
       "undo": "撤銷",
       "redo": "重做",
-      "pan": "平移",
+      "pan": "單指移",
       "select": "選擇",
       "pointerTools": "平移與選擇",
       "copy": "複製",
@@ -205,6 +205,7 @@
     "element": "元素",
     "multiSelect": "多選",
     "multiSelectHint": "多選已開：點按切換選中；再點「多選」關閉",
+    "multiSelectCanvasHint": "打開後點物件可疊加選擇；長按拖動可框選",
     "moveUp": "上移一層",
     "moveDown": "下移一層"
   },

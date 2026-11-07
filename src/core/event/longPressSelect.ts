@@ -64,13 +64,23 @@ export class LongPressSelect {
     if (e.pointerType === 'mouse') {
       return
     }
-    if (useBoardStore.getState().isPanMode) {
+    const boardState = useBoardStore.getState()
+    if (boardState.isPanMode) {
       return
     }
     if (paintBoard.textElement.isTextEditing) {
       return
     }
     if ((paintBoard.evnet?.touchEvent?.touches ?? 0) >= 2) {
+      return
+    }
+    // Sticky canvas multi-select owns object taps; keep long-press only for
+    // empty-canvas marquee so it does not wipe the multi-selection.
+    if (
+      boardState.isTouchMultiSelect &&
+      boardState.mode === ActionMode.SELECT &&
+      findUnlockedTargetAtClient(e)
+    ) {
       return
     }
 

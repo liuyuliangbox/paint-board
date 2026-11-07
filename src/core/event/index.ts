@@ -6,6 +6,7 @@ import { ObjectEvent } from './objectEvent'
 import { DragInteraction } from './dragInteraction'
 import { RightClickSelect } from './rightClickSelect'
 import { LongPressSelect } from './longPressSelect'
+import { TouchMultiSelect } from './touchMultiSelect'
 import { WidgetDrop } from './widgetDrop'
 import { CanvasTouchEvent } from './touchEvent'
 import { CanvasZoomEvent } from './zoomEvent'
@@ -21,6 +22,7 @@ export class EventModule {
   dragInteraction: DragInteraction
   rightClickSelect: RightClickSelect
   longPressSelect: LongPressSelect
+  touchMultiSelect: TouchMultiSelect
   windowEvent: WindowEvent
   touchEvent: CanvasTouchEvent
 
@@ -51,6 +53,9 @@ export class EventModule {
     const longPressSelect = new LongPressSelect()
     this.longPressSelect = longPressSelect
 
+    const touchMultiSelect = new TouchMultiSelect()
+    this.touchMultiSelect = touchMultiSelect
+
     const windowEvent = new WindowEvent()
     this.windowEvent = windowEvent
 
@@ -63,6 +68,7 @@ export class EventModule {
     this.imageDrop.detach()
     this.widgetDrop.detach()
     this.longPressSelect.removeEvents()
+    this.touchMultiSelect.removeEvents()
     this.windowEvent.removeWindowEvents()
     this.touchEvent.removeTouchEvents()
   }

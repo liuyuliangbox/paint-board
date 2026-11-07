@@ -107,7 +107,7 @@
     "dock": {
       "undo": "元に戻す",
       "redo": "やり直し",
-      "pan": "移動",
+      "pan": "一本指移動",
       "select": "選択",
       "pointerTools": "移動と選択",
       "copy": "コピー",
@@ -205,6 +205,7 @@
     "element": "要素",
     "multiSelect": "複数選択",
     "multiSelectHint": "複数選択オン：タップで切替、再タップでオフ",
+    "multiSelectCanvasHint": "オン時はタップで追加/解除、長押しドラッグで枠選択",
     "moveUp": "上へ移動",
     "moveDown": "下へ移動"
   },
