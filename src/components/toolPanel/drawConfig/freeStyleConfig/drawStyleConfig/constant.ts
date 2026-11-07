@@ -6,6 +6,7 @@ interface StyleSwitchType {
   keyboard: string
 }
 
+/** Two per row so phone landscape can stay narrow (mask click-to-close). */
 export const styleSwitch: Record<string, Array<StyleSwitchType>> = {
   line_1: [
     {
@@ -17,19 +18,21 @@ export const styleSwitch: Record<string, Array<StyleSwitchType>> = {
       type: DrawStyle.Freehand,
       text: 'style.freehand',
       keyboard: 'W'
-    },
-    {
-      type: DrawStyle.FreehandStroke,
-      text: 'style.freehandStroke',
-      keyboard: 'Y'
     }
   ],
   line_2: [
     {
+      type: DrawStyle.FreehandStroke,
+      text: 'style.freehandStroke',
+      keyboard: 'Y'
+    },
+    {
       type: DrawStyle.Rainbow,
       text: 'style.rainbow',
       keyboard: 'A'
-    },
+    }
+  ],
+  line_3: [
     {
       type: DrawStyle.Shape,
       text: 'style.shape',
@@ -41,7 +44,7 @@ export const styleSwitch: Record<string, Array<StyleSwitchType>> = {
       keyboard: 'D'
     }
   ],
-  line_3: [
+  line_4: [
     {
       type: DrawStyle.Pixels,
       text: 'style.pixels',
@@ -51,19 +54,21 @@ export const styleSwitch: Record<string, Array<StyleSwitchType>> = {
       type: DrawStyle.MultiColor,
       text: 'style.multiColor',
       keyboard: 'X'
-    },
+    }
+  ],
+  line_5: [
     {
       type: DrawStyle.Text,
       text: 'style.text',
       keyboard: 'C'
-    }
-  ],
-  line_4: [
+    },
     {
       type: DrawStyle.MultiLine,
       text: 'style.multiLine',
       keyboard: 'R'
-    },
+    }
+  ],
+  line_6: [
     {
       type: DrawStyle.Reticulate,
       text: 'style.reticulate',
@@ -75,7 +80,7 @@ export const styleSwitch: Record<string, Array<StyleSwitchType>> = {
       keyboard: 'V'
     }
   ],
-  line_5: [
+  line_7: [
     {
       type: DrawStyle.Wiggle,
       text: 'style.wiggle',
@@ -85,7 +90,9 @@ export const styleSwitch: Record<string, Array<StyleSwitchType>> = {
       type: DrawStyle.Thorn,
       text: 'style.thorn',
       keyboard: 'G'
-    },
+    }
+  ],
+  line_8: [
     {
       type: DrawStyle.Ink,
       text: 'style.ink',

@@ -132,13 +132,6 @@
   overflow-y: auto;
 }
 
-/* Phone landscape: wider panel → a third column before vertical scroll. */
-@media (orientation: landscape) and (max-height: 500px) and (min-width: 700px) {
-  .pb-panel-flow-cols {
-    columns: 3;
-  }
-}
-
 .pb-panel-flow-cols > * {
   break-inside: avoid;
   -webkit-column-break-inside: avoid;

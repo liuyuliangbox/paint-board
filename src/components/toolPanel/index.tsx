@@ -214,8 +214,8 @@ const ToolPanel: FC = () => {
             <div
               className={`pointer-events-auto absolute left-3 top-3 z-[1] flex h-[var(--pb-panel-max-h)] flex-row items-stretch gap-2 ${
                 coarse
-                  ? 'w-[min(calc(100vw-1.5rem),58rem)]'
-                  : 'w-[min(calc(100vw-1.5rem),48rem)]'
+                  ? 'w-[min(calc(100vw-7rem),34rem)]'
+                  : 'w-[min(calc(100vw-8rem),40rem)]'
               }`}
             >
               <div className="flex shrink-0 flex-col pt-0.5">{toggle}</div>
