@@ -302,6 +302,7 @@
     "cameraPermissionDenied": "Camera permission denied, please check the browser permission",
     "fileHydrationFail": "Could not restore saved boards. Refresh to retry, or clear corrupted data to continue (unrecoverable boards will be lost).",
     "clearCorruptBoards": "Clear corrupted data",
+    "clearCorruptBoardsFail": "Could not clear local data. Close other tabs and try again, or clear this site’s data in your browser settings.",
     "filePersistFail": "Could not save the drawing locally. Refresh the page. New edits will not overwrite saved files until saving works again.",
     "exportFail": "Could not save the image. The canvas may contain a picture from another site.",
     "exportTooLarge": "The image is too large to export. Zoom out or export a smaller area.",

@@ -20,9 +20,9 @@ const Toast: FC<IProps> = ({
   const { t } = useTranslation()
 
   return (
-    <div className="toast toast-top toast-center z-[100] w-[min(94vw,36rem)] max-w-[min(94vw,36rem)]">
+    <div className="pointer-events-none toast toast-top toast-center z-[200] w-[min(94vw,36rem)] max-w-[min(94vw,36rem)]">
       <div
-        className={`alert alert-${type} w-full max-w-full items-start overflow-visible shadow-lg`}
+        className={`pointer-events-auto alert alert-${type} w-full max-w-full items-start overflow-visible shadow-lg`}
       >
         <div className="flex w-full min-w-0 flex-col gap-2">
           <span className="block w-full whitespace-normal break-words text-left text-sm leading-snug">

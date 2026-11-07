@@ -37,6 +37,7 @@ const Board: React.FC = () => {
   const [hydrationFailed, setHydrationFailed] = useState(false)
   const [persistFailed, setPersistFailed] = useState(false)
   const [clearingStorage, setClearingStorage] = useState(false)
+  const [clearStorageError, setClearStorageError] = useState(false)
   const [offerTemplates, setOfferTemplates] = useState<BoardTemplate[] | null>(
     null
   )
@@ -132,19 +133,26 @@ const Board: React.FC = () => {
             if (clearingStorage) {
               return
             }
+            setClearStorageError(false)
             setClearingStorage(true)
             void clearCorruptedBoardStorage()
               .then(() => {
-                // Full navigation so persist middleware starts clean with empty IDB.
-                window.location.assign(
-                  `${window.location.pathname}${window.location.search}`
-                )
+                // Same-URL assign can be a no-op; force a real document reload.
+                window.location.reload()
               })
-              .catch(() => {
+              .catch((error) => {
+                console.error(
+                  '[paint-board] clearCorruptedBoardStorage failed',
+                  error
+                )
+                setClearStorageError(true)
                 setClearingStorage(false)
               })
           }}
         />
+      )}
+      {clearStorageError && (
+        <Toast message="tip.clearCorruptBoardsFail" type="error" />
       )}
       {persistFailed && <Toast message="tip.filePersistFail" type="error" />}
       {canvasLoaded && (

@@ -252,12 +252,23 @@ export const isBoardStorageKey = (key: IDBValidKey) => {
 /**
  * Delete local board list + drawing blobs via the given key enumerator.
  * Does not touch widgets or other app keys.
+ * Always removes the known list/backup keys first so a hung or empty
+ * key scan cannot leave the corrupt envelope behind.
  */
 export const clearPersistedBoardKeys = async (
   listKeys: () => Promise<IDBValidKey[]>,
   remove: (key: IDBValidKey) => Promise<void>
 ) => {
-  const allKeys = await listKeys()
+  await Promise.all([
+    remove(FILE_LIST_STORAGE_KEY),
+    remove(FILE_LIST_BACKUP_KEY)
+  ])
+  let allKeys: IDBValidKey[] = []
+  try {
+    allKeys = await listKeys()
+  } catch {
+    // Known keys already removed; a scan failure must not block recovery.
+  }
   await Promise.all(allKeys.filter(isBoardStorageKey).map((key) => remove(key)))
   resetFilePersistenceCache()
 }

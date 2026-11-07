@@ -173,4 +173,19 @@ describe('file records', () => {
     expect(store.get('PAINT-BOARD-WIDGETS')).toBe('keep')
     expect(isBoardStorageKey('PAINT-BOARD-WIDGETS')).toBe(false)
   })
+
+  it('still removes the list keys when the key scan is empty', async () => {
+    const store = new Map<string, string>([
+      [FILE_LIST_STORAGE_KEY, 'corrupt'],
+      [FILE_LIST_BACKUP_KEY, 'corrupt-backup']
+    ])
+    await clearPersistedBoardKeys(
+      async () => [],
+      async (key) => {
+        store.delete(String(key))
+      }
+    )
+    expect(store.has(FILE_LIST_STORAGE_KEY)).toBe(false)
+    expect(store.has(FILE_LIST_BACKUP_KEY)).toBe(false)
+  })
 })
