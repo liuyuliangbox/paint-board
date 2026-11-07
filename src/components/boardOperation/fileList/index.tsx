@@ -378,11 +378,11 @@ const FileList: FC<IProps> = ({ updateShow }) => {
         onClick={() => updateShow(false)}
       >
         <div
-          className="modal-box flex h-[min(88vh,920px)] w-[94vw] max-w-5xl flex-col overflow-hidden p-0 landscape:h-[min(92vh,920px)]"
+          className="pb-panel-fill modal-box flex w-[94vw] max-w-5xl flex-col overflow-hidden p-0"
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 landscape:px-4 landscape:py-2.5">
-            <h3 className="font-fredokaOne text-2xl landscape:text-xl">
+          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-3 landscape:px-3 landscape:py-2">
+            <h3 className="font-fredokaOne text-xl landscape:text-lg">
               {t('fileBoard.title')}
             </h3>
             <div className="flex items-center gap-1">
@@ -419,7 +419,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
             </div>
           </div>
 
-          <div className="flex shrink-0 gap-2 border-b border-slate-100 px-5 pt-3 landscape:px-4 landscape:pt-2">
+          <div className="flex shrink-0 gap-2 border-b border-slate-100 px-4 pt-2 landscape:px-3 landscape:pt-1.5">
             <button
               type="button"
               className={`rounded-t-lg px-3 py-1.5 text-sm ${
@@ -446,7 +446,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
 
           {tab === 'local' ? (
             <>
-              <div className="flex shrink-0 flex-wrap items-center gap-2 px-5 py-3 landscape:px-4 landscape:py-2">
+              <div className="flex shrink-0 flex-wrap items-center gap-2 px-4 py-2 landscape:px-3 landscape:py-1.5">
                 <label className="flex cursor-pointer items-center gap-2 text-sm">
                   <input
                     ref={selectAllRef}
@@ -557,8 +557,8 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                   {t('fileBoard.limit', { count: MAX_BOARD_COUNT })}
                 </div>
               )}
-              <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 pt-1">
-                <div className="grid content-start items-start gap-4 [grid-auto-rows:220px] [grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))] landscape:gap-3 landscape:[grid-auto-rows:minmax(140px,180px)] landscape:[grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr))]">
+              <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-1 landscape:px-3 landscape:pb-3">
+                <div className="grid content-start items-start gap-3 [grid-auto-rows:minmax(10rem,12.5rem)] [grid-template-columns:repeat(auto-fill,minmax(min(100%,14rem),1fr))] landscape:gap-2.5 landscape:[grid-auto-rows:minmax(8rem,min(28vh,11rem))] landscape:[grid-template-columns:repeat(auto-fill,minmax(min(100%,11rem),1fr))]">
                   {files.map((file) => {
                     void thumbVersion
                     return (

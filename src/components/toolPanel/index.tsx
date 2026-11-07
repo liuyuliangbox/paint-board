@@ -17,7 +17,7 @@ const ToolPanel: FC = () => {
   const { t } = useTranslation()
   const { mode, updateMode } = useBoardStore()
   const { landscape } = useLandscapeLayout()
-  // Landscape starts collapsed so the short canvas is not covered by the tall draw panel.
+  // Landscape starts collapsed so the short canvas opens clear; user can reopen.
   const [showPanel, setShowPanel] = useState(() => !isViewportLandscape())
   const panelRef = useRef<HTMLDivElement>(null)
   const wasLandscape = useRef(landscape)
@@ -65,8 +65,8 @@ const ToolPanel: FC = () => {
   return (
     <div
       ref={panelRef}
-      className={`fixed top-7 left-7 z-[3] flex max-h-[80%] max-w-[85%] flex-col overflow-visible bg-[#eef1ff] card shadow-xl landscape:top-3 landscape:left-3 landscape:max-h-[min(62vh,15.5rem)] landscape:max-w-[min(46vw,17rem)] ${
-        showPanel ? 'p-4 landscape:p-2' : ''
+      className={`pb-panel-shell fixed left-7 top-7 z-[3] flex max-w-[85%] flex-col overflow-hidden bg-[#eef1ff] card shadow-xl landscape:left-3 landscape:top-3 landscape:max-w-[min(48vw,22rem)] ${
+        showPanel ? 'pb-panel-open p-3 landscape:p-2' : ''
       }`}
     >
       {/* toggle main panel display button */}
@@ -90,9 +90,9 @@ const ToolPanel: FC = () => {
         />
       </label>
       {showPanel && (
-        <div className="max-h-full overflow-y-auto noScrollbar p-1 landscape:max-h-[min(56vh,13.5rem)]">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto noScrollbar p-0.5">
           {/* switch mode tabs */}
-          <div className="tabs tabs-sm tabs-boxed bg-[#333C4D]">
+          <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
             {modeSwitch.map(({ type, text, keyboard }) => (
               <a
                 key={type}

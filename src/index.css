@@ -23,6 +23,56 @@
   }
 }
 
+/*
+ * Shared panel height: fill viewport above the operation dock.
+ * Outside @layer so these beat DaisyUI modal-box max-height.
+ * Landscape / desktop → bottom dock clearance.
+ * Portrait phone (side rail) → reclaim vertical space.
+ */
+:root {
+  /* bottom-3 (0.75rem) + dock ~2.9rem + small breathing room */
+  --pb-dock-clearance: 4rem;
+  --pb-panel-inset: 0.75rem;
+  --pb-panel-max-h: calc(
+    100dvh - var(--pb-dock-clearance) - var(--pb-panel-inset)
+  );
+}
+
+@media (orientation: portrait) and (max-width: 750px) {
+  :root {
+    --pb-dock-clearance: 0.75rem;
+  }
+}
+
+/* Floating tool panel: grow into the safe band above the dock. */
+.pb-panel-shell {
+  max-height: var(--pb-panel-max-h);
+}
+
+.pb-panel-shell.pb-panel-open {
+  height: var(--pb-panel-max-h);
+  max-height: var(--pb-panel-max-h);
+}
+
+/*
+ * Drawer / modal panels: same usable height as the tool panel.
+ * Top-aligned (not vertically centered) so the bottom stays above the dock.
+ */
+.pb-panel-fill {
+  box-sizing: border-box;
+  height: var(--pb-panel-max-h);
+  max-height: var(--pb-panel-max-h);
+  margin-top: var(--pb-panel-inset);
+  margin-bottom: auto;
+  align-self: flex-start;
+}
+
+/* Only top-align modals that host a full-height panel (boards list, etc.). */
+.modal.modal-open:has(> .pb-panel-fill) {
+  align-items: flex-start;
+  justify-content: center;
+}
+
 .colorInput {
   width: 1.5rem;
   height: 1.5rem;

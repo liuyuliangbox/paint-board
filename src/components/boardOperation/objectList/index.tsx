@@ -133,11 +133,11 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
           className="drawer-overlay"
           onClick={() => updateShow(false)}
         ></label>
-        <div className="flex h-full max-h-full w-96 max-w-[80%] flex-col overflow-hidden bg-white px-5 py-7 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-4 landscape:pb-16 landscape:pt-4">
-          <div className="shrink-0 text-center font-fredokaOne text-2xl landscape:text-xl">
+        <div className="pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden bg-white px-4 py-4 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-3 landscape:py-3">
+          <div className="shrink-0 text-center font-fredokaOne text-xl landscape:text-lg">
             {t('objectList.title')}
           </div>
-          <div className="mt-3 flex shrink-0 flex-wrap items-center justify-center gap-2 landscape:mt-2">
+          <div className="mt-2 flex shrink-0 flex-wrap items-center justify-center gap-1.5">
             {coarse && (
               <button
                 type="button"
@@ -175,15 +175,15 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
               {t('objectList.unlink')}
             </button>
           </div>
-          <p className="mt-2 shrink-0 text-center text-[11px] text-slate-400 landscape:mt-1 landscape:line-clamp-1">
+          <p className="mt-1.5 shrink-0 text-center text-[11px] text-slate-400 line-clamp-2 landscape:line-clamp-1">
             {coarse && multiSelect
               ? t('objectList.multiSelectHint')
               : t('objectList.hint')}
           </p>
-          <div className="mt-4 flex min-h-0 w-full max-w-full flex-1 flex-col rounded-2xl bg-[#eef1ff] py-2 landscape:mt-2">
+          <div className="mt-2 flex min-h-0 w-full max-w-full flex-1 flex-col rounded-2xl bg-[#eef1ff] py-1.5">
             <ul
               ref={sortableRef}
-              className="text-base-content noScrollbar mx-4 my-2 max-h-[70vh] max-w-full flex-1 flex-nowrap overflow-y-auto rounded-xl bg-white px-2 py-3 xs:max-h-[40vh] landscape:max-h-none"
+              className="text-base-content noScrollbar mx-2 my-1.5 min-h-0 max-w-full flex-1 flex-nowrap overflow-y-auto rounded-xl bg-white px-2 py-2"
             >
               {rows.length === 0 ? (
                 <li className="px-2 py-6 text-center text-sm text-slate-400">
