@@ -24,10 +24,9 @@
 }
 
 /*
- * Shared panel height: fill viewport above the operation dock.
- * Outside @layer so these beat DaisyUI modal-box max-height.
- * Landscape / desktop → bottom dock clearance.
- * Portrait phone (side rail) → reclaim vertical space.
+ * Shared panel height. Outside @layer so these beat DaisyUI modal-box max-height.
+ * Narrow portrait & landscape → full viewport (side mask dismiss; no need to clear
+ * the bottom dock). Wide portrait desktop still clears the bottom dock.
  */
 :root {
   /* bottom-3 (0.75rem) + dock ~2.9rem + small breathing room */
@@ -85,7 +84,16 @@
   }
 }
 
-/* Floating tool panel: grow into the safe band above the dock. */
+/* Landscape: full-height sheets; left/right mask is enough to dismiss. */
+@media (orientation: landscape) {
+  :root {
+    --pb-dock-clearance: 0;
+    --pb-panel-inset: 0;
+    --pb-panel-max-h: 100dvh;
+  }
+}
+
+/* Floating / drawer tool panel height follows --pb-panel-max-h. */
 .pb-panel-shell {
   max-height: var(--pb-panel-max-h);
 }
@@ -116,7 +124,7 @@
 
 /*
  * Drawer / modal panels: same usable height as the tool panel.
- * Top-aligned (not vertically centered) so the bottom stays above the dock.
+ * Top-aligned; inset is 0 in landscape / narrow portrait.
  */
 .pb-panel-fill {
   box-sizing: border-box;
