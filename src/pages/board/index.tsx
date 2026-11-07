@@ -132,7 +132,10 @@ const Board: React.FC = () => {
             setClearingStorage(true)
             void clearCorruptedBoardStorage()
               .then(() => {
-                window.location.reload()
+                // Full navigation so persist middleware starts clean with empty IDB.
+                window.location.assign(
+                  `${window.location.pathname}${window.location.search}`
+                )
               })
               .catch(() => {
                 setClearingStorage(false)

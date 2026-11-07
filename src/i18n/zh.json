@@ -295,7 +295,7 @@
     "uploadFileFail": "上传失败，请重试",
     "unselectedElementTip": "请点击或者框选画板内容",
     "cameraPermissionDenied": "摄像头权限被拒绝，请检查浏览器权限",
-    "fileHydrationFail": "无法恢复已保存的画布。可刷新重试；若仍失败，可清空损坏的本地数据后继续使用（会丢失无法恢复的画板）。",
+    "fileHydrationFail": "无法恢复已保存的画布。可刷新重试，或清空损坏数据后继续（无法恢复的画板会丢失）。",
     "clearCorruptBoards": "清空损坏数据",
     "filePersistFail": "无法把画布保存到本地。请刷新页面。在保存成功之前，新的编辑不会覆盖已保存的文件。",
     "exportFail": "无法保存图片。画布里可能有来自其他网站的图片。",

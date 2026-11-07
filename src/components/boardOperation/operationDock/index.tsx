@@ -247,6 +247,16 @@ const OperationDock: FC<OperationDockProps> = ({
 
   const iconStroke = 2
   const showSelection = hasSelection
+  // Landscape: workspace chrome lives top-right — keep the dock for draw actions only.
+  const compactDock = isLandscapeLayout
+
+  useEffect(() => {
+    if (!compactDock) {
+      return
+    }
+    // Labels make the bottom bar overflow on short landscape viewports.
+    setLegend(false)
+  }, [compactDock, setLegend])
 
   const legendToggle = (
     <DockButton
@@ -298,24 +308,25 @@ const OperationDock: FC<OperationDockProps> = ({
           }`}
         >
           {legendToggle}
-          {/* Pinned next to legend so it stays visible when the bar scrolls. */}
-          <DockButton
-            label={
-              isLandscapeLayout
-                ? labelOf('operate.dock.portrait')
-                : labelOf('operate.dock.landscape')
-            }
-            showLabel={layout === 'rail' || legendOpen}
-            layout={layout}
-            active={isLandscapeLayout}
-            onClick={onToggleLandscapeLayout}
-          >
-            {isLandscapeLayout ? (
-              <RectangleVertical strokeWidth={iconStroke} />
-            ) : (
-              <RectangleHorizontal strokeWidth={iconStroke} />
-            )}
-          </DockButton>
+          {!compactDock && (
+            <DockButton
+              label={
+                isLandscapeLayout
+                  ? labelOf('operate.dock.portrait')
+                  : labelOf('operate.dock.landscape')
+              }
+              showLabel={layout === 'rail' || legendOpen}
+              layout={layout}
+              active={isLandscapeLayout}
+              onClick={onToggleLandscapeLayout}
+            >
+              {isLandscapeLayout ? (
+                <RectangleVertical strokeWidth={iconStroke} />
+              ) : (
+                <RectangleHorizontal strokeWidth={iconStroke} />
+              )}
+            </DockButton>
+          )}
         </div>
 
         <div className="flex min-h-0 w-auto min-w-0 items-center gap-0.5 overflow-x-auto noScrollbar xs:w-full xs:flex-1 xs:flex-col xs:overflow-x-hidden xs:overflow-y-auto">
@@ -462,25 +473,29 @@ const OperationDock: FC<OperationDockProps> = ({
               layout={layout}
               label={labelOf('operate.dock.save')}
             />
-            <DockButton
-              label={labelOf('operate.dock.layers')}
-              showLabel={showLabel}
-              layout={layout}
-              onClick={onToggleObjectList}
-            >
-              <Layers strokeWidth={iconStroke} />
-            </DockButton>
-            <DockButton
-              label={labelOf('operate.dock.boards')}
-              showLabel={showLabel}
-              layout={layout}
-              onClick={onOpenFiles}
-            >
-              <BookText strokeWidth={iconStroke} />
-            </DockButton>
+            {!compactDock && (
+              <>
+                <DockButton
+                  label={labelOf('operate.dock.layers')}
+                  showLabel={showLabel}
+                  layout={layout}
+                  onClick={onToggleObjectList}
+                >
+                  <Layers strokeWidth={iconStroke} />
+                </DockButton>
+                <DockButton
+                  label={labelOf('operate.dock.boards')}
+                  showLabel={showLabel}
+                  layout={layout}
+                  onClick={onOpenFiles}
+                >
+                  <BookText strokeWidth={iconStroke} />
+                </DockButton>
+              </>
+            )}
           </Section>
 
-          {!isMobile && (
+          {!isMobile && !compactDock && (
             <div className="relative xs:w-full">
               <DockButton
                 label={labelOf('operate.dock.more')}

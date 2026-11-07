@@ -65,12 +65,14 @@ const ToolPanel: FC = () => {
   return (
     <div
       ref={panelRef}
-      className={`pb-panel-shell fixed left-7 top-7 z-[3] flex max-w-[85%] flex-col overflow-hidden bg-[#eef1ff] card shadow-xl landscape:left-3 landscape:top-3 landscape:max-w-[min(48vw,22rem)] ${
-        showPanel ? 'pb-panel-open p-3 landscape:p-2' : ''
-      }`}
+      className="fixed left-7 top-7 z-[3] landscape:left-3 landscape:top-3"
     >
-      {/* toggle main panel display button */}
-      <label className="btn btn-neutral btn-circle swap swap-rotate absolute -top-3 -left-3 h-7 w-7 min-h-0">
+      {/* Toggle stays outside the open panel so overflow never clips it. */}
+      <label
+        className={`btn btn-neutral btn-circle swap swap-rotate h-7 w-7 min-h-0 ${
+          showPanel ? 'absolute -left-3 -top-3 z-10' : 'relative'
+        }`}
+      >
         <input
           type="checkbox"
           checked={!showPanel}
@@ -90,30 +92,34 @@ const ToolPanel: FC = () => {
         />
       </label>
       {showPanel && (
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto noScrollbar p-0.5">
-          {/* switch mode tabs */}
-          <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
-            {modeSwitch.map(({ type, text, keyboard }) => (
-              <a
-                key={type}
-                className={`tab flex-grow font-fredokaOne text-white font-medium ${
-                  mode === type ? 'tab-active' : 'hover:text-base-300'
-                }`}
-                onClick={() => {
-                  updateMode(type)
-                }}
-              >
-                {t(text)}
-                <span className="ml-1 text-xs leading-none font-normal opacity-70 pt-1 font-sans xs:hidden">
-                  {keyboard}
-                </span>
-              </a>
-            ))}
+        <div
+          className={`pb-panel-shell pb-panel-open flex max-w-[85%] flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl landscape:max-w-[min(48vw,22rem)] landscape:p-2`}
+        >
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto noScrollbar p-0.5">
+            {/* switch mode tabs */}
+            <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
+              {modeSwitch.map(({ type, text, keyboard }) => (
+                <a
+                  key={type}
+                  className={`tab flex-grow font-fredokaOne text-white font-medium ${
+                    mode === type ? 'tab-active' : 'hover:text-base-300'
+                  }`}
+                  onClick={() => {
+                    updateMode(type)
+                  }}
+                >
+                  {t(text)}
+                  <span className="ml-1 text-xs leading-none font-normal opacity-70 pt-1 font-sans xs:hidden">
+                    {keyboard}
+                  </span>
+                </a>
+              ))}
+            </div>
+            {mode === ActionMode.DRAW && <DrawConfig />}
+            {mode === ActionMode.ERASE && <EraserConfig />}
+            {mode === ActionMode.SELECT && <SelectConfig />}
+            {mode === ActionMode.Board && <BoardConfig />}
           </div>
-          {mode === ActionMode.DRAW && <DrawConfig />}
-          {mode === ActionMode.ERASE && <EraserConfig />}
-          {mode === ActionMode.SELECT && <SelectConfig />}
-          {mode === ActionMode.Board && <BoardConfig />}
         </div>
       )}
     </div>

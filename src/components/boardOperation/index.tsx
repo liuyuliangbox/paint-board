@@ -33,6 +33,7 @@ import UploadImage from '@/components/uploadImage/lazy'
 import Toast from '@/components/toast'
 import { subscribeImageDropNotice } from '@/core/event/imageDrop'
 import OperationDock from './operationDock'
+import OperationChrome from './operationChrome'
 
 const BoardOperation = () => {
   const { landscape } = useLandscapeLayout()
@@ -216,6 +217,16 @@ const BoardOperation = () => {
 
   return (
     <>
+      {landscape && (
+        <OperationChrome
+          isFullscreen={isFullscreen}
+          isLandscapeLayout={landscape}
+          onToggleObjectList={() => updateShowObjectList((open) => !open)}
+          onOpenFiles={() => updateShowFile(true)}
+          onToggleFullscreen={() => void toggleFullscreen()}
+          onToggleLandscapeLayout={() => void toggleLandscapeLayout()}
+        />
+      )}
       <OperationDock
         hasSelection={hasSelection}
         canGroup={canGroup}

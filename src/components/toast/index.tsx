@@ -20,16 +20,26 @@ const Toast: FC<IProps> = ({
   const { t } = useTranslation()
 
   return (
-    <div className="toast toast-top toast-center z-[100]">
-      <div className={`alert alert-${type} max-w-[min(94vw,36rem)]`}>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-left">{t(message)}</span>
+    <div className="toast toast-top toast-center z-[100] w-[min(94vw,36rem)] max-w-[min(94vw,36rem)]">
+      <div
+        className={`alert alert-${type} w-full max-w-full items-start overflow-visible shadow-lg`}
+      >
+        <div className="flex w-full min-w-0 flex-col gap-2">
+          <span className="block w-full whitespace-normal break-words text-left text-sm leading-snug">
+            {t(message)}
+          </span>
           {actionLabel && onAction && (
             <button
               type="button"
-              className="btn btn-sm btn-neutral shrink-0"
+              className="btn btn-sm btn-neutral self-end shrink-0"
               disabled={actionBusy}
-              onClick={onAction}
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (!actionBusy) {
+                  onAction()
+                }
+              }}
             >
               {actionBusy ? '…' : t(actionLabel)}
             </button>
