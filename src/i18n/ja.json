@@ -89,6 +89,7 @@
     "fileList": "ボード",
     "fullscreen": "全画面表示",
     "exitFullscreen": "全画面を終了",
+    "fullscreenFail": "全画面の開始または終了ができません。ブラウザの全画面許可を確認してください。",
     "addFile": "ファイル追加",
     "deleteFile": "ファイル削除",
     "saveFile": "ファイルデータ保存",

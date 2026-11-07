@@ -89,6 +89,7 @@
     "fileList": "Boards",
     "fullscreen": "Enter Fullscreen",
     "exitFullscreen": "Exit Fullscreen",
+    "fullscreenFail": "Could not enter or exit fullscreen. Check that the browser allows it.",
     "addFile": "Add File",
     "deleteFile": "Delete File",
     "saveFile": "Save File Data",

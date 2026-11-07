@@ -10,6 +10,9 @@ import {
 } from 'lucide-react'
 import useUiLegendStore from '@/store/uiLegend'
 import type { OperationChromeBridge } from '@/store/operationChromeBridge'
+import { isMobile as isMobileFn } from '@/utils'
+
+const isMobile = isMobileFn()
 
 export type ChromeActionsLayout = 'row' | 'col'
 
@@ -77,23 +80,26 @@ const ChromeActions: FC<{
 
   return (
     <>
-      <ChromeButton
-        label={
-          isLandscapeLayout
-            ? labelOf('operate.dock.portrait')
-            : labelOf('operate.dock.landscape')
-        }
-        showLabel={showLabel}
-        layout={layout}
-        active={isLandscapeLayout}
-        onClick={onToggleLandscapeLayout}
-      >
-        {isLandscapeLayout ? (
-          <RectangleVertical strokeWidth={2} />
-        ) : (
-          <RectangleHorizontal strokeWidth={2} />
-        )}
-      </ChromeButton>
+      {/* Desktop cannot orientation.lock — hide rather than a no-op control. */}
+      {isMobile && (
+        <ChromeButton
+          label={
+            isLandscapeLayout
+              ? labelOf('operate.dock.portrait')
+              : labelOf('operate.dock.landscape')
+          }
+          showLabel={showLabel}
+          layout={layout}
+          active={isLandscapeLayout}
+          onClick={onToggleLandscapeLayout}
+        >
+          {isLandscapeLayout ? (
+            <RectangleVertical strokeWidth={2} />
+          ) : (
+            <RectangleHorizontal strokeWidth={2} />
+          )}
+        </ChromeButton>
+      )}
       <ChromeButton
         label={labelOf('operate.dock.layers')}
         showLabel={showLabel}

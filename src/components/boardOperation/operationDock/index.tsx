@@ -249,7 +249,8 @@ const OperationDock: FC<OperationDockProps> = ({
             : 'gap-0.5 px-0.5 py-0.5 xs:w-11 xs:gap-0.5 xs:px-0.5'
         }`}
       >
-        {!chromeOutsideDock && (
+        {/* Desktop cannot orientation.lock — phone/tablet only. */}
+        {!chromeOutsideDock && isMobile && (
           <div
             className={`flex shrink-0 items-center gap-0.5 border-r border-slate-200/80 xs:flex-col xs:border-r-0 xs:border-b xs:px-0.5 xs:pr-0 ${
               legendOpen ? 'pr-1 xs:pb-1' : 'pr-0.5 xs:pb-0.5'

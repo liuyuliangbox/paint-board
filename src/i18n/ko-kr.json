@@ -89,6 +89,7 @@
     "fileList": "보드",
     "fullscreen": "전체 화면",
     "exitFullscreen": "전체 화면 종료",
+    "fullscreenFail": "전체 화면을 시작하거나 종료할 수 없습니다. 브라우저 전체 화면 허용을 확인해 주세요.",
     "addFile": "파일 추가",
     "deleteFile": "파일 삭제",
     "saveFile": "파일 데이터 저장",

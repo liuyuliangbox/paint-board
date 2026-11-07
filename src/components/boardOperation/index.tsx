@@ -74,8 +74,11 @@ const BoardOperation = () => {
       } else {
         await document.exitFullscreen()
       }
+      setLayoutHint(null)
     } catch (err) {
       console.error('fullscreen error:', err)
+      setLayoutHint('operate.fullscreenFail')
+      window.setTimeout(() => setLayoutHint(null), 2800)
     }
   }, [])
 
