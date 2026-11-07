@@ -40,9 +40,7 @@ const ToolPanel: FC = () => {
   // Closed toggle label: current tool tab; pan override shows 单指移 instead.
   const activeTool = modeSwitch.find((item) => item.type === mode)
   const drawLabel = String(
-    isPanMode
-      ? t('operate.dock.pan')
-      : t(activeTool?.text || 'operate.tools')
+    isPanMode ? t('operate.dock.pan') : t(activeTool?.text || 'operate.tools')
   )
 
   const setToolsOpen = (open: boolean) => {
@@ -180,7 +178,7 @@ const ToolPanel: FC = () => {
               >
                 <div className="flex shrink-0 items-center gap-2">
                   {toggle}
-                  {modeTabs}
+                  <div className="min-w-0 flex-1">{modeTabs}</div>
                 </div>
                 {panelBody}
               </div>
@@ -191,8 +189,9 @@ const ToolPanel: FC = () => {
     )
   }
 
-  // Desktop / landscape: dim + click mask. Landscape: toggle left, panel to its
-  // right on the same row, filling remaining height (two-column body).
+  // Desktop / landscape: dim + click mask.
+  // Landscape: definite height (CSS --pb-panel-max-h) so multi-column body can
+  // spill sideways. Phone landscape → nearly full height + wide; desktop → 露坞.
   if (chromeHidden && !showPanel) {
     return null
   }
@@ -212,13 +211,19 @@ const ToolPanel: FC = () => {
             onClick={() => setToolsOpen(false)}
           />
           {landscape ? (
-            <div className="pointer-events-auto absolute left-3 top-3 z-[1] flex w-[min(70vw,34rem)] max-h-[min(68dvh,calc(100dvh-4.5rem))] flex-row items-start gap-2">
+            <div
+              className={`pointer-events-auto absolute left-3 top-3 z-[1] flex h-[var(--pb-panel-max-h)] flex-row items-stretch gap-2 ${
+                coarse
+                  ? 'w-[min(calc(100vw-1.5rem),58rem)]'
+                  : 'w-[min(calc(100vw-1.5rem),48rem)]'
+              }`}
+            >
               <div className="flex shrink-0 flex-col pt-0.5">{toggle}</div>
               <div
                 ref={panelRef}
-                className="flex max-h-[min(68dvh,calc(100dvh-4.5rem))] min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-[#eef1ff] p-2 shadow-xl card"
+                className="pb-panel-shell pb-panel-open flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-[#eef1ff] p-2 shadow-xl card"
               >
-                {modeTabs}
+                <div className="flex w-full shrink-0">{modeTabs}</div>
                 {panelBody}
               </div>
             </div>

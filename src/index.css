@@ -84,12 +84,26 @@
   }
 }
 
-/* Landscape: full-height sheets; left/right mask is enough to dismiss. */
+/*
+ * Landscape desktop (taller): clear the bottom dock so floating panels 露坞.
+ * Phone landscape (short height): fill nearly full height — side mask dismisses;
+ * keep a small inset so rounded tool cards don’t kiss the screen edge.
+ */
 @media (orientation: landscape) {
   :root {
+    --pb-dock-clearance: 4rem;
+    --pb-panel-inset: 0.75rem;
+    --pb-panel-max-h: calc(
+      100dvh - var(--pb-dock-clearance) - var(--pb-panel-inset)
+    );
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
     --pb-dock-clearance: 0;
-    --pb-panel-inset: 0;
-    --pb-panel-max-h: 100dvh;
+    --pb-panel-inset: 0.75rem;
+    --pb-panel-max-h: calc(100dvh - 1.5rem);
   }
 }
 
@@ -115,6 +129,13 @@
   overflow-x: auto;
   /* Allow scroll when a tall tab (e.g. Board) still exceeds the shell. */
   overflow-y: auto;
+}
+
+/* Phone landscape: wider panel → a third column before vertical scroll. */
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 700px) {
+  .pb-panel-flow-cols {
+    columns: 3;
+  }
 }
 
 .pb-panel-flow-cols > * {

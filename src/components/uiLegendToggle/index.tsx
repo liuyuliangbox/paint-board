@@ -29,47 +29,81 @@ const UiLegendToggle: FC = () => {
     return null
   }
 
-  return (
-    <div
-      className={`pointer-events-none fixed ${
-        chromeHidden ? 'z-[var(--pb-z-focus)]' : 'z-[var(--pb-z-chrome)]'
-      } ${
-        narrowPortrait
-          ? 'bottom-3 left-1/2 -translate-x-1/2'
-          : 'bottom-3 left-3 landscape:left-3 landscape:right-auto'
-      }`}
-    >
-      <div className="pointer-events-auto flex items-center gap-1.5">
-        {!chromeHidden && (
+  const zClass = chromeHidden
+    ? 'z-[var(--pb-z-focus)]'
+    : 'z-[var(--pb-z-chrome)]'
+  const btnClass = (active: boolean) =>
+    `pointer-events-auto flex items-center gap-1 rounded-2xl border border-slate-200/80 px-2.5 py-1.5 text-xs font-medium shadow-md backdrop-blur transition-colors ${
+      active
+        ? 'bg-[#66CC8A]/25 text-[#2d8f55]'
+        : 'bg-[#eef1ff]/95 text-slate-700 hover:bg-slate-200/80'
+    }`
+
+  // Narrow portrait: both centered under the dock.
+  // Landscape / desktop: hide-UI bottom-left, legend bottom-right — avoid
+  // stacking on one side where they collide with the centered dock.
+  if (narrowPortrait) {
+    return (
+      <div
+        className={`pointer-events-none fixed bottom-3 left-1/2 -translate-x-1/2 ${zClass}`}
+      >
+        <div className="pointer-events-auto flex items-center gap-1.5">
+          {!chromeHidden && (
+            <button
+              type="button"
+              title={legendLabel}
+              aria-label={legendLabel}
+              aria-pressed={legendOpen}
+              onClick={toggleLegend}
+              className={btnClass(legendOpen)}
+            >
+              <Tags
+                className="h-4 w-4 shrink-0 text-[#66CC8A]"
+                strokeWidth={2}
+              />
+              <span className="max-w-[5rem] truncate whitespace-nowrap">
+                {legendLabel}
+              </span>
+            </button>
+          )}
           <button
             type="button"
-            title={legendLabel}
-            aria-label={legendLabel}
-            aria-pressed={legendOpen}
-            onClick={toggleLegend}
-            className={`flex items-center gap-1 rounded-2xl border border-slate-200/80 px-2.5 py-1.5 text-xs font-medium shadow-md backdrop-blur transition-colors ${
-              legendOpen
-                ? 'bg-[#66CC8A]/25 text-[#2d8f55]'
-                : 'bg-[#eef1ff]/95 text-slate-700 hover:bg-slate-200/80'
-            }`}
+            title={chromeLabel}
+            aria-label={chromeLabel}
+            aria-pressed={chromeHidden}
+            onClick={toggleChromeHidden}
+            className={btnClass(chromeHidden)}
           >
-            <Tags className="h-4 w-4 shrink-0 text-[#66CC8A]" strokeWidth={2} />
-            <span className="max-w-[5rem] truncate whitespace-nowrap landscape:max-w-none">
-              {legendLabel}
+            {chromeHidden ? (
+              <Eye
+                className="h-4 w-4 shrink-0 text-[#66CC8A]"
+                strokeWidth={2}
+              />
+            ) : (
+              <EyeOff
+                className="h-4 w-4 shrink-0 text-[#66CC8A]"
+                strokeWidth={2}
+              />
+            )}
+            <span className="max-w-[5rem] truncate whitespace-nowrap">
+              {chromeLabel}
             </span>
           </button>
-        )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className={`pointer-events-none fixed bottom-3 left-3 ${zClass}`}>
         <button
           type="button"
           title={chromeLabel}
           aria-label={chromeLabel}
           aria-pressed={chromeHidden}
           onClick={toggleChromeHidden}
-          className={`flex items-center gap-1 rounded-2xl border border-slate-200/80 px-2.5 py-1.5 text-xs font-medium shadow-md backdrop-blur transition-colors ${
-            chromeHidden
-              ? 'bg-[#66CC8A]/25 text-[#2d8f55]'
-              : 'bg-[#eef1ff]/95 text-slate-700 hover:bg-slate-200/80'
-          }`}
+          className={btnClass(chromeHidden)}
         >
           {chromeHidden ? (
             <Eye className="h-4 w-4 shrink-0 text-[#66CC8A]" strokeWidth={2} />
@@ -84,7 +118,24 @@ const UiLegendToggle: FC = () => {
           </span>
         </button>
       </div>
-    </div>
+      {!chromeHidden && (
+        <div className={`pointer-events-none fixed bottom-3 right-3 ${zClass}`}>
+          <button
+            type="button"
+            title={legendLabel}
+            aria-label={legendLabel}
+            aria-pressed={legendOpen}
+            onClick={toggleLegend}
+            className={btnClass(legendOpen)}
+          >
+            <Tags className="h-4 w-4 shrink-0 text-[#66CC8A]" strokeWidth={2} />
+            <span className="max-w-[5rem] truncate whitespace-nowrap landscape:max-w-none">
+              {legendLabel}
+            </span>
+          </button>
+        </div>
+      )}
+    </>
   )
 }
 
