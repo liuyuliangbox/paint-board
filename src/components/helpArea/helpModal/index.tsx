@@ -5,15 +5,13 @@ import { languageList } from './constants'
 
 import { Github, BookOpen, BookText, Keyboard } from 'lucide-react'
 import TranslateIcon from '@/components/icons/translate.svg?react'
-import Shortcut from '../shortcut'
-import Features from '../features'
+import HelpControls from '../controls'
+import HelpGuide from '../guide'
 
 const HelpModal = () => {
   const { t, i18n } = useTranslation()
   const { language, updateLanguage } = useBoardStore()
-  const [activeTab, setActiveTab] = useState<'shortcut' | 'featureIntro'>(
-    'shortcut'
-  )
+  const [activeTab, setActiveTab] = useState<'controls' | 'guide'>('guide')
 
   const handleChangLang = (newLanguage: string) => {
     // Menu uses `zh-tw`; i18n resource key is `zh-TW`.
@@ -21,16 +19,12 @@ const HelpModal = () => {
     updateLanguage(newLanguage)
   }
 
-  const handleTabChange = (tab: 'shortcut' | 'featureIntro') => {
-    setActiveTab(tab)
-  }
-
   return (
     <dialog id="help-modal" className="modal">
       <form method="dialog" className="modal-backdrop">
         <button>close</button>
       </form>
-      <div className="modal-box w-[90vw] max-w-[800px] h-[90vh] max-h-[800px] overflow-auto">
+      <div className="modal-box h-[90vh] max-h-[800px] w-[90vw] max-w-[800px] overflow-auto">
         <div className="mb-8 flex items-start gap-3">
           <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
             <a
@@ -73,11 +67,11 @@ const HelpModal = () => {
 
           <div className="dropdown dropdown-bottom dropdown-end shrink-0">
             <div tabIndex={0} role="button">
-              <TranslateIcon className="w-8 h-8 p-1 rounded-md cursor-pointer bg-[#66CC8960] hover:bg-[#66CC8980]" />
+              <TranslateIcon className="h-8 w-8 cursor-pointer rounded-md bg-[#66CC8960] p-1 hover:bg-[#66CC8980]" />
             </div>
             <ul
               tabIndex={0}
-              className="dropdown-content menu menu-compact shadow bg-base-100 rounded-box w-40 z-[11]"
+              className="dropdown-content menu menu-compact z-[11] w-40 rounded-box bg-base-100 shadow"
             >
               {languageList.map((item) => (
                 <li
@@ -95,30 +89,28 @@ const HelpModal = () => {
 
         <div
           role="tablist"
-          className="tabs tabs-bordered tabs-lg sticky -top-6 bg-white z-10"
+          className="tabs tabs-bordered tabs-lg sticky -top-6 z-10 bg-white"
         >
           <a
             role="tab"
-            className={`tab ${activeTab === 'shortcut' ? 'tab-active' : ''}`}
-            onClick={() => handleTabChange('shortcut')}
+            className={`tab ${activeTab === 'guide' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('guide')}
           >
-            <Keyboard size={20} className="mr-2" />
-            {t('helpInfo.shortcuts')}
+            <BookText size={20} className="mr-2" />
+            {t('helpInfo.guideTab')}
           </a>
           <a
             role="tab"
-            className={`tab ${
-              activeTab === 'featureIntro' ? 'tab-active' : ''
-            }`}
-            onClick={() => handleTabChange('featureIntro')}
+            className={`tab ${activeTab === 'controls' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('controls')}
           >
-            <BookText size={20} className="mr-2" />
-            {t('helpInfo.featureIntro')}
+            <Keyboard size={20} className="mr-2" />
+            {t('helpInfo.controlsTab')}
           </a>
         </div>
 
-        {activeTab === 'shortcut' && <Shortcut />}
-        {activeTab === 'featureIntro' && <Features />}
+        {activeTab === 'guide' && <HelpGuide />}
+        {activeTab === 'controls' && <HelpControls />}
       </div>
     </dialog>
   )
