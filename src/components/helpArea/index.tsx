@@ -17,8 +17,8 @@ const HelpArea: React.FC = () => {
   return (
     <>
       {/*
-        Narrow portrait: left rail owns tools/language/help/zoom/camera;
-        bottom short edge is legend only. This capsule is landscape/desktop.
+        Narrow portrait: language/help/zoom/camera live on PortraitLeftRail.
+        Landscape/desktop: bottom-left (or top-left in landscape) capsule.
       */}
       {!narrowPortrait && (
         <div className="z-[4] fixed bottom-3 left-3 flex flex-row items-center justify-center gap-0.5 rounded-full bg-[#eef1ff] px-2 py-1.5 landscape:bottom-auto landscape:left-14 landscape:top-3">
