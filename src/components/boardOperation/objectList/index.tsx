@@ -120,7 +120,8 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
   }
 
   return (
-    <div className="drawer drawer-end fixed top-0 z-[5]">
+    {/* Above operation dock (z-12) so landscape bottom bar cannot cover the list. */}
+    <div className="drawer drawer-end fixed inset-0 z-[25]">
       <input
         id="object-list-drawer"
         type="checkbox"
@@ -132,7 +133,7 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
           className="drawer-overlay"
           onClick={() => updateShow(false)}
         ></label>
-        <div className="flex h-screen max-h-screen w-96 max-w-[80%] flex-col overflow-hidden bg-white px-5 py-7 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-4 landscape:py-4">
+        <div className="flex h-full max-h-full w-96 max-w-[80%] flex-col overflow-hidden bg-white px-5 py-7 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-4 landscape:pb-16 landscape:pt-4">
           <div className="shrink-0 text-center font-fredokaOne text-2xl landscape:text-xl">
             {t('objectList.title')}
           </div>
