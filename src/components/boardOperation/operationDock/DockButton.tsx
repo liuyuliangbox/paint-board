@@ -33,8 +33,11 @@ const DockButton: FC<IProps> = ({
       : 'cursor-pointer hover:bg-slate-200'
   } ${active ? 'bg-[#66CC8A]/25 text-[#2d8f55]' : 'text-slate-700'} ${
     rail
-      ? `w-full flex-col gap-0.5 px-0.5 py-1.5 ${showLabel ? '' : 'py-2'}`
-      : `flex-row gap-1 px-1.5 py-1.5`
+      ? `w-full flex-col gap-0.5 px-0.5 ${showLabel ? 'py-1.5' : 'py-2'}`
+      : // Bottom bar: icon+label row when open; compact icon-only when collapsed.
+      showLabel
+      ? 'flex-row gap-1 px-1.5 py-1.5'
+      : 'flex-row px-1 py-1'
   } ${className}`
 
   const content = (

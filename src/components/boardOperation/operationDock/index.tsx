@@ -248,8 +248,8 @@ const OperationDock: FC<OperationDockProps> = ({
           ? labelOf('operate.collapseLegend')
           : labelOf('operate.expandLegend')
       }
-      // Always show this control with text so the rail entry is discoverable.
-      showLabel
+      // Rail: always labeled. Bottom bar: label only while open so collapse hugs icons.
+      showLabel={layout === 'rail' || legendOpen}
       layout={layout}
       active={legendOpen}
       onClick={onToggleLegend}
@@ -272,22 +272,46 @@ const OperationDock: FC<OperationDockProps> = ({
   return (
     <div
       className={`pointer-events-none fixed z-[12] ${
-        // Phone: slim right rail. Desktop: bottom bar.
-        'bottom-4 left-1/2 w-[min(96vw,44rem)] -translate-x-1/2 xs:bottom-auto xs:left-auto xs:right-1.5 xs:top-1/2 xs:w-auto xs:translate-x-0 xs:-translate-y-1/2'
+        // Phone portrait: right rail. Landscape / desktop: bottom bar that hugs content
+        // (max-w only — fixed width left empty gaps after collapsing labels).
+        'bottom-3 left-1/2 w-auto max-w-[min(96vw,44rem)] -translate-x-1/2 xs:bottom-auto xs:left-auto xs:right-1.5 xs:top-1/2 xs:max-w-none xs:translate-x-0 xs:-translate-y-1/2'
       }`}
     >
       <div
         ref={dockRef}
-        className={`pointer-events-auto relative flex items-stretch gap-1 overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1 py-1 shadow-md backdrop-blur max-h-[30vh] xs:max-h-[78vh] xs:flex-col xs:gap-0.5 xs:px-0.5 ${
-          // Slim rail: icon above text — never a wide icon+text row.
-          legendOpen ? 'xs:w-16' : 'xs:w-11'
+        className={`pointer-events-auto relative flex w-auto max-w-full items-stretch overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 shadow-md backdrop-blur max-h-[30vh] xs:max-h-[78vh] xs:flex-col ${
+          legendOpen
+            ? 'gap-1 px-1 py-1 xs:w-16 xs:gap-0.5 xs:px-0.5'
+            : 'gap-0.5 px-0.5 py-0.5 xs:w-11 xs:gap-0.5 xs:px-0.5'
         }`}
       >
-        <div className="flex shrink-0 items-center border-r border-slate-200/80 pr-1 xs:border-r-0 xs:border-b xs:px-0.5 xs:pb-1 xs:pr-0">
+        <div
+          className={`flex shrink-0 items-center gap-0.5 border-r border-slate-200/80 xs:flex-col xs:border-r-0 xs:border-b xs:px-0.5 xs:pr-0 ${
+            legendOpen ? 'pr-1 xs:pb-1' : 'pr-0.5 xs:pb-0.5'
+          }`}
+        >
           {legendToggle}
+          {/* Pinned next to legend so it stays visible when the bar scrolls. */}
+          <DockButton
+            label={
+              isLandscapeLayout
+                ? labelOf('operate.dock.portrait')
+                : labelOf('operate.dock.landscape')
+            }
+            showLabel={layout === 'rail' || legendOpen}
+            layout={layout}
+            active={isLandscapeLayout}
+            onClick={onToggleLandscapeLayout}
+          >
+            {isLandscapeLayout ? (
+              <RectangleVertical strokeWidth={iconStroke} />
+            ) : (
+              <RectangleHorizontal strokeWidth={iconStroke} />
+            )}
+          </DockButton>
         </div>
 
-        <div className="flex min-h-0 min-w-0 flex-1 items-center gap-0.5 overflow-x-auto noScrollbar xs:w-full xs:flex-col xs:overflow-x-hidden xs:overflow-y-auto">
+        <div className="flex min-h-0 w-auto min-w-0 items-center gap-0.5 overflow-x-auto noScrollbar xs:w-full xs:flex-1 xs:flex-col xs:overflow-x-hidden xs:overflow-y-auto">
           <Section tone="default">
             <DockButton
               label={labelOf('operate.dock.undo')}
@@ -433,23 +457,6 @@ const OperationDock: FC<OperationDockProps> = ({
               onClick={onOpenFiles}
             >
               <BookText strokeWidth={iconStroke} />
-            </DockButton>
-            <DockButton
-              label={
-                isLandscapeLayout
-                  ? labelOf('operate.dock.portrait')
-                  : labelOf('operate.dock.landscape')
-              }
-              showLabel={showLabel}
-              layout={layout}
-              active={isLandscapeLayout}
-              onClick={onToggleLandscapeLayout}
-            >
-              {isLandscapeLayout ? (
-                <RectangleVertical strokeWidth={iconStroke} />
-              ) : (
-                <RectangleHorizontal strokeWidth={iconStroke} />
-              )}
             </DockButton>
           </Section>
 

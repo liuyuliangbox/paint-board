@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import useBoardStore from '@/store/board'
 import { ActionMode } from '@/constants'
 import { paintBoard } from '@/core/paintBoard'
+import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
+import { isViewportLandscape } from '@/utils/screenOrientation'
 import { modeSwitch } from './constant'
 
 import { X, Menu } from 'lucide-react'
@@ -14,8 +16,19 @@ import BoardConfig from './boardConfig'
 const ToolPanel: FC = () => {
   const { t } = useTranslation()
   const { mode, updateMode } = useBoardStore()
-  const [showPanel, setShowPanel] = useState(true)
+  const { landscape } = useLandscapeLayout()
+  // Landscape starts collapsed so the short canvas is not covered by the tall draw panel.
+  const [showPanel, setShowPanel] = useState(() => !isViewportLandscape())
   const panelRef = useRef<HTMLDivElement>(null)
+  const wasLandscape = useRef(landscape)
+
+  // Entering landscape: collapse so the short canvas is usable; user can reopen.
+  useEffect(() => {
+    if (landscape && !wasLandscape.current) {
+      setShowPanel(false)
+    }
+    wasLandscape.current = landscape
+  }, [landscape])
 
   // Close when interacting with the canvas (blank / draw), same as widget panel.
   useEffect(() => {
@@ -52,8 +65,8 @@ const ToolPanel: FC = () => {
   return (
     <div
       ref={panelRef}
-      className={`fixed top-7 left-7 z-[3] flex max-h-[80%] max-w-[85%] flex-col overflow-visible bg-[#eef1ff] card shadow-xl landscape:top-4 landscape:max-h-[calc(100vh-5.5rem)] landscape:max-w-[min(92vw,28rem)] ${
-        showPanel ? 'p-4 landscape:p-3' : ''
+      className={`fixed top-7 left-7 z-[3] flex max-h-[80%] max-w-[85%] flex-col overflow-visible bg-[#eef1ff] card shadow-xl landscape:top-3 landscape:left-3 landscape:max-h-[min(62vh,15.5rem)] landscape:max-w-[min(46vw,17rem)] ${
+        showPanel ? 'p-4 landscape:p-2' : ''
       }`}
     >
       {/* toggle main panel display button */}
@@ -77,7 +90,7 @@ const ToolPanel: FC = () => {
         />
       </label>
       {showPanel && (
-        <div className="max-h-full overflow-y-auto noScrollbar p-1 landscape:max-h-[calc(100vh-7rem)]">
+        <div className="max-h-full overflow-y-auto noScrollbar p-1 landscape:max-h-[min(56vh,13.5rem)]">
           {/* switch mode tabs */}
           <div className="tabs tabs-sm tabs-boxed bg-[#333C4D]">
             {modeSwitch.map(({ type, text, keyboard }) => (

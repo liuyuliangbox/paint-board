@@ -161,7 +161,9 @@ const ExportImageMenu = ({
         className={`flex shrink-0 cursor-pointer items-center justify-center rounded-lg hover:bg-slate-200 ${
           layout === 'rail'
             ? `w-full flex-col gap-0.5 px-0.5 ${showLabel ? 'py-1.5' : 'py-2'}`
-            : 'flex-row gap-1 px-1.5 py-1.5'
+            : showLabel
+            ? 'flex-row gap-1 px-1.5 py-1.5'
+            : 'flex-row px-1 py-1'
         } ${open ? 'bg-slate-200/80' : ''}`}
         onMouseEnter={() => {
           if (canHover.current) {
