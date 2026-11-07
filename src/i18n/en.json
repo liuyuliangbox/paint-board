@@ -96,6 +96,10 @@
     "expandLegend": "Show labels",
     "collapseLegend": "Hide labels",
     "selectionActions": "Selection",
+    "tools": "Tools",
+    "help": "Help",
+    "zoom": "Zoom",
+    "camera": "Camera",
     "dock": {
       "undo": "Undo",
       "redo": "Redo",

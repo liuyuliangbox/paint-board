@@ -96,6 +96,10 @@
     "expandLegend": "展開說明",
     "collapseLegend": "收起說明",
     "selectionActions": "選中操作",
+    "tools": "工具",
+    "help": "說明",
+    "zoom": "縮放",
+    "camera": "攝像",
     "dock": {
       "undo": "撤銷",
       "redo": "重做",

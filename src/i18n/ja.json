@@ -96,6 +96,10 @@
     "expandLegend": "説明を表示",
     "collapseLegend": "説明を隠す",
     "selectionActions": "選択操作",
+    "tools": "ツール",
+    "help": "ヘルプ",
+    "zoom": "ズーム",
+    "camera": "カメラ",
     "dock": {
       "undo": "元に戻す",
       "redo": "やり直し",

@@ -1,20 +1,8 @@
-import {
-  ChangeEvent,
-  FC,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react'
+import { ChangeEvent, FC, ReactNode, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   BookText,
   BrushCleaning,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
   Copy,
   Ellipsis,
   Expand,
@@ -37,8 +25,8 @@ import { isMobile as isMobileFn } from '@/utils'
 import { ActionMode } from '@/constants'
 import ExportImageMenu from '../exportImageMenu'
 import { ExportScope } from '@/core/export/exportCanvasImage'
+import useUiLegendStore from '@/store/uiLegend'
 import DockButton from './DockButton'
-import { readDockLegendOpen, writeDockLegendOpen } from './dockStorage'
 
 const isMobile = isMobileFn()
 const SWIPE_PX = 40
@@ -135,7 +123,8 @@ const OperationDock: FC<OperationDockProps> = ({
       window.matchMedia(SIDE_MQ).matches
   )
   const layout = railLayout ? 'rail' : 'bar'
-  const [legendOpen, setLegendOpen] = useState(() => readDockLegendOpen())
+  const legendOpen = useUiLegendStore((s) => s.legendOpen)
+  const setLegendOpen = useUiLegendStore((s) => s.setLegendOpen)
   const [moreOpen, setMoreOpen] = useState(false)
   const dockRef = useRef<HTMLDivElement>(null)
   const swipeStart = useRef<{ x: number; y: number } | null>(null)
@@ -151,19 +140,6 @@ const OperationDock: FC<OperationDockProps> = ({
     mq.addEventListener('change', sync)
     return () => mq.removeEventListener('change', sync)
   }, [])
-
-  const setLegend = useCallback((open: boolean) => {
-    setLegendOpen(open)
-    writeDockLegendOpen(open)
-  }, [])
-
-  const onToggleLegend = () => {
-    setLegendOpen((prev) => {
-      const next = !prev
-      writeDockLegendOpen(next)
-      return next
-    })
-  }
 
   useEffect(() => {
     const el = dockRef.current
@@ -199,9 +175,9 @@ const OperationDock: FC<OperationDockProps> = ({
           return
         }
         if (dx < -SWIPE_PX) {
-          setLegend(true)
+          setLegendOpen(true)
         } else if (dx > SWIPE_PX) {
-          setLegend(false)
+          setLegendOpen(false)
         }
         return
       }
@@ -211,9 +187,9 @@ const OperationDock: FC<OperationDockProps> = ({
         return
       }
       if (dy < -SWIPE_PX) {
-        setLegend(true)
+        setLegendOpen(true)
       } else if (dy > SWIPE_PX) {
-        setLegend(false)
+        setLegendOpen(false)
       }
     }
 
@@ -228,7 +204,7 @@ const OperationDock: FC<OperationDockProps> = ({
       el.removeEventListener('pointerup', onPointerUp)
       el.removeEventListener('pointercancel', onPointerCancel)
     }
-  }, [setLegend])
+  }, [setLegendOpen])
 
   useEffect(() => {
     if (!moreOpen) {
@@ -250,48 +226,13 @@ const OperationDock: FC<OperationDockProps> = ({
   // Landscape: workspace chrome lives top-right — keep the dock for draw actions only.
   const compactDock = isLandscapeLayout
 
-  useEffect(() => {
-    if (!compactDock) {
-      return
-    }
-    // Labels make the bottom bar overflow on short landscape viewports.
-    setLegend(false)
-  }, [compactDock, setLegend])
-
-  const legendToggle = (
-    <DockButton
-      label={
-        legendOpen
-          ? labelOf('operate.collapseLegend')
-          : labelOf('operate.expandLegend')
-      }
-      // Rail: always labeled. Bottom bar: label only while open so collapse hugs icons.
-      showLabel={layout === 'rail' || legendOpen}
-      layout={layout}
-      active={legendOpen}
-      onClick={onToggleLegend}
-      className="border border-[#66CC8A]/50 bg-white shadow-sm"
-    >
-      {layout === 'rail' ? (
-        legendOpen ? (
-          <ChevronRight strokeWidth={iconStroke} />
-        ) : (
-          <ChevronLeft strokeWidth={iconStroke} />
-        )
-      ) : legendOpen ? (
-        <ChevronDown strokeWidth={iconStroke} />
-      ) : (
-        <ChevronUp strokeWidth={iconStroke} />
-      )}
-    </DockButton>
-  )
-
   return (
     <div
       className={`pointer-events-none fixed z-[12] ${
         // Phone portrait: right rail. Landscape / desktop: bottom bar that hugs content
         // (max-w only — fixed width left empty gaps after collapsing labels).
-        'bottom-3 left-1/2 w-auto max-w-[min(96vw,44rem)] -translate-x-1/2 xs:bottom-auto xs:left-auto xs:right-1.5 xs:top-1/2 xs:max-w-none xs:translate-x-0 xs:-translate-y-1/2'
+        // Leave room on the right for the global labels toggle (bottom-right).
+        'bottom-3 left-1/2 w-auto max-w-[min(96vw,44rem)] -translate-x-1/2 landscape:max-w-[min(calc(96vw-7.5rem),44rem)] xs:bottom-auto xs:left-auto xs:right-1.5 xs:top-1/2 xs:max-w-none xs:translate-x-0 xs:-translate-y-1/2'
       }`}
     >
       <div
@@ -302,20 +243,19 @@ const OperationDock: FC<OperationDockProps> = ({
             : 'gap-0.5 px-0.5 py-0.5 xs:w-11 xs:gap-0.5 xs:px-0.5'
         }`}
       >
-        <div
-          className={`flex shrink-0 items-center gap-0.5 border-r border-slate-200/80 xs:flex-col xs:border-r-0 xs:border-b xs:px-0.5 xs:pr-0 ${
-            legendOpen ? 'pr-1 xs:pb-1' : 'pr-0.5 xs:pb-0.5'
-          }`}
-        >
-          {legendToggle}
-          {!compactDock && (
+        {!compactDock && (
+          <div
+            className={`flex shrink-0 items-center gap-0.5 border-r border-slate-200/80 xs:flex-col xs:border-r-0 xs:border-b xs:px-0.5 xs:pr-0 ${
+              legendOpen ? 'pr-1 xs:pb-1' : 'pr-0.5 xs:pb-0.5'
+            }`}
+          >
             <DockButton
               label={
                 isLandscapeLayout
                   ? labelOf('operate.dock.portrait')
                   : labelOf('operate.dock.landscape')
               }
-              showLabel={layout === 'rail' || legendOpen}
+              showLabel={showLabel}
               layout={layout}
               active={isLandscapeLayout}
               onClick={onToggleLandscapeLayout}
@@ -326,8 +266,8 @@ const OperationDock: FC<OperationDockProps> = ({
                 <RectangleHorizontal strokeWidth={iconStroke} />
               )}
             </DockButton>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="flex min-h-0 w-auto min-w-0 items-center gap-0.5 overflow-x-auto noScrollbar xs:w-full xs:flex-1 xs:flex-col xs:overflow-x-hidden xs:overflow-y-auto">
           {/* Pan / Select as one segmented switch, left of undo/redo. */}

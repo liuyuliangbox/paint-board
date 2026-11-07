@@ -96,6 +96,10 @@
     "expandLegend": "설명 펼치기",
     "collapseLegend": "설명 접기",
     "selectionActions": "선택 작업",
+    "tools": "도구",
+    "help": "도움말",
+    "zoom": "확대/축소",
+    "camera": "카메라",
     "dock": {
       "undo": "실행 취소",
       "redo": "다시 실행",

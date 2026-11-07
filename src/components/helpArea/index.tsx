@@ -1,4 +1,6 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
+import useUiLegendStore from '@/store/uiLegend'
 
 import InfoIcon from '@/components/icons/info.svg?react'
 import ZoomInfo from '../zoomInfo'
@@ -6,6 +8,9 @@ import CameraConfig from '../cameraConfig'
 import HelpModal from './helpModal'
 
 const HelpArea: React.FC = () => {
+  const { t } = useTranslation()
+  const showLabel = useUiLegendStore((s) => s.legendOpen)
+
   return (
     <>
       {/*
@@ -13,16 +18,28 @@ const HelpArea: React.FC = () => {
         Landscape: top-left beside the tool-panel toggle so it does not crowd the dock.
       */}
       <div className="z-[4] fixed bottom-5 left-5 flex flex-row items-center justify-center rounded-full bg-[#eef1ff] px-2.5 py-1.5 landscape:bottom-auto landscape:left-14 landscape:top-3">
-        <InfoIcon
-          className="cursor-pointer rounded-full bg-white hover:opacity-70"
+        <button
+          type="button"
+          className={`flex items-center gap-1 rounded-full bg-white px-0.5 py-0.5 hover:opacity-70 ${
+            showLabel ? 'pr-1.5' : ''
+          }`}
+          title={showLabel ? undefined : String(t('operate.help'))}
+          aria-label={String(t('operate.help'))}
           onClick={() => {
             ;(
               document.getElementById('help-modal') as HTMLDialogElement
             ).showModal()
           }}
-        />
-        <ZoomInfo />
-        <CameraConfig />
+        >
+          <InfoIcon className="rounded-full" />
+          {showLabel && (
+            <span className="pr-1 text-[11px] font-medium text-slate-700">
+              {t('operate.help')}
+            </span>
+          )}
+        </button>
+        <ZoomInfo showLabel={showLabel} />
+        <CameraConfig showLabel={showLabel} />
       </div>
 
       <HelpModal />

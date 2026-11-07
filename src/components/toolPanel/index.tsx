@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import useBoardStore from '@/store/board'
+import useUiLegendStore from '@/store/uiLegend'
 import { ActionMode } from '@/constants'
 import { paintBoard } from '@/core/paintBoard'
 import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
@@ -17,10 +18,12 @@ const ToolPanel: FC = () => {
   const { t } = useTranslation()
   const { mode, updateMode } = useBoardStore()
   const { landscape } = useLandscapeLayout()
+  const showLabel = useUiLegendStore((s) => s.legendOpen)
   // Landscape starts collapsed so the short canvas opens clear; user can reopen.
   const [showPanel, setShowPanel] = useState(() => !isViewportLandscape())
   const panelRef = useRef<HTMLDivElement>(null)
   const wasLandscape = useRef(landscape)
+  const toolsLabel = String(t('operate.tools'))
 
   // Entering landscape: collapse so the short canvas is usable; user can reopen.
   useEffect(() => {
@@ -72,31 +75,42 @@ const ToolPanel: FC = () => {
         Portrait: float on the panel corner. Landscape: stay in flow — the
         shell is already edge-inset and negative offsets clip the control.
       */}
-      <label
-        className={`btn btn-neutral btn-circle swap swap-rotate h-7 w-7 min-h-0 ${
+      <div
+        className={`flex items-center gap-1 ${
           showPanel && !landscape
             ? 'absolute -left-3 -top-3 z-10'
             : 'relative mb-1'
         }`}
       >
-        <input
-          type="checkbox"
-          checked={!showPanel}
-          onChange={() => setShowPanel((v) => !v)}
-        />
-        <Menu
-          strokeWidth={2.5}
-          color="#fff"
-          size={20}
-          className="swap-on fill-current"
-        />
-        <X
-          strokeWidth={2.5}
-          color="#fff"
-          size={20}
-          className="swap-off fill-current"
-        />
-      </label>
+        <label
+          className="btn btn-neutral btn-circle swap swap-rotate h-7 w-7 min-h-0"
+          title={showLabel ? undefined : toolsLabel}
+          aria-label={toolsLabel}
+        >
+          <input
+            type="checkbox"
+            checked={!showPanel}
+            onChange={() => setShowPanel((v) => !v)}
+          />
+          <Menu
+            strokeWidth={2.5}
+            color="#fff"
+            size={20}
+            className="swap-on fill-current"
+          />
+          <X
+            strokeWidth={2.5}
+            color="#fff"
+            size={20}
+            className="swap-off fill-current"
+          />
+        </label>
+        {showLabel && (
+          <span className="rounded-full bg-[#eef1ff]/95 px-2 py-0.5 text-[11px] font-medium text-slate-700 shadow-sm">
+            {toolsLabel}
+          </span>
+        )}
+      </div>
       {showPanel && (
         <div
           className={`pb-panel-shell flex max-w-[85%] flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl landscape:max-w-[min(48vw,22rem)] landscape:p-2 ${

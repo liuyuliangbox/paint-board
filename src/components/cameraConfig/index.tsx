@@ -7,12 +7,17 @@ import DisplayConfig from './displayConfig'
 import Toast from '../toast'
 import CountDown from './countDown'
 
-const CameraConfig = () => {
+interface CameraConfigProps {
+  showLabel?: boolean
+}
+
+const CameraConfig = ({ showLabel = false }: CameraConfigProps) => {
   const { t } = useTranslation()
   const { openCamera, updateOpenCamera, pauseCamera, updatePauseCamera } =
     useCameraStore()
   const [showCameraTip, updateShowCameraTip] = useState(false)
   const [openCameraCountdown, setOpenCameraCountdown] = useState(false)
+  const cameraLabel = String(t('operate.camera'))
 
   const handleOpenCamera = async () => {
     const status = await navigator?.permissions?.query({
@@ -44,22 +49,37 @@ const CameraConfig = () => {
   }
 
   return (
-    <div className="dropdown dropdown-top dropdown-hover w-7 h-7 ml-2">
+    <div
+      className={`dropdown dropdown-hover ml-2 dropdown-top landscape:dropdown-bottom ${
+        showLabel ? 'h-7' : 'h-7 w-7'
+      }`}
+    >
       <div
         tabIndex={0}
         role="button"
-        className="flex items-center justify-center rounded-full w-7 h-7 cursor-pointer bg-[#eef1ff]"
+        title={showLabel ? undefined : cameraLabel}
+        aria-label={cameraLabel}
+        className={`relative flex cursor-pointer items-center justify-center rounded-full bg-[#eef1ff] ${
+          showLabel ? 'h-7 gap-1 pl-0.5 pr-1.5' : 'h-7 w-7'
+        }`}
       >
-        {openCamera ? (
-          <>
-            <span className="animate-pulse absolute inline-flex h-7 w-7 rounded-full bg-[#ff586180]"></span>
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-[#ff5861] z-10"></span>
-          </>
-        ) : (
-          <>
-            <span className="absolute inline-flex h-7 w-7 rounded-full bg-[#66CC8A40]"></span>
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-[#66CC8A] z-10"></span>
-          </>
+        <span className="relative flex h-7 w-7 shrink-0 items-center justify-center">
+          {openCamera ? (
+            <>
+              <span className="absolute inline-flex h-7 w-7 animate-pulse rounded-full bg-[#ff586180]"></span>
+              <span className="relative z-10 inline-flex h-4 w-4 rounded-full bg-[#ff5861]"></span>
+            </>
+          ) : (
+            <>
+              <span className="absolute inline-flex h-7 w-7 rounded-full bg-[#66CC8A40]"></span>
+              <span className="relative z-10 inline-flex h-4 w-4 rounded-full bg-[#66CC8A]"></span>
+            </>
+          )}
+        </span>
+        {showLabel && (
+          <span className="text-[11px] font-medium text-slate-700">
+            {cameraLabel}
+          </span>
         )}
       </div>
       <ul
