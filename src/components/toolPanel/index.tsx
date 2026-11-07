@@ -6,6 +6,7 @@ import useWidgetStore from '@/store/widgets'
 import { ActionMode } from '@/constants'
 import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
 import { useNarrowPortrait } from '@/hooks/useNarrowPortrait'
+import { useTouchUi } from '@/hooks/useTouchUi'
 import { isViewportLandscape } from '@/utils/screenOrientation'
 import useUiLegendStore from '@/store/uiLegend'
 import { modeSwitch } from './constant'
@@ -26,7 +27,10 @@ const ToolPanel: FC = () => {
   const { mode, updateMode } = useBoardStore()
   const { landscape } = useLandscapeLayout()
   const narrowPortrait = useNarrowPortrait()
+  const { coarse } = useTouchUi()
   const overlayActive = useUiOverlayStore((s) => s.active)
+  // Landscape (short) or touch: spill into columns; desktop mouse keeps wheel scroll.
+  const flowCols = landscape || coarse
   const showLabel = useUiLegendStore((s) => s.legendOpen)
   const setWidgetPanelOpen = useWidgetStore((s) => s.setPanelOpen)
   const [showPanel, setShowPanel] = useState(() => !isViewportLandscape())
@@ -126,7 +130,7 @@ const ToolPanel: FC = () => {
   const panelBody = (
     <div
       className={`mt-1 min-h-0 flex-1 p-0.5 ${
-        landscape
+        flowCols
           ? 'pb-panel-flow-cols'
           : 'flex flex-col overflow-y-auto noScrollbar'
       }`}

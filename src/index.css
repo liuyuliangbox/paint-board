@@ -96,23 +96,22 @@
 }
 
 /*
- * Landscape tool body: fill column 1 top→bottom, then spill into column 2
- * (needs a definite height — parent uses pb-panel-open / flex-1).
+ * Tool body: fill column 1 top→bottom, then spill into column 2.
+ * Used for landscape (short height) and coarse/touch (prefer columns over scroll).
+ * Needs a definite height — parent uses pb-panel-open / flex-1.
  */
-@media (orientation: landscape) {
-  .pb-panel-flow-cols {
-    columns: 2;
-    column-gap: 0.75rem;
-    column-fill: auto;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
+.pb-panel-flow-cols {
+  columns: 2;
+  column-gap: 0.75rem;
+  column-fill: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
 
-  .pb-panel-flow-cols > * {
-    break-inside: avoid;
-    -webkit-column-break-inside: avoid;
-    page-break-inside: avoid;
-  }
+.pb-panel-flow-cols > * {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 /*
