@@ -213,44 +213,53 @@ const ToolPanel: FC = () => {
     )
   }
 
+  // Desktop / landscape: no full dim (canvas stays drawable). Open panel uses
+  // focus z so it sits above dock/chrome; click canvas still closes.
   return (
-    <div className="fixed left-7 top-7 z-[3] landscape:left-3 landscape:top-3">
-      <div
-        className={
-          showPanel && !landscape
-            ? 'absolute -left-3 -top-3 z-10'
-            : 'relative mb-1'
-        }
-      >
-        {toggle}
-      </div>
-      {showPanel && (
-        <div
-          ref={panelRef}
-          className="pb-panel-shell pb-panel-open flex flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl max-w-[min(85%,calc(100vw-5.5rem))] landscape:max-w-[min(78vw,38rem)] landscape:p-2"
-        >
-          <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
-            {modeSwitch.map(({ type, text, keyboard }) => (
-              <a
-                key={type}
-                className={`tab flex-grow font-fredokaOne text-white font-medium ${
-                  mode === type ? 'tab-active' : 'hover:text-base-300'
-                }`}
-                onClick={() => {
-                  updateMode(type)
-                }}
-              >
-                {t(text)}
-                <span className="ml-1 text-xs leading-none font-normal opacity-70 pt-1 font-sans xs:hidden">
-                  {keyboard}
-                </span>
-              </a>
-            ))}
-          </div>
-          {panelBody}
+    <>
+      {!showPanel && (
+        <div className="pointer-events-auto fixed left-7 top-7 z-[var(--pb-z-chrome)] landscape:left-3 landscape:top-3">
+          {toggle}
         </div>
       )}
-    </div>
+      {showPanel && (
+        <div className="pointer-events-none fixed inset-0 z-[var(--pb-z-focus)]">
+          <div className="pointer-events-auto absolute left-7 top-7 landscape:left-3 landscape:top-3">
+            <div
+              className={
+                !landscape ? 'absolute -left-3 -top-3 z-10' : 'relative mb-1'
+              }
+            >
+              {toggle}
+            </div>
+            <div
+              ref={panelRef}
+              className="pb-panel-shell pb-panel-open flex flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl max-w-[min(85%,calc(100vw-5.5rem))] landscape:max-w-[min(78vw,38rem)] landscape:p-2"
+            >
+              <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
+                {modeSwitch.map(({ type, text, keyboard }) => (
+                  <a
+                    key={type}
+                    className={`tab flex-grow font-fredokaOne text-white font-medium ${
+                      mode === type ? 'tab-active' : 'hover:text-base-300'
+                    }`}
+                    onClick={() => {
+                      updateMode(type)
+                    }}
+                  >
+                    {t(text)}
+                    <span className="ml-1 text-xs leading-none font-normal opacity-70 pt-1 font-sans xs:hidden">
+                      {keyboard}
+                    </span>
+                  </a>
+                ))}
+              </div>
+              {panelBody}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

@@ -11,12 +11,12 @@ import CameraConfig from '@/components/cameraConfig'
 import InfoIcon from '@/components/icons/info.svg?react'
 
 /**
- * Portrait long right edge: workspace chrome + help cluster.
+ * Narrow-portrait long right edge: workspace chrome + help cluster.
  * Ops dock sits on the left; draw toggle stays top-left (ToolPanel).
  * Hidden while layers/boards/widgets cover this side; stays for tools
  * (tools open from the left and clear this rail).
  */
-const PortraitLeftRail: FC = () => {
+const PortraitChromeRail: FC = () => {
   const { t } = useTranslation()
   const showLabel = useUiLegendStore((s) => s.legendOpen)
   const chromeBridge = useOperationChromeBridge((s) => s.bridge)
@@ -70,4 +70,4 @@ const PortraitLeftRail: FC = () => {
   )
 }
 
-export default PortraitLeftRail
+export default PortraitChromeRail
