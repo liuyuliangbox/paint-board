@@ -8,7 +8,6 @@ import useCameraStore from '@/store/camera'
 import { canGroupActiveObjects } from '@/core/element/group/groupSelection'
 import { getLinkMenuState } from '@/core/element/layer/linkMenuState'
 import { linkActiveObjects } from '@/core/element/layer/objectListActions'
-import { ActionMode } from '@/constants'
 import { paintBoard } from '@/core/paintBoard'
 import { ImageElement } from '@/core/element/image'
 import { captureCameraFrame } from '@/core/camera/renderer'
@@ -38,8 +37,7 @@ import OperationChrome from './operationChrome'
 
 const BoardOperation = () => {
   const { landscape } = useLandscapeLayout()
-  const { isPanMode, mode, togglePanMode, setPanMode, updateMode } =
-    useBoardStore()
+  const { isPanMode, togglePanMode } = useBoardStore()
   const { cameraOpacity, openCamera } = useCameraStore()
   const currentFile = useCurrentFile()
   const saveJSON = useFileStore((state) => state.saveJSON)
@@ -265,7 +263,6 @@ const BoardOperation = () => {
         canLink={canLink}
         isFullscreen={isFullscreen}
         isPanMode={isPanMode}
-        mode={mode}
         onUndo={() => paintBoard.history?.undo()}
         onRedo={() => paintBoard.history?.redo()}
         onCopy={() => paintBoard.copyObject()}
@@ -298,11 +295,6 @@ const BoardOperation = () => {
         }}
         onToggleFullscreen={() => void toggleFullscreen()}
         onTogglePanMode={() => togglePanMode()}
-        onSelectMode={() => {
-          // Always exit hand-pan; one tap must land in select even if already SELECT.
-          setPanMode(false)
-          updateMode(ActionMode.SELECT)
-        }}
         isLandscapeLayout={landscape}
         onToggleLandscapeLayout={() => void toggleLandscapeLayout()}
       />

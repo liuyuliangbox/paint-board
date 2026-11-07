@@ -12,7 +12,6 @@ import {
   Layers,
   LayoutTemplate,
   Link2,
-  MousePointer2,
   RectangleHorizontal,
   RectangleVertical,
   Redo2,
@@ -22,7 +21,6 @@ import {
   Undo2
 } from 'lucide-react'
 import { isMobile as isMobileFn } from '@/utils'
-import { ActionMode } from '@/constants'
 import ExportImageMenu from '../exportImageMenu'
 import { ExportScope } from '@/core/export/exportCanvasImage'
 import useUiLegendStore from '@/store/uiLegend'
@@ -40,8 +38,6 @@ export interface OperationDockProps {
   canLink: boolean
   isFullscreen: boolean
   isPanMode: boolean
-  /** Current tool mode (draw / select / …). */
-  mode: string
   onUndo: () => void
   onRedo: () => void
   onCopy: () => void
@@ -57,14 +53,13 @@ export interface OperationDockProps {
   onOpenFiles: () => void
   onToggleFullscreen: () => void
   onTogglePanMode: () => void
-  onSelectMode: () => void
   /** Viewport currently landscape (after rotate / orientation.lock). */
   isLandscapeLayout: boolean
   onToggleLandscapeLayout: () => void
 }
 
 const Section: FC<{
-  tone?: 'default' | 'selection' | 'toggle'
+  tone?: 'default' | 'selection'
   children: ReactNode
   title?: string
   /** Portrait long-edge rail (not width-only xs). */
@@ -75,13 +70,9 @@ const Section: FC<{
   }
   return (
     <div
-      role={tone === 'toggle' ? 'group' : undefined}
       className={`flex items-center ${rail ? 'w-full flex-col' : ''} ${
         tone === 'selection'
           ? 'gap-0.5 rounded-xl bg-white/70 px-1 py-0.5 ring-1 ring-[#66CC8A]/35'
-          : tone === 'toggle'
-          ? // Segmented pan/select: shared shell, tight gap so they read as one control.
-            'gap-0 overflow-hidden rounded-xl bg-slate-200/70 p-0.5 ring-1 ring-slate-300/80'
           : 'gap-0.5'
       }`}
       aria-label={title}
@@ -97,7 +88,6 @@ const OperationDock: FC<OperationDockProps> = ({
   canLink,
   isFullscreen,
   isPanMode,
-  mode,
   onUndo,
   onRedo,
   onCopy,
@@ -113,7 +103,6 @@ const OperationDock: FC<OperationDockProps> = ({
   onOpenFiles,
   onToggleFullscreen,
   onTogglePanMode,
-  onSelectMode,
   isLandscapeLayout,
   onToggleLandscapeLayout
 }) => {
@@ -132,7 +121,7 @@ const OperationDock: FC<OperationDockProps> = ({
   const dockRef = useRef<HTMLDivElement>(null)
   const swipeStart = useRef<{ x: number; y: number } | null>(null)
   const showLabel = legendOpen
-  // Touch: pan override + select. Desktop: select shortcut only (space/mid pan).
+  // Touch only: sticky single-finger pan. Desktop: space / Ctrl-drag / keys.
   const showPanButton = coarse || isMobile
 
   useEffect(() => {
@@ -287,46 +276,23 @@ const OperationDock: FC<OperationDockProps> = ({
               : 'w-auto overflow-x-auto'
           }`}
         >
-          {/*
-            Content mode = tool tabs. Pan is an optional single-finger override
-            (touch only). Desktop uses space/mid-button pan — no Hand button.
-          */}
-          <Section
-            rail={railLayout}
-            tone={showPanButton ? 'toggle' : 'default'}
-            title={labelOf('operate.dock.pointerTools')}
-          >
-            {showPanButton && (
+          {showPanButton && (
+            <Section
+              rail={railLayout}
+              tone="default"
+              title={labelOf('operate.dock.pan')}
+            >
               <DockButton
                 label={labelOf('operate.dock.pan')}
                 showLabel={showLabel}
                 layout={layout}
                 active={isPanMode}
                 onClick={onTogglePanMode}
-                className={
-                  layout === 'rail' ? 'rounded-md' : 'rounded-md rounded-r-none'
-                }
               >
                 <Hand strokeWidth={iconStroke} />
               </DockButton>
-            )}
-            <DockButton
-              label={labelOf('operate.dock.select')}
-              showLabel={showLabel}
-              layout={layout}
-              active={mode === ActionMode.SELECT && !isPanMode}
-              onClick={onSelectMode}
-              className={
-                showPanButton
-                  ? layout === 'rail'
-                    ? 'rounded-md border-t border-slate-300/70'
-                    : 'rounded-md rounded-l-none border-l border-slate-300/70'
-                  : 'rounded-md'
-              }
-            >
-              <MousePointer2 strokeWidth={iconStroke} />
-            </DockButton>
-          </Section>
+            </Section>
+          )}
 
           <Section rail={railLayout} tone="default">
             <DockButton
