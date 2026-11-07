@@ -6,6 +6,8 @@ import useFileStore, {
 } from '@/store/files'
 import useCameraStore from '@/store/camera'
 import { canGroupActiveObjects } from '@/core/element/group/groupSelection'
+import { getLinkMenuState } from '@/core/element/layer/linkMenuState'
+import { linkActiveObjects } from '@/core/element/layer/objectListActions'
 import { paintBoard } from '@/core/paintBoard'
 import { ImageElement } from '@/core/element/image'
 import { captureCameraFrame } from '@/core/camera/renderer'
@@ -35,12 +37,7 @@ import OperationDock from './operationDock'
 const BoardOperation = () => {
   const { touchUi } = useTouchUi()
   const { landscape } = useLandscapeLayout()
-  const {
-    isPanMode,
-    duplicateDragEnabled,
-    togglePanMode,
-    toggleDuplicateDragEnabled
-  } = useBoardStore()
+  const { isPanMode, togglePanMode } = useBoardStore()
   const { cameraOpacity, openCamera } = useCameraStore()
   const currentFile = useCurrentFile()
   const saveJSON = useFileStore((state) => state.saveJSON)
@@ -55,6 +52,7 @@ const BoardOperation = () => {
   const [exportError, setExportError] = useState<string | null>(null)
   const [hasSelection, setHasSelection] = useState(false)
   const [canGroup, setCanGroup] = useState(false)
+  const [canLink, setCanLink] = useState(false)
   const exportingRef = useRef(false)
 
   const [uploadImageURL, setUploadImageURL] = useState('')
@@ -172,9 +170,11 @@ const BoardOperation = () => {
 
   useEffect(() => {
     const refreshSelection = () => {
-      const count = paintBoard.canvas?.getActiveObjects().length ?? 0
+      const active = paintBoard.canvas?.getActiveObjects() ?? []
+      const count = active.length
       setHasSelection(count > 0)
       setCanGroup(canGroupActiveObjects(count))
+      setCanLink(getLinkMenuState(active).canLink)
     }
     paintBoard.addHookFn(refreshSelection)
     refreshSelection()
@@ -219,15 +219,16 @@ const BoardOperation = () => {
       <OperationDock
         hasSelection={hasSelection}
         canGroup={canGroup}
+        canLink={canLink}
         isFullscreen={isFullscreen}
         isPanMode={isPanMode}
-        duplicateDragEnabled={duplicateDragEnabled}
         showTouchTools={touchUi}
         onUndo={() => paintBoard.history?.undo()}
         onRedo={() => paintBoard.history?.redo()}
         onCopy={() => paintBoard.copyObject()}
         onDelete={() => paintBoard.deleteObject()}
         onGroup={() => paintBoard.groupObject()}
+        onLink={() => linkActiveObjects()}
         onAddWidget={() => void saveSelectionAsWidget()}
         onText={() => paintBoard.textElement?.loadText({})}
         onUploadImage={uploadImageFile}
@@ -237,7 +238,6 @@ const BoardOperation = () => {
         onOpenFiles={() => updateShowFile(true)}
         onToggleFullscreen={() => void toggleFullscreen()}
         onTogglePanMode={() => togglePanMode()}
-        onToggleDuplicateMode={() => toggleDuplicateDragEnabled()}
         isLandscapeLayout={landscape}
         onToggleLandscapeLayout={() => void toggleLandscapeLayout()}
       />

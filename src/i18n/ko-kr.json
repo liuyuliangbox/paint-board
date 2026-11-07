@@ -101,9 +101,9 @@
       "redo": "다시 실행",
       "pan": "이동",
       "copy": "복사",
-      "group": "그룹",
-      "widget": "위젯",
-      "duplicateMode": "드래그 복제",
+      "group": "+그룹",
+      "link": "+연결",
+      "widget": "+위젯",
       "delete": "삭제",
       "text": "텍스트",
       "image": "이미지",
@@ -595,7 +595,7 @@
       "moveLayer": "요소 레이어 이동",
       "longPressSelect": "길게 눌러 선택",
       "longPressMarquee": "길게 누르고 드래그하여 영역 선택",
-      "duplicateDragTouch": "복제 모드에서 드래그 복제",
+      "duplicateDragTouch": "선택 후 두 손가락 드래그로 복제 이동",
       "moveSelectedTouch": "두 손가락 드래그로 선택 이동",
       "scaleSelectedTouch": "핀치로 선택 확대/축소"
     },
@@ -625,7 +625,7 @@
       "handPanToggle": "손 버튼 후 한 손가락 드래그",
       "longPress": "길게 누르기",
       "longPressDrag": "길게 누른 뒤 드래그",
-      "duplicateModeToggle": "복제 버튼 탭 후 드래그",
+      "duplicateModeToggle": "선택 위에서 두 손가락 드래그",
       "twoFingerMoveSelection": "선택 위 두 손가락 드래그",
       "twoFingerScaleSelection": "선택 위 핀치"
     }

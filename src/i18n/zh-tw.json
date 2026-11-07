@@ -101,9 +101,9 @@
       "redo": "重做",
       "pan": "平移",
       "copy": "複製",
-      "group": "組合",
-      "widget": "組件",
-      "duplicateMode": "拖複製",
+      "group": "+編組",
+      "link": "+軟關聯",
+      "widget": "+小組件",
       "delete": "刪除",
       "text": "文字",
       "image": "圖片",
@@ -595,7 +595,7 @@
       "moveLayer": "移動元素圖層",
       "longPressSelect": "觸屏長按選中元素",
       "longPressMarquee": "觸屏長按拖動框選",
-      "duplicateDragTouch": "開啟複製模式後拖動複製",
+      "duplicateDragTouch": "選中後雙指拖複製移動",
       "moveSelectedTouch": "雙指拖移動選中元素",
       "scaleSelectedTouch": "雙指捏合縮放選中元素"
     },
@@ -625,7 +625,7 @@
       "handPanToggle": "點按底部手型按鈕後單指拖拽",
       "longPress": "長按",
       "longPressDrag": "長按後拖拽",
-      "duplicateModeToggle": "點按底部複製按鈕後拖動",
+      "duplicateModeToggle": "選中對象上雙指拖拽",
       "twoFingerMoveSelection": "選中對象上雙指拖拽",
       "twoFingerScaleSelection": "選中對象上雙指捏合"
     }

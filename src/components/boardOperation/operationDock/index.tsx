@@ -23,6 +23,7 @@ import {
   ImageUp,
   Layers,
   LayoutTemplate,
+  Link2,
   RectangleHorizontal,
   RectangleVertical,
   Redo2,
@@ -45,15 +46,16 @@ const SIDE_MQ = '(max-width: 750px)'
 export interface OperationDockProps {
   hasSelection: boolean
   canGroup: boolean
+  canLink: boolean
   isFullscreen: boolean
   isPanMode: boolean
-  duplicateDragEnabled: boolean
   showTouchTools: boolean
   onUndo: () => void
   onRedo: () => void
   onCopy: () => void
   onDelete: () => void
   onGroup: () => void
+  onLink: () => void
   onAddWidget: () => void
   onText: () => void
   onUploadImage: (e: ChangeEvent<HTMLInputElement>) => void
@@ -63,7 +65,6 @@ export interface OperationDockProps {
   onOpenFiles: () => void
   onToggleFullscreen: () => void
   onTogglePanMode: () => void
-  onToggleDuplicateMode: () => void
   /** Viewport currently landscape (after rotate / orientation.lock). */
   isLandscapeLayout: boolean
   onToggleLandscapeLayout: () => void
@@ -94,15 +95,16 @@ const Section: FC<{
 const OperationDock: FC<OperationDockProps> = ({
   hasSelection,
   canGroup,
+  canLink,
   isFullscreen,
   isPanMode,
-  duplicateDragEnabled,
   showTouchTools,
   onUndo,
   onRedo,
   onCopy,
   onDelete,
   onGroup,
+  onLink,
   onAddWidget,
   onText,
   onUploadImage,
@@ -112,7 +114,6 @@ const OperationDock: FC<OperationDockProps> = ({
   onOpenFiles,
   onToggleFullscreen,
   onTogglePanMode,
-  onToggleDuplicateMode,
   isLandscapeLayout,
   onToggleLandscapeLayout
 }) => {
@@ -365,6 +366,16 @@ const OperationDock: FC<OperationDockProps> = ({
                   <Group strokeWidth={iconStroke} />
                 </DockButton>
               )}
+              {canLink && (
+                <DockButton
+                  label={labelOf('operate.dock.link')}
+                  showLabel={showLabel}
+                  layout={layout}
+                  onClick={onLink}
+                >
+                  <Link2 strokeWidth={iconStroke} />
+                </DockButton>
+              )}
               <DockButton
                 label={labelOf('operate.dock.widget')}
                 showLabel={showLabel}
@@ -373,22 +384,6 @@ const OperationDock: FC<OperationDockProps> = ({
               >
                 <LayoutTemplate strokeWidth={iconStroke} />
               </DockButton>
-              {showTouch && (
-                <DockButton
-                  label={labelOf('operate.dock.duplicateMode')}
-                  showLabel={showLabel}
-                  layout={layout}
-                  active={duplicateDragEnabled}
-                  onClick={onToggleDuplicateMode}
-                >
-                  <span className="relative inline-flex">
-                    <Copy strokeWidth={iconStroke} size={18} />
-                    <span className="absolute -bottom-0.5 -right-0.5 text-[9px] font-bold leading-none text-[#66CC8A]">
-                      +
-                    </span>
-                  </span>
-                </DockButton>
-              )}
               <DockButton
                 label={labelOf('operate.dock.delete')}
                 showLabel={showLabel}

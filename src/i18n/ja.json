@@ -101,9 +101,9 @@
       "redo": "やり直し",
       "pan": "移動",
       "copy": "コピー",
-      "group": "グループ",
-      "widget": "部品",
-      "duplicateMode": "ドラッグ複製",
+      "group": "+グループ",
+      "link": "+リンク",
+      "widget": "+部品",
       "delete": "削除",
       "text": "文字",
       "image": "画像",
@@ -595,7 +595,7 @@
       "moveLayer": "要素レイヤー移動",
       "longPressSelect": "長押しで選択",
       "longPressMarquee": "長押しドラッグで範囲選択",
-      "duplicateDragTouch": "複製モードでドラッグ複製",
+      "duplicateDragTouch": "選択後に二本指ドラッグで複製移動",
       "moveSelectedTouch": "選択を二本指ドラッグで移動",
       "scaleSelectedTouch": "選択をピンチで拡大縮小"
     },
@@ -625,7 +625,7 @@
       "handPanToggle": "ハンドボタン後に一本指ドラッグ",
       "longPress": "長押し",
       "longPressDrag": "長押し後ドラッグ",
-      "duplicateModeToggle": "複製ボタンをタップしてからドラッグ",
+      "duplicateModeToggle": "選択上で二本指ドラッグ",
       "twoFingerMoveSelection": "選択上を二本指ドラッグ",
       "twoFingerScaleSelection": "選択上をピンチ"
     }
