@@ -119,8 +119,8 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
     }
   }
 
+  // Above operation dock (z-12) so landscape bottom bar cannot cover the list.
   return (
-    {/* Above operation dock (z-12) so landscape bottom bar cannot cover the list. */}
     <div className="drawer drawer-end fixed inset-0 z-[25]">
       <input
         id="object-list-drawer"
