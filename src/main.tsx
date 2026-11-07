@@ -8,6 +8,22 @@ import { loadUiChineseFont } from '@/core/font/googleFont'
 // Do not await. The interface renders with the system Chinese fallback first.
 void loadUiChineseFont()
 
+// Purge leftover Workbox SWs from when PWA was enabled in vite dev.
+if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  void navigator.serviceWorker.getRegistrations().then((regs) => {
+    for (const reg of regs) {
+      void reg.unregister()
+    }
+  })
+  if (typeof caches !== 'undefined') {
+    void caches.keys().then((keys) => {
+      for (const key of keys) {
+        void caches.delete(key)
+      }
+    })
+  }
+}
+
 if (import.meta.env.PROD) {
   const script = document.createElement('script')
   script.textContent = `

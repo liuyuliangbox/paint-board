@@ -49,8 +49,10 @@ export default defineConfig({
     svgr(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Dev SW + HMR races often throw CacheStorage "Unexpected internal error"
+      // (especially in embedded browsers). Keep PWA for production builds only.
       devOptions: {
-        enabled: true
+        enabled: false
       },
       manifest: {
         name: 'Paint Board - Creative Canvas',
