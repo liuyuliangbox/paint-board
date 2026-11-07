@@ -101,6 +101,7 @@
       "redo": "다시 실행",
       "pan": "이동",
       "select": "선택",
+      "pointerTools": "이동과 선택",
       "copy": "복사",
       "group": "+그룹",
       "link": "+연결",

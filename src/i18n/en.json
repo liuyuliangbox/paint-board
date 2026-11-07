@@ -101,6 +101,7 @@
       "redo": "Redo",
       "pan": "Pan",
       "select": "Select",
+      "pointerTools": "Pan and select",
       "copy": "Copy",
       "group": "+Group",
       "link": "+Link",

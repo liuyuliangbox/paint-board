@@ -35,7 +35,6 @@ import {
 } from 'lucide-react'
 import { isMobile as isMobileFn } from '@/utils'
 import { ActionMode } from '@/constants'
-import { useTouchUi } from '@/hooks/useTouchUi'
 import ExportImageMenu from '../exportImageMenu'
 import { ExportScope } from '@/core/export/exportCanvasImage'
 import DockButton from './DockButton'
@@ -53,7 +52,6 @@ export interface OperationDockProps {
   isPanMode: boolean
   /** Current tool mode (draw / select / …). */
   mode: string
-  showTouchTools: boolean
   onUndo: () => void
   onRedo: () => void
   onCopy: () => void
@@ -76,7 +74,7 @@ export interface OperationDockProps {
 }
 
 const Section: FC<{
-  tone?: 'default' | 'selection'
+  tone?: 'default' | 'selection' | 'toggle'
   children: ReactNode
   title?: string
 }> = ({ tone = 'default', children, title }) => {
@@ -85,10 +83,14 @@ const Section: FC<{
   }
   return (
     <div
-      className={`flex items-center gap-0.5 xs:w-full xs:flex-col ${
+      role={tone === 'toggle' ? 'group' : undefined}
+      className={`flex items-center xs:w-full xs:flex-col ${
         tone === 'selection'
-          ? 'rounded-xl bg-white/70 px-1 py-0.5 ring-1 ring-[#66CC8A]/35'
-          : ''
+          ? 'gap-0.5 rounded-xl bg-white/70 px-1 py-0.5 ring-1 ring-[#66CC8A]/35'
+          : tone === 'toggle'
+          ? // Segmented pan/select: shared shell, tight gap so they read as one control.
+            'gap-0 overflow-hidden rounded-xl bg-slate-200/70 p-0.5 ring-1 ring-slate-300/80'
+          : 'gap-0.5'
       }`}
       aria-label={title}
     >
@@ -104,7 +106,6 @@ const OperationDock: FC<OperationDockProps> = ({
   isFullscreen,
   isPanMode,
   mode,
-  showTouchTools,
   onUndo,
   onRedo,
   onCopy,
@@ -126,7 +127,6 @@ const OperationDock: FC<OperationDockProps> = ({
 }) => {
   const { t } = useTranslation()
   const labelOf = (key: string) => String(t(key))
-  const { touchUi } = useTouchUi()
   // Match Tailwind `xs` (max 750px) so rail layout tracks the vertical dock.
   const [railLayout, setRailLayout] = useState(
     () =>
@@ -247,7 +247,6 @@ const OperationDock: FC<OperationDockProps> = ({
 
   const iconStroke = 2
   const showSelection = hasSelection
-  const showTouch = showTouchTools || touchUi
 
   const legendToggle = (
     <DockButton
@@ -320,6 +319,36 @@ const OperationDock: FC<OperationDockProps> = ({
         </div>
 
         <div className="flex min-h-0 w-auto min-w-0 items-center gap-0.5 overflow-x-auto noScrollbar xs:w-full xs:flex-1 xs:flex-col xs:overflow-x-hidden xs:overflow-y-auto">
+          {/* Pan / Select as one segmented switch, left of undo/redo. */}
+          <Section tone="toggle" title={labelOf('operate.dock.pointerTools')}>
+            <DockButton
+              label={labelOf('operate.dock.pan')}
+              showLabel={showLabel}
+              layout={layout}
+              active={isPanMode}
+              onClick={onTogglePanMode}
+              className={
+                layout === 'rail' ? 'rounded-md' : 'rounded-md rounded-r-none'
+              }
+            >
+              <Hand strokeWidth={iconStroke} />
+            </DockButton>
+            <DockButton
+              label={labelOf('operate.dock.select')}
+              showLabel={showLabel}
+              layout={layout}
+              active={mode === ActionMode.SELECT && !isPanMode}
+              onClick={onSelectMode}
+              className={
+                layout === 'rail'
+                  ? 'rounded-md border-t border-slate-300/70'
+                  : 'rounded-md rounded-l-none border-l border-slate-300/70'
+              }
+            >
+              <MousePointer2 strokeWidth={iconStroke} />
+            </DockButton>
+          </Section>
+
           <Section tone="default">
             <DockButton
               label={labelOf('operate.dock.undo')}
@@ -336,26 +365,6 @@ const OperationDock: FC<OperationDockProps> = ({
               onClick={onRedo}
             >
               <Redo2 strokeWidth={iconStroke} />
-            </DockButton>
-            {showTouch && (
-              <DockButton
-                label={labelOf('operate.dock.pan')}
-                showLabel={showLabel}
-                layout={layout}
-                active={isPanMode}
-                onClick={onTogglePanMode}
-              >
-                <Hand strokeWidth={iconStroke} />
-              </DockButton>
-            )}
-            <DockButton
-              label={labelOf('operate.dock.select')}
-              showLabel={showLabel}
-              layout={layout}
-              active={mode === ActionMode.SELECT && !isPanMode}
-              onClick={onSelectMode}
-            >
-              <MousePointer2 strokeWidth={iconStroke} />
             </DockButton>
           </Section>
 

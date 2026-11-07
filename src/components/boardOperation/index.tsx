@@ -19,7 +19,6 @@ import {
 } from '@/core/export/exportCanvasImage'
 import { exportErrorMessageKey } from '@/core/export/exportError'
 import useWidgetStore, { MAX_WIDGET_COUNT } from '@/store/widgets'
-import { useTouchUi } from '@/hooks/useTouchUi'
 import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
 import {
   enterLandscapeLayout,
@@ -36,7 +35,6 @@ import { subscribeImageDropNotice } from '@/core/event/imageDrop'
 import OperationDock from './operationDock'
 
 const BoardOperation = () => {
-  const { touchUi } = useTouchUi()
   const { landscape } = useLandscapeLayout()
   const { isPanMode, mode, togglePanMode, setPanMode, updateMode } =
     useBoardStore()
@@ -225,7 +223,6 @@ const BoardOperation = () => {
         isFullscreen={isFullscreen}
         isPanMode={isPanMode}
         mode={mode}
-        showTouchTools={touchUi}
         onUndo={() => paintBoard.history?.undo()}
         onRedo={() => paintBoard.history?.redo()}
         onCopy={() => paintBoard.copyObject()}

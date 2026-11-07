@@ -101,6 +101,7 @@
       "redo": "やり直し",
       "pan": "移動",
       "select": "選択",
+      "pointerTools": "移動と選択",
       "copy": "コピー",
       "group": "+グループ",
       "link": "+リンク",
