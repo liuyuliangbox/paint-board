@@ -318,8 +318,11 @@ const exitOwnedFullscreenWhenPortrait = () => {
 }
 
 /**
- * After OS back: unlock, never re-enter FS, apply canvas for current viewport;
- * if still landscape wait for portrait then apply portrait ratios.
+ * After OS back: fullscreen is already gone (often while still landscape).
+ * Never re-enter FS. Immediately bake portrait canvas ratios so WindowEvent
+ * resize does not keep landscape %. If the viewport is already portrait →
+ * idle. If still landscape → return to `active` so tapping 竖版 uses the
+ * normal endLandscapeSession path (do not intercept that button).
  */
 const recoverFromFullscreenLoss = async () => {
   const gen = ++state.generation
@@ -327,6 +330,7 @@ const recoverFromFullscreenLoss = async () => {
   setActiveViewportListening(false)
   state.ownsFullscreen = false
   setMode('recovering')
+
   unlockOrientation()
   await lockOrientation('portrait')
   await waitMs(80)
@@ -334,25 +338,21 @@ const recoverFromFullscreenLoss = async () => {
     return
   }
 
-  if (applyCanvasNow(false)) {
+  // Always write portrait ratios now (live portrait measure or synthetic).
+  if (!applyCanvasNow(false)) {
+    applyPortraitFallback()
+  }
+
+  if (!isViewportLandscape()) {
     setHint(null)
     finishToIdle()
     return
   }
 
-  applyCanvasNow(true)
+  // Still landscape: keep session active so 竖版 stays the same exit control.
   setHint('operate.portraitHint', 3600)
-  const wait = await waitForViewport(false)
-  if (gen !== state.generation) {
-    return
-  }
-  if (wait.matched) {
-    state.applyCanvas?.(false, wait.width, wait.height)
-  } else {
-    applyPortraitFallback()
-  }
-  setHint(null)
-  finishToIdle()
+  setMode('active')
+  setActiveViewportListening(true)
 }
 
 /** While session is active, physical rotate to portrait completes exit. */
