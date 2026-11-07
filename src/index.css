@@ -62,9 +62,9 @@
   box-sizing: border-box;
   height: var(--pb-panel-max-h);
   max-height: var(--pb-panel-max-h);
+  align-self: flex-start;
   margin-top: var(--pb-panel-inset);
   margin-bottom: auto;
-  align-self: flex-start;
 }
 
 /* Only top-align modals that host a full-height panel (boards list, etc.). */
