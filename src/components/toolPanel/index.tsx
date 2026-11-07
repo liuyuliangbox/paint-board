@@ -185,8 +185,8 @@ const ToolPanel: FC = () => {
     )
   }
 
-  // Desktop / landscape: same focus dim as other popups — click mask to close.
-  // Fixed width so tab switches do not resize the shell; height clears top inset.
+  // Desktop / landscape: dim + click mask. Landscape: toggle left, panel to its
+  // right on the same row, filling remaining height (two-column body).
   if (chromeHidden && !showPanel) {
     return null
   }
@@ -205,43 +205,29 @@ const ToolPanel: FC = () => {
             className="pointer-events-auto absolute inset-0 z-0 bg-black/40"
             onClick={() => setToolsOpen(false)}
           />
-          <div className="pointer-events-auto absolute left-7 top-7 z-[1] landscape:left-3 landscape:top-3">
-            <div
-              className={
-                !landscape ? 'absolute -left-3 -top-3 z-10' : 'relative mb-1'
-              }
-            >
-              {toggle}
-            </div>
-            <div
-              ref={panelRef}
-              className={`pb-panel-shell pb-panel-open flex flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl ${
-                landscape
-                  ? 'h-[calc(100dvh-1.5rem)] max-h-[calc(100dvh-1.5rem)] w-[min(78vw,38rem)] p-2'
-                  : 'w-[min(22rem,calc(100vw-5.5rem))] max-w-[min(85%,calc(100vw-5.5rem))]'
-              }`}
-            >
-              <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
-                {modeSwitch.map(({ type, text, keyboard }) => (
-                  <a
-                    key={type}
-                    className={`tab flex-grow font-fredokaOne text-white font-medium ${
-                      mode === type ? 'tab-active' : 'hover:text-base-300'
-                    }`}
-                    onClick={() => {
-                      updateMode(type)
-                    }}
-                  >
-                    {t(text)}
-                    <span className="ml-1 text-xs leading-none font-normal opacity-70 pt-1 font-sans xs:hidden">
-                      {keyboard}
-                    </span>
-                  </a>
-                ))}
+          {landscape ? (
+            <div className="pointer-events-auto absolute bottom-3 left-3 top-3 z-[1] flex w-[min(78vw,40rem)] flex-row items-stretch gap-2">
+              <div className="flex shrink-0 flex-col pt-0.5">{toggle}</div>
+              <div
+                ref={panelRef}
+                className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-[#eef1ff] p-2 shadow-xl card"
+              >
+                {modeTabs}
+                {panelBody}
               </div>
-              {panelBody}
             </div>
-          </div>
+          ) : (
+            <div className="pointer-events-auto absolute left-7 top-7 z-[1]">
+              <div className="absolute -left-3 -top-3 z-10">{toggle}</div>
+              <div
+                ref={panelRef}
+                className="pb-panel-shell pb-panel-open flex w-[min(22rem,calc(100vw-5.5rem))] max-w-[min(85%,calc(100vw-5.5rem))] flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl"
+              >
+                {modeTabs}
+                {panelBody}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>
