@@ -24,7 +24,7 @@ import BoardConfig from './boardConfig'
  */
 const ToolPanel: FC = () => {
   const { t } = useTranslation()
-  const { mode, updateMode } = useBoardStore()
+  const { mode, updateMode, isPanMode } = useBoardStore()
   const { landscape } = useLandscapeLayout()
   const narrowPortrait = useNarrowPortrait()
   const { coarse } = useTouchUi()
@@ -37,7 +37,13 @@ const ToolPanel: FC = () => {
   const [showPanel, setShowPanel] = useState(() => !isViewportLandscape())
   const panelRef = useRef<HTMLDivElement>(null)
   const wasLandscape = useRef(landscape)
-  const drawLabel = String(t('operate.tools'))
+  // Closed toggle label: current tool tab; pan override shows 单指移 instead.
+  const activeTool = modeSwitch.find((item) => item.type === mode)
+  const drawLabel = String(
+    isPanMode
+      ? t('operate.dock.pan')
+      : t(activeTool?.text || 'operate.tools')
+  )
 
   const setToolsOpen = (open: boolean) => {
     setShowPanel(open)
@@ -206,11 +212,11 @@ const ToolPanel: FC = () => {
             onClick={() => setToolsOpen(false)}
           />
           {landscape ? (
-            <div className="pointer-events-auto absolute bottom-3 left-3 top-3 z-[1] flex w-[min(78vw,40rem)] flex-row items-stretch gap-2">
+            <div className="pointer-events-auto absolute left-3 top-3 z-[1] flex w-[min(70vw,34rem)] max-h-[min(68dvh,calc(100dvh-4.5rem))] flex-row items-start gap-2">
               <div className="flex shrink-0 flex-col pt-0.5">{toggle}</div>
               <div
                 ref={panelRef}
-                className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-[#eef1ff] p-2 shadow-xl card"
+                className="flex max-h-[min(68dvh,calc(100dvh-4.5rem))] min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl bg-[#eef1ff] p-2 shadow-xl card"
               >
                 {modeTabs}
                 {panelBody}

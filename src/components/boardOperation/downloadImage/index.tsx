@@ -228,10 +228,10 @@ const DownloadImage: FC<IProps> = ({
       }}
     >
       {downloadFailed && <Toast message="tip.exportFail" type="error" />}
-      <div className="card h-fit max-h-[85vh] w-[min(96vw,800px)] overflow-auto bg-[#eef1ff] p-4 shadow-xl sm:max-h-[60vh] sm:w-[80vw] sm:p-6">
+      <div className="card h-fit max-h-[min(92dvh,900px)] w-[min(96vw,56rem)] overflow-auto bg-[#eef1ff] p-3 shadow-xl landscape:max-h-[min(92dvh,calc(100dvh-1rem))] landscape:w-[min(96vw,56rem)] landscape:p-3 sm:max-h-[80vh] sm:w-[min(90vw,52rem)] sm:p-5">
         {completedCrop && (
-          <div className="flex w-full flex-col gap-4 sm:flex-row sm:justify-between sm:gap-0">
-            <div className="w-full sm:w-[48%]">
+          <div className="flex w-full flex-col gap-3 landscape:flex-row landscape:items-stretch landscape:gap-4 sm:flex-row sm:justify-between sm:gap-4">
+            <div className="w-full min-w-0 landscape:w-[55%] sm:w-[52%]">
               <div className="flex items-center flex-wrap gap-y-2">
                 <div
                   className="mr-[12px] shrink-0 min-xs:tooltip"
@@ -342,7 +342,7 @@ const DownloadImage: FC<IProps> = ({
               </div>
             </div>
 
-            <div className="flex h-fit w-full flex-wrap gap-x-4 gap-y-2 sm:w-[48%]">
+            <div className="flex h-fit w-full flex-wrap gap-x-4 gap-y-2 landscape:w-[45%] sm:w-[48%]">
               <button
                 className="btn btn-ghost btn-outline btn-sm min-h-10"
                 onClick={() => setShowModal(false)}
@@ -378,9 +378,9 @@ const DownloadImage: FC<IProps> = ({
             </div>
           </div>
         )}
-        <div className="mt-3 flex w-full flex-col gap-3 sm:flex-row sm:justify-between">
+        <div className="mt-3 flex w-full flex-col gap-3 landscape:flex-row landscape:items-start sm:flex-row sm:justify-between">
           {url && (
-            <div className="w-full shrink-0 overflow-auto sm:w-[48%]">
+            <div className="w-full min-w-0 shrink-0 overflow-auto landscape:max-h-[min(72dvh,30rem)] sm:w-[48%]">
               <div className="flex w-fit max-w-full bg-transparent bg-white bg-[length:13px_13px]">
                 <ReactCrop
                   crop={crop}
@@ -392,7 +392,7 @@ const DownloadImage: FC<IProps> = ({
                   <img
                     ref={imgRef}
                     src={displayUrl}
-                    className="max-w-full"
+                    className="max-h-[min(72dvh,30rem)] max-w-full object-contain"
                     style={{
                       transform: `scale(${saveImageScale}) rotate(${saveImageRotate}deg)`
                     }}
@@ -403,7 +403,7 @@ const DownloadImage: FC<IProps> = ({
             </div>
           )}
           {completedCrop && (
-            <div className="w-full max-h-48 shrink-0 overflow-auto sm:max-h-none sm:w-[48%]">
+            <div className="w-full max-h-48 min-w-0 shrink-0 overflow-auto landscape:max-h-[min(72dvh,30rem)] sm:max-h-none sm:w-[48%]">
               <canvas
                 ref={previewCanvasRef}
                 className="object-contain border border-base-content border-dashed"

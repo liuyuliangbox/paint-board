@@ -125,7 +125,8 @@
       "landscape": "横向き",
       "portrait": "縦向き"
     },
-    "landscapeHint": "端末を横向きにしてください"
+    "landscapeHint": "端末を横向きにしてください",
+    "portraitHint": "縦向きに戻してから横画面を終了してください（デスクトップ表示化を防ぎます）"
   },
   "widget": {
     "panelTitle": "ウィジェット",

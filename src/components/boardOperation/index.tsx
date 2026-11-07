@@ -22,7 +22,8 @@ import useUiOverlayStore, { shouldMutexOverlays } from '@/store/uiOverlay'
 import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
 import {
   enterLandscapeLayout,
-  exitLandscapeLayout
+  exitLandscapeLayout,
+  isViewportLandscape
 } from '@/utils/screenOrientation'
 import { canvasSizeForOrientation } from '@/utils/canvasOrientation'
 
@@ -85,6 +86,13 @@ const BoardOperation = () => {
       await exitLandscapeLayout()
       const portrait = canvasSizeForOrientation(false)
       updateCanvasSize(portrait.width, portrait.height)
+      // Still landscape after unlock → ask user to rotate; keep FS until then.
+      if (isViewportLandscape()) {
+        setLayoutHint('operate.portraitHint')
+        window.setTimeout(() => setLayoutHint(null), 3600)
+      } else {
+        setLayoutHint(null)
+      }
       return
     }
     const result = await enterLandscapeLayout()

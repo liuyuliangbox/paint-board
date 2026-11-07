@@ -125,7 +125,8 @@
       "landscape": "Landscape",
       "portrait": "Portrait"
     },
-    "landscapeHint": "Rotate your phone to landscape"
+    "landscapeHint": "Rotate your phone to landscape",
+    "portraitHint": "Rotate back to portrait to leave landscape mode (avoids desktop-site chrome)"
   },
   "widget": {
     "panelTitle": "Widgets",

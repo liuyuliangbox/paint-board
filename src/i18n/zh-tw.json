@@ -125,7 +125,8 @@
       "landscape": "橫版",
       "portrait": "豎版"
     },
-    "landscapeHint": "請將手機橫過來使用"
+    "landscapeHint": "請將手機橫過來使用",
+    "portraitHint": "請將手機轉回直屏後再離開橫版（避免變成電腦版網頁樣式）"
   },
   "widget": {
     "panelTitle": "小組件",

@@ -125,7 +125,8 @@
       "landscape": "가로",
       "portrait": "세로"
     },
-    "landscapeHint": "휴대폰을 가로로 돌려 주세요"
+    "landscapeHint": "휴대폰을 가로로 돌려 주세요",
+    "portraitHint": "세로로 돌린 뒤 가로 모드를 종료하세요 (데스크톱 사이트 전환 방지)"
   },
   "widget": {
     "panelTitle": "위젯",
