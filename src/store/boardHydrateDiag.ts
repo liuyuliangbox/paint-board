@@ -69,19 +69,26 @@ const preview = (raw: string | null | undefined, max = 96) => {
 export const describeStorageError = (error: unknown) => {
   if (error instanceof DOMException) {
     const msg = error.message || ''
+    let code:
+      | 'QUOTA_EXCEEDED'
+      | 'IDB_INTERNAL'
+      | 'IDB_BLOCKED'
+      | 'IDB_UNKNOWN' = 'IDB_UNKNOWN'
+    if (error.name === 'QuotaExceededError') {
+      code = 'QUOTA_EXCEEDED'
+    } else if (error.name === 'UnknownError' || /internal error/i.test(msg)) {
+      code = 'IDB_INTERNAL'
+    } else if (
+      error.name === 'InvalidStateError' ||
+      error.name === 'AbortError' ||
+      /blocked|versionchange/i.test(msg)
+    ) {
+      code = 'IDB_BLOCKED'
+    }
     return {
       name: error.name,
       message: msg,
-      code:
-        error.name === 'QuotaExceededError'
-          ? ('QUOTA_EXCEEDED' as const)
-          : error.name === 'UnknownError' || /internal error/i.test(msg)
-            ? ('IDB_INTERNAL' as const)
-            : error.name === 'InvalidStateError' ||
-                error.name === 'AbortError' ||
-                /blocked|versionchange/i.test(msg)
-              ? ('IDB_BLOCKED' as const)
-              : ('IDB_UNKNOWN' as const)
+      code
     }
   }
   if (error instanceof Error) {
@@ -178,7 +185,9 @@ const hintKeysFor = (code: BoardHydrateCode): string[] => {
   }
 }
 
-const buildLines = (diag: Omit<BoardHydrateDiagnosis, 'lines' | 'hintKeys'>) => {
+const buildLines = (
+  diag: Omit<BoardHydrateDiagnosis, 'lines' | 'hintKeys'>
+) => {
   const lines = [
     `code=${diag.code}`,
     `outcome=${diag.outcome}`,
@@ -205,7 +214,9 @@ const buildLines = (diag: Omit<BoardHydrateDiagnosis, 'lines' | 'hintKeys'>) => 
     lines.push(`backupPreview=${diag.backupPreview}`)
   }
   lines.push('idbDatabase=keyval-store')
-  lines.push('keys=PAINT-BOARD-FILES | PAINT-BOARD-FILES-BACKUP | paint-board-file:*')
+  lines.push(
+    'keys=PAINT-BOARD-FILES | PAINT-BOARD-FILES-BACKUP | paint-board-file:*'
+  )
   return lines
 }
 

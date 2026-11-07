@@ -7,7 +7,10 @@ const isMobile = isMobileFn()
 export type HelpSurface = 'touch' | 'pointer' | 'keyboard'
 
 const readSurfaces = () => {
-  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+  if (
+    typeof window === 'undefined' ||
+    typeof window.matchMedia !== 'function'
+  ) {
     return { touch: false, pointer: true, keyboard: true }
   }
   const touch = window.matchMedia('(pointer: coarse)').matches
@@ -46,8 +49,11 @@ export const useHelpSurfaces = () => {
     }
   }, [])
 
-  const { touch: showTouch, pointer: showPointer, keyboard: showKeyboard } =
-    surfaces
+  const {
+    touch: showTouch,
+    pointer: showPointer,
+    keyboard: showKeyboard
+  } = surfaces
 
   return {
     showTouch,

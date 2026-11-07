@@ -14,20 +14,20 @@ export const isIdbInternalError = (error: unknown) => {
     error instanceof Error
       ? error.name
       : typeof error === 'object' &&
-          error !== null &&
-          'name' in error &&
-          typeof (error as { name: unknown }).name === 'string'
-        ? (error as { name: string }).name
-        : ''
+        error !== null &&
+        'name' in error &&
+        typeof (error as { name: unknown }).name === 'string'
+      ? (error as { name: string }).name
+      : ''
   const message =
     error instanceof Error
       ? error.message
       : typeof error === 'object' &&
-          error !== null &&
-          'message' in error &&
-          typeof (error as { message: unknown }).message === 'string'
-        ? (error as { message: string }).message
-        : String(error)
+        error !== null &&
+        'message' in error &&
+        typeof (error as { message: unknown }).message === 'string'
+      ? (error as { message: string }).message
+      : String(error)
   return (
     name === 'UnknownError' ||
     /internal error/i.test(message) ||

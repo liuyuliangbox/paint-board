@@ -93,6 +93,7 @@ const storage: StateStorage = {
     } catch (error) {
       // Stale idb-keyval connection after deleteDatabase → rotate and retry once.
       let rotatedOk = false
+      let readError: unknown = error
       if (isIdbInternalError(error)) {
         try {
           const { resetIdbStore } = await import('./idbKeyvalStore')
@@ -102,14 +103,14 @@ const storage: StateStorage = {
           primarySnap = snapshotRaw(primary)
           rotatedOk = true
         } catch (rotatedError) {
-          error = rotatedError
+          readError = rotatedError
           primary = null
           primarySnap = snapshotRaw(null)
         }
       }
 
       if (!rotatedOk) {
-        const described = describeStorageError(error)
+        const described = describeStorageError(readError)
         // Still try backup before giving up.
         let backup: string | null = null
         let backupSnap = snapshotRaw(null)
@@ -159,8 +160,8 @@ const storage: StateStorage = {
             described.code === 'IDB_BLOCKED'
               ? described.code
               : described.code === 'IDB_INTERNAL'
-                ? 'IDB_INTERNAL'
-                : 'IDB_GET_PRIMARY_THROW',
+              ? 'IDB_INTERNAL'
+              : 'IDB_GET_PRIMARY_THROW',
           outcome: 'soft_blank',
           phase: 'get_primary',
           errorName: described.name,
@@ -279,8 +280,8 @@ const storage: StateStorage = {
             described.code === 'QUOTA_EXCEEDED'
               ? 'QUOTA_EXCEEDED'
               : described.code === 'IDB_INTERNAL'
-                ? 'IDB_INTERNAL'
-                : 'PERSIST_WRITE_FAIL',
+              ? 'IDB_INTERNAL'
+              : 'PERSIST_WRITE_FAIL',
           outcome: 'persist_fail',
           phase: 'persist_write',
           errorName: described.name,

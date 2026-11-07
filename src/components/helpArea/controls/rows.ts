@@ -105,7 +105,9 @@ export const BOARD_ROWS: HelpControlRow[] = [
     id: 'pan-touch',
     actionKey: 'helpInfo.boardOperations.panBoardMobile',
     surfaces: ['touch'],
-    parts: [{ kind: 'text', key: 'helpInfo.keyboardShortcuts.doubleFingerDrag' }]
+    parts: [
+      { kind: 'text', key: 'helpInfo.keyboardShortcuts.doubleFingerDrag' }
+    ]
   },
   {
     id: 'pan-hand',
@@ -117,7 +119,9 @@ export const BOARD_ROWS: HelpControlRow[] = [
     id: 'zoom-touch',
     actionKey: 'helpInfo.boardOperations.zoomBoardMobile',
     surfaces: ['touch'],
-    parts: [{ kind: 'text', key: 'helpInfo.keyboardShortcuts.doubleFingerZoom' }]
+    parts: [
+      { kind: 'text', key: 'helpInfo.keyboardShortcuts.doubleFingerZoom' }
+    ]
   },
   {
     id: 'undo-touch',
@@ -158,9 +162,7 @@ export const ELEMENT_ROWS: HelpControlRow[] = [
     id: 'right-click',
     actionKey: 'helpInfo.elementOperations.rightClickSelect',
     surfaces: ['pointer'],
-    parts: [
-      { kind: 'text', key: 'helpInfo.keyboardShortcuts.mouseRightClick' }
-    ]
+    parts: [{ kind: 'text', key: 'helpInfo.keyboardShortcuts.mouseRightClick' }]
   },
   {
     id: 'right-marquee',
@@ -243,7 +245,10 @@ export const ELEMENT_ROWS: HelpControlRow[] = [
     actionKey: 'helpInfo.elementOperations.scaleSelectedTouch',
     surfaces: ['touch'],
     parts: [
-      { kind: 'text', key: 'helpInfo.keyboardShortcuts.twoFingerScaleSelection' }
+      {
+        kind: 'text',
+        key: 'helpInfo.keyboardShortcuts.twoFingerScaleSelection'
+      }
     ]
   },
   {

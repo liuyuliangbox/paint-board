@@ -8,8 +8,7 @@ import { useHelpSurfaces } from '@/hooks/useHelpSurfaces'
  */
 const HelpGuide: FC = () => {
   const { t } = useTranslation()
-  const { narrowPortrait, isMobile, showTouch, showPointer } =
-    useHelpSurfaces()
+  const { narrowPortrait, isMobile, showTouch, showPointer } = useHelpSurfaces()
 
   return (
     <div className="pb-10">

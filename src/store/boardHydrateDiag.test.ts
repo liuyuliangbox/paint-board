@@ -15,9 +15,9 @@ describe('boardHydrateDiag', () => {
     expect(
       describeStorageError(new DOMException('quota', 'QuotaExceededError')).code
     ).toBe('QUOTA_EXCEEDED')
-    expect(
-      describeStorageError(new Error('invalid file list')).code
-    ).toBe('PRIMARY_INVALID_SHAPE')
+    expect(describeStorageError(new Error('invalid file list')).code).toBe(
+      'PRIMARY_INVALID_SHAPE'
+    )
   })
 
   it('stores a copyable diagnosis dump', () => {
