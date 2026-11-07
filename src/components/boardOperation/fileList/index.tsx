@@ -5,13 +5,14 @@ import {
   CloudUpload,
   FileDown,
   FilePlus,
-  FileUp,
+  FolderInput,
   LogIn,
   LogOut,
   RefreshCw,
   Trash2,
   X
 } from 'lucide-react'
+import useUiLegendStore from '@/store/uiLegend'
 import useFileStore, { canAddBoard, MAX_BOARD_COUNT } from '@/store/files'
 import { idsToDelete } from '@/store/boardRules'
 import useBoardStore from '@/store/board'
@@ -66,6 +67,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
   } = useFileStore()
   const updateMode = useBoardStore((state) => state.updateMode)
   const updateOpenCamera = useCameraStore((state) => state.updateOpenCamera)
+  const showLabel = useUiLegendStore((s) => s.legendOpen)
   const [tab, setTab] = useState<TabId>('local')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [renameId, setRenameId] = useState('')
@@ -383,7 +385,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
         />
         <div className="pointer-events-none absolute inset-0 z-[1] flex items-stretch justify-center narrow-portrait:justify-end">
           <div
-            className="pointer-events-auto pb-panel-fill flex w-[min(92vw,48rem)] max-w-5xl flex-col overflow-hidden bg-white shadow-xl narrow-portrait:m-0 narrow-portrait:w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:max-w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:rounded-none narrow-portrait:rounded-l-2xl"
+            className="pointer-events-auto pb-panel-fill flex w-[min(92vw,48rem)] max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl narrow-portrait:m-0 narrow-portrait:w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:max-w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:rounded-none narrow-portrait:rounded-l-2xl landscape:rounded-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-3 xs:px-3 xs:py-2 landscape:px-3 landscape:py-2">
@@ -474,8 +476,8 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                       <>
                         <button
                           type="button"
-                          className="btn btn-ghost btn-sm min-xs:tooltip"
-                          data-tip={t('fileBoard.create')}
+                          className="btn btn-ghost btn-sm gap-1"
+                          title={String(t('fileBoard.create'))}
                           aria-label={t('fileBoard.create') || undefined}
                           onClick={() => {
                             if (atLimit) {
@@ -486,11 +488,16 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                           }}
                         >
                           <FilePlus size={18} color="#66CC8A" />
+                          {showLabel && (
+                            <span className="text-xs font-medium normal-case">
+                              {t('fileBoard.create')}
+                            </span>
+                          )}
                         </button>
                         <button
                           type="button"
-                          className="btn btn-ghost btn-sm min-xs:tooltip"
-                          data-tip={t('operate.uploadFile')}
+                          className="btn btn-ghost btn-sm gap-1"
+                          title={String(t('operate.uploadFile'))}
                           aria-label={t('operate.uploadFile') || undefined}
                           onClick={() => {
                             if (atLimit) {
@@ -500,7 +507,12 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                             uploadRef.current?.click()
                           }}
                         >
-                          <FileUp size={18} color="#66CC8A" />
+                          <FolderInput size={18} color="#66CC8A" />
+                          {showLabel && (
+                            <span className="text-xs font-medium normal-case">
+                              {t('operate.uploadFile')}
+                            </span>
+                          )}
                         </button>
                         {deleteTargets.length > 0 && (
                           <button

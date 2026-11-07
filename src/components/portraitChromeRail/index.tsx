@@ -19,11 +19,12 @@ import InfoIcon from '@/components/icons/info.svg?react'
 const PortraitChromeRail: FC = () => {
   const { t } = useTranslation()
   const showLabel = useUiLegendStore((s) => s.legendOpen)
+  const chromeHidden = useUiLegendStore((s) => s.chromeHidden)
   const chromeBridge = useOperationChromeBridge((s) => s.bridge)
   const narrowPortrait = useNarrowPortrait()
   const overlayActive = useUiOverlayStore((s) => s.active)
 
-  if (!narrowPortrait) {
+  if (!narrowPortrait || chromeHidden) {
     return null
   }
   // Layers / boards / widgets cover the right chrome; tools clears it so keep it.
@@ -37,34 +38,39 @@ const PortraitChromeRail: FC = () => {
 
   return (
     <div className="pointer-events-none fixed right-1.5 top-1/2 z-[var(--pb-z-chrome)] flex max-h-[min(70vh,32rem)] -translate-y-1/2 flex-col">
-      <div className="pointer-events-auto flex max-h-full flex-col items-center gap-0.5 overflow-y-auto noScrollbar rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1 py-1.5 shadow-md backdrop-blur">
-        {chromeBridge && (
-          <>
-            <ChromeActions bridge={chromeBridge} layout="col" />
-            <div className="my-0.5 h-px w-6 shrink-0 bg-slate-200/80" />
-          </>
-        )}
-        <LanguageSwitch rail />
-        <button
-          type="button"
-          className="flex w-full flex-col items-center gap-0.5 rounded-full bg-white px-0.5 py-1 hover:opacity-70"
-          title={showLabel ? undefined : String(t('operate.help'))}
-          aria-label={String(t('operate.help'))}
-          onClick={() => {
-            ;(
-              document.getElementById('help-modal') as HTMLDialogElement
-            ).showModal()
-          }}
-        >
-          <InfoIcon className="h-7 w-7 shrink-0 rounded-full" />
-          {showLabel && (
-            <span className="max-w-[2.75rem] truncate text-center text-[9px] font-medium leading-tight text-slate-700">
-              {t('operate.help')}
-            </span>
+      <div className="pointer-events-auto flex max-h-full flex-col items-center gap-0.5 overflow-visible rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1 py-1.5 shadow-md backdrop-blur">
+        <div className="flex min-h-0 w-full flex-1 flex-col items-center gap-0.5 overflow-y-auto noScrollbar">
+          {chromeBridge && (
+            <>
+              <ChromeActions bridge={chromeBridge} layout="col" />
+              <div className="my-0.5 h-px w-6 shrink-0 bg-slate-200/80" />
+            </>
           )}
-        </button>
-        <ZoomInfo showLabel={showLabel} rail />
-        <CameraConfig showLabel={showLabel} rail />
+          <button
+            type="button"
+            className="flex w-full flex-col items-center gap-0.5 rounded-full bg-white px-0.5 py-1 hover:opacity-70"
+            title={showLabel ? undefined : String(t('operate.help'))}
+            aria-label={String(t('operate.help'))}
+            onClick={() => {
+              ;(
+                document.getElementById('help-modal') as HTMLDialogElement
+              ).showModal()
+            }}
+          >
+            <InfoIcon className="h-7 w-7 shrink-0 rounded-full" />
+            {showLabel && (
+              <span className="max-w-[2.75rem] truncate text-center text-[9px] font-medium leading-tight text-slate-700">
+                {t('operate.help')}
+              </span>
+            )}
+          </button>
+          <ZoomInfo showLabel={showLabel} rail />
+          <CameraConfig showLabel={showLabel} rail />
+        </div>
+        {/* Sibling of the scroller so the left-opening menu is not clipped. */}
+        <div className="relative z-[1] mt-0.5 w-full shrink-0 overflow-visible">
+          <LanguageSwitch rail />
+        </div>
       </div>
     </div>
   )

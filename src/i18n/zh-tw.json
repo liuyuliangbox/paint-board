@@ -96,6 +96,8 @@
     "uploadFile": "匯入本機畫板檔案",
     "expandLegend": "展開說明",
     "collapseLegend": "收起說明",
+    "hideChrome": "隱藏介面",
+    "showChrome": "顯示介面",
     "selectionActions": "選中操作",
     "tools": "繪畫",
     "help": "說明",
@@ -202,7 +204,9 @@
     "group": "組合",
     "element": "元素",
     "multiSelect": "多選",
-    "multiSelectHint": "多選已開：點按切換選中；再點「多選」關閉"
+    "multiSelectHint": "多選已開：點按切換選中；再點「多選」關閉",
+    "moveUp": "上移一層",
+    "moveDown": "下移一層"
   },
   "cleanModal": {
     "title": "確認清除內容？"

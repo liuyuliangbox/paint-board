@@ -82,6 +82,9 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
       chosenClass: 'scale-105',
       dragClass: 'rotate-2',
       handle: '.drag-object-list-handle',
+      forceFallback: coarse,
+      fallbackTolerance: 4,
+      touchStartThreshold: 8,
       onEnd: (evt) => {
         if (evt.oldIndex !== undefined && evt.newIndex !== undefined) {
           moveObjectInList(evt.oldIndex, evt.newIndex)
@@ -91,7 +94,7 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
     return () => {
       sortable.destroy()
     }
-  }, [])
+  }, [coarse])
 
   const handleSelect = (index: number, event: React.MouseEvent) => {
     const object = objectFromList(index)
@@ -129,7 +132,7 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
         onClick={() => updateShow(false)}
       />
       <div className="pointer-events-none absolute inset-0 z-[1] flex items-stretch justify-center narrow-portrait:justify-end">
-        <div className="pointer-events-auto pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden bg-white px-4 py-4 shadow-xl narrow-portrait:m-0 narrow-portrait:w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:max-w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:rounded-none narrow-portrait:rounded-l-2xl narrow-portrait:px-3 narrow-portrait:py-3 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-3 landscape:py-3">
+        <div className="pointer-events-auto pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden rounded-2xl bg-white px-4 py-4 shadow-xl narrow-portrait:m-0 narrow-portrait:w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:max-w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:rounded-none narrow-portrait:rounded-l-2xl narrow-portrait:px-3 narrow-portrait:py-3 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:rounded-2xl landscape:px-3 landscape:py-3">
           <div className="shrink-0 text-center font-fredokaOne text-xl xs:text-lg landscape:text-lg">
             {t('objectList.title')}
           </div>
@@ -190,11 +193,23 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
                   <ObjectItem
                     key={row.key}
                     row={row}
+                    index={index}
+                    total={rows.length}
                     onSelect={(event) => handleSelect(index, event)}
                     onToggleVisible={() => {
                       const object = objectFromList(index)
                       if (object) {
                         toggleObjectVisible(object)
+                      }
+                    }}
+                    onMoveUp={() => {
+                      if (index > 0) {
+                        moveObjectInList(index, index - 1)
+                      }
+                    }}
+                    onMoveDown={() => {
+                      if (index < rows.length - 1) {
+                        moveObjectInList(index, index + 1)
                       }
                     }}
                     onCommitText={(value) => {

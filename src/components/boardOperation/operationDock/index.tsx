@@ -28,6 +28,7 @@ import { ExportScope } from '@/core/export/exportCanvasImage'
 import useUiLegendStore from '@/store/uiLegend'
 import useUiOverlayStore from '@/store/uiOverlay'
 import { useNarrowPortrait } from '@/hooks/useNarrowPortrait'
+import { useTouchUi } from '@/hooks/useTouchUi'
 import DockButton from './DockButton'
 
 const isMobile = isMobileFn()
@@ -125,10 +126,14 @@ const OperationDock: FC<OperationDockProps> = ({
   const layout = railLayout ? 'rail' : 'bar'
   const legendOpen = useUiLegendStore((s) => s.legendOpen)
   const setLegendOpen = useUiLegendStore((s) => s.setLegendOpen)
+  const chromeHidden = useUiLegendStore((s) => s.chromeHidden)
+  const { coarse } = useTouchUi()
   const [moreOpen, setMoreOpen] = useState(false)
   const dockRef = useRef<HTMLDivElement>(null)
   const swipeStart = useRef<{ x: number; y: number } | null>(null)
   const showLabel = legendOpen
+  // Touch: pan override + select. Desktop: select shortcut only (space/mid pan).
+  const showPanButton = coarse || isMobile
 
   useEffect(() => {
     const el = dockRef.current
@@ -214,6 +219,10 @@ const OperationDock: FC<OperationDockProps> = ({
   // Keep the dock visible when a panel is open, but drop under the focused dim.
   const underPanelDim = narrowPortrait && overlayActive !== 'none'
 
+  if (chromeHidden) {
+    return null
+  }
+
   return (
     <div
       className={`pointer-events-none fixed ${
@@ -278,24 +287,29 @@ const OperationDock: FC<OperationDockProps> = ({
               : 'w-auto overflow-x-auto'
           }`}
         >
-          {/* Pan / Select as one segmented switch, left of undo/redo. */}
+          {/*
+            Content mode = tool tabs. Pan is an optional single-finger override
+            (touch only). Desktop uses space/mid-button pan — no Hand button.
+          */}
           <Section
             rail={railLayout}
-            tone="toggle"
+            tone={showPanButton ? 'toggle' : 'default'}
             title={labelOf('operate.dock.pointerTools')}
           >
-            <DockButton
-              label={labelOf('operate.dock.pan')}
-              showLabel={showLabel}
-              layout={layout}
-              active={isPanMode}
-              onClick={onTogglePanMode}
-              className={
-                layout === 'rail' ? 'rounded-md' : 'rounded-md rounded-r-none'
-              }
-            >
-              <Hand strokeWidth={iconStroke} />
-            </DockButton>
+            {showPanButton && (
+              <DockButton
+                label={labelOf('operate.dock.pan')}
+                showLabel={showLabel}
+                layout={layout}
+                active={isPanMode}
+                onClick={onTogglePanMode}
+                className={
+                  layout === 'rail' ? 'rounded-md' : 'rounded-md rounded-r-none'
+                }
+              >
+                <Hand strokeWidth={iconStroke} />
+              </DockButton>
+            )}
             <DockButton
               label={labelOf('operate.dock.select')}
               showLabel={showLabel}
@@ -303,9 +317,11 @@ const OperationDock: FC<OperationDockProps> = ({
               active={mode === ActionMode.SELECT && !isPanMode}
               onClick={onSelectMode}
               className={
-                layout === 'rail'
-                  ? 'rounded-md border-t border-slate-300/70'
-                  : 'rounded-md rounded-l-none border-l border-slate-300/70'
+                showPanButton
+                  ? layout === 'rail'
+                    ? 'rounded-md border-t border-slate-300/70'
+                    : 'rounded-md rounded-l-none border-l border-slate-300/70'
+                  : 'rounded-md'
               }
             >
               <MousePointer2 strokeWidth={iconStroke} />

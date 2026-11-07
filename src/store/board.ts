@@ -6,6 +6,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { alignGuideLine } from '@/core/fabricMixin/alignGuideLine'
 import { getInitLanguage } from '@/i18n/utils'
+import { syncDocumentLanguage } from '@/i18n/documentLang'
 
 interface BoardState {
   mode: string // operating mode
@@ -68,6 +69,7 @@ const useBoardStore = create<BoardState & BoardAction>()(
         set({
           language
         })
+        syncDocumentLanguage(language)
       },
       updateCacheState() {
         const oldCacheState = get().isObjectCaching

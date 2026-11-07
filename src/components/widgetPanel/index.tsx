@@ -23,6 +23,7 @@ import useWidgetStore, {
   widgetCategoryOf
 } from '@/store/widgets'
 import useUiOverlayStore, { shouldMutexOverlays } from '@/store/uiOverlay'
+import useUiLegendStore from '@/store/uiLegend'
 import { insertWidgetObjects } from '@/core/widget/widget'
 import {
   getMySyncCode,
@@ -84,6 +85,7 @@ const WidgetPanel = () => {
   const regenerateArmedRef = useRef(false)
   const { coarse, narrow } = useTouchUi()
   const overlayActive = useUiOverlayStore((s) => s.active)
+  const chromeHidden = useUiLegendStore((s) => s.chromeHidden)
 
   useEffect(() => subscribeCloudAuth(() => setLoggedIn(isCloudLoggedIn())), [])
 
@@ -437,6 +439,10 @@ const WidgetPanel = () => {
     },
     ...categories.map((name) => ({ id: name, label: name }))
   ]
+
+  if (chromeHidden && !panelOpen) {
+    return null
+  }
 
   return (
     <>

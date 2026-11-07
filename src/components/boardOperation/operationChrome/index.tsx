@@ -1,6 +1,7 @@
 import { FC, useEffect, useRef } from 'react'
 import { useNarrowPortrait } from '@/hooks/useNarrowPortrait'
 import useOperationChromeBridge from '@/store/operationChromeBridge'
+import useUiLegendStore from '@/store/uiLegend'
 import ChromeActions from './ChromeActions'
 
 /**
@@ -26,6 +27,7 @@ const OperationChrome: FC<OperationChromeProps> = ({
   onToggleLandscapeLayout
 }) => {
   const narrowPortrait = useNarrowPortrait()
+  const chromeHidden = useUiLegendStore((s) => s.chromeHidden)
   const setBridge = useOperationChromeBridge((s) => s.setBridge)
   const actionsRef = useRef({
     onToggleObjectList,
@@ -54,7 +56,7 @@ const OperationChrome: FC<OperationChromeProps> = ({
   }, [isFullscreen, isLandscapeLayout, setBridge])
 
   // Portrait phone: right chrome rail owns these actions.
-  if (narrowPortrait) {
+  if (narrowPortrait || chromeHidden) {
     return null
   }
 

@@ -38,3 +38,21 @@ export const writeDockLegendOpen = (open: boolean) => {
     // ignore quota / private mode
   }
 }
+
+const CHROME_HIDDEN_KEY = 'PAINT-BOARD-CHROME-HIDDEN-V1'
+
+export const readChromeHidden = () => {
+  try {
+    return localStorage.getItem(CHROME_HIDDEN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export const writeChromeHidden = (hidden: boolean) => {
+  try {
+    localStorage.setItem(CHROME_HIDDEN_KEY, hidden ? '1' : '0')
+  } catch {
+    // ignore
+  }
+}

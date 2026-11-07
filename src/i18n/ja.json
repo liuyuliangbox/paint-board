@@ -96,6 +96,8 @@
     "uploadFile": "ローカルボードファイルを読み込む",
     "expandLegend": "説明を表示",
     "collapseLegend": "説明を隠す",
+    "hideChrome": "UIを隠す",
+    "showChrome": "UIを表示",
     "selectionActions": "選択操作",
     "tools": "描画",
     "help": "ヘルプ",
@@ -202,7 +204,9 @@
     "group": "グループ",
     "element": "要素",
     "multiSelect": "複数選択",
-    "multiSelectHint": "複数選択オン：タップで切替、再タップでオフ"
+    "multiSelectHint": "複数選択オン：タップで切替、再タップでオフ",
+    "moveUp": "上へ移動",
+    "moveDown": "下へ移動"
   },
   "cleanModal": {
     "title": "コンテンツのクリアを確認しますか？"

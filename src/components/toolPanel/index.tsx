@@ -32,6 +32,7 @@ const ToolPanel: FC = () => {
   // Landscape (short) or touch: spill into columns; desktop mouse keeps wheel scroll.
   const flowCols = landscape || coarse
   const showLabel = useUiLegendStore((s) => s.legendOpen)
+  const chromeHidden = useUiLegendStore((s) => s.chromeHidden)
   const setWidgetPanelOpen = useWidgetStore((s) => s.setPanelOpen)
   const [showPanel, setShowPanel] = useState(() => !isViewportLandscape())
   const panelRef = useRef<HTMLDivElement>(null)
@@ -145,6 +146,9 @@ const ToolPanel: FC = () => {
   // Narrow portrait: focused tools panel is topmost. Closed draw toggle only
   // shows when nothing else is focused, so it never covers widgets/layers/boards.
   if (narrowPortrait) {
+    if (chromeHidden && !showPanel) {
+      return null
+    }
     return (
       <>
         {!showPanel && overlayActive === 'none' && (
@@ -182,6 +186,10 @@ const ToolPanel: FC = () => {
   }
 
   // Desktop / landscape: same focus dim as other popups — click mask to close.
+  // Fixed width so tab switches do not resize the shell; height clears top inset.
+  if (chromeHidden && !showPanel) {
+    return null
+  }
   return (
     <>
       {!showPanel && (
@@ -207,7 +215,11 @@ const ToolPanel: FC = () => {
             </div>
             <div
               ref={panelRef}
-              className="pb-panel-shell pb-panel-open flex flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl max-w-[min(85%,calc(100vw-5.5rem))] landscape:max-w-[min(78vw,38rem)] landscape:p-2"
+              className={`pb-panel-shell pb-panel-open flex flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl ${
+                landscape
+                  ? 'h-[calc(100dvh-1.5rem)] max-h-[calc(100dvh-1.5rem)] w-[min(78vw,38rem)] p-2'
+                  : 'w-[min(22rem,calc(100vw-5.5rem))] max-w-[min(85%,calc(100vw-5.5rem))]'
+              }`}
             >
               <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
                 {modeSwitch.map(({ type, text, keyboard }) => (

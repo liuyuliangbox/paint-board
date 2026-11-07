@@ -1,19 +1,34 @@
 import { FC, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, GripVertical, Link2 } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  EyeOff,
+  GripVertical,
+  Link2
+} from 'lucide-react'
 import { ObjectListRow } from '@/core/element/layer/objectList'
 
 interface IProps {
   row: ObjectListRow
+  index: number
+  total: number
   onSelect: (event: React.MouseEvent) => void
   onToggleVisible: () => void
+  onMoveUp: () => void
+  onMoveDown: () => void
   onCommitText?: (value: string) => void
 }
 
 const ObjectItem: FC<IProps> = ({
   row,
+  index,
+  total,
   onSelect,
   onToggleVisible,
+  onMoveUp,
+  onMoveDown,
   onCommitText
 }) => {
   const { t } = useTranslation()
@@ -79,7 +94,33 @@ const ObjectItem: FC<IProps> = ({
           </span>
         )}
       </span>
-      <span className="ml-3 flex shrink-0 items-center gap-x-2">
+      <span className="ml-2 flex shrink-0 items-center gap-x-1">
+        <button
+          type="button"
+          className="btn btn-ghost btn-xs min-h-0 h-7 w-7 p-0"
+          title={String(t('objectList.moveUp'))}
+          aria-label={String(t('objectList.moveUp'))}
+          disabled={index <= 0}
+          onClick={(event) => {
+            event.stopPropagation()
+            onMoveUp()
+          }}
+        >
+          <ChevronUp size={16} color={iconColor} />
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost btn-xs min-h-0 h-7 w-7 p-0"
+          title={String(t('objectList.moveDown'))}
+          aria-label={String(t('objectList.moveDown'))}
+          disabled={index >= total - 1}
+          onClick={(event) => {
+            event.stopPropagation()
+            onMoveDown()
+          }}
+        >
+          <ChevronDown size={16} color={iconColor} />
+        </button>
         <span
           onClick={(event) => {
             event.stopPropagation()
@@ -93,7 +134,7 @@ const ObjectItem: FC<IProps> = ({
           )}
         </span>
         <GripVertical
-          className="drag-object-list-handle hidden cursor-grab group-hover:block [@media(pointer:coarse)]:block xs:block"
+          className="drag-object-list-handle hidden cursor-grab touch-none group-hover:block [@media(pointer:coarse)]:block xs:block"
           color={iconColor}
           size={16}
           onClick={(event) => {

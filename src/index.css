@@ -113,7 +113,8 @@
   column-gap: 0.75rem;
   column-fill: auto;
   overflow-x: auto;
-  overflow-y: hidden;
+  /* Allow scroll when a tall tab (e.g. Board) still exceeds the shell. */
+  overflow-y: auto;
 }
 
 .pb-panel-flow-cols > * {

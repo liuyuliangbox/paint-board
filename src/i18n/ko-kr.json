@@ -96,6 +96,8 @@
     "uploadFile": "로컬 보드 파일 가져오기",
     "expandLegend": "설명 펼치기",
     "collapseLegend": "설명 접기",
+    "hideChrome": "UI 숨기기",
+    "showChrome": "UI 보이기",
     "selectionActions": "선택 작업",
     "tools": "그리기",
     "help": "도움말",
@@ -202,7 +204,9 @@
     "group": "그룹",
     "element": "요소",
     "multiSelect": "다중 선택",
-    "multiSelectHint": "다중 선택 켜짐: 탭으로 토글, 다시 탭하여 끔"
+    "multiSelectHint": "다중 선택 켜짐: 탭으로 토글, 다시 탭하여 끔",
+    "moveUp": "위로 이동",
+    "moveDown": "아래로 이동"
   },
   "cleanModal": {
     "title": "내용을 지우시겠습니까?"

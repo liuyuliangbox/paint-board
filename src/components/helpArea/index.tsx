@@ -12,6 +12,7 @@ import HelpModal from './helpModal'
 const HelpArea: React.FC = () => {
   const { t } = useTranslation()
   const showLabel = useUiLegendStore((s) => s.legendOpen)
+  const chromeHidden = useUiLegendStore((s) => s.chromeHidden)
   const narrowPortrait = useNarrowPortrait()
 
   return (
@@ -20,7 +21,7 @@ const HelpArea: React.FC = () => {
         Narrow portrait: language/help/zoom/camera live on the right chrome rail.
         Landscape/desktop: bottom-left (or top-left in landscape) capsule.
       */}
-      {!narrowPortrait && (
+      {!chromeHidden && !narrowPortrait && (
         <div className="z-[4] fixed bottom-3 left-3 flex flex-row items-center justify-center gap-0.5 rounded-full bg-[#eef1ff] px-2 py-1.5 landscape:bottom-auto landscape:left-14 landscape:top-3">
           <LanguageSwitch />
           <button

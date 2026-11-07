@@ -12,7 +12,7 @@ const sameLang = (a: string, b: string) =>
   toI18nLng(a).toLowerCase() === toI18nLng(b).toLowerCase()
 
 interface LanguageSwitchProps {
-  /** Portrait left rail: compact vertical control, menu opens to the right. */
+  /** Portrait right chrome rail: compact vertical control, menu opens left. */
   rail?: boolean
 }
 
@@ -52,7 +52,10 @@ const LanguageSwitch: FC<LanguageSwitchProps> = ({ rail = false }) => {
   }
 
   return (
-    <div ref={rootRef} className={`relative ${rail ? 'w-full' : ''}`}>
+    <div
+      ref={rootRef}
+      className={`relative ${rail ? 'w-full overflow-visible' : ''}`}
+    >
       <button
         type="button"
         title={showLabel ? undefined : aria}
@@ -90,8 +93,9 @@ const LanguageSwitch: FC<LanguageSwitchProps> = ({ rail = false }) => {
           aria-label={aria}
           className={
             rail
-              ? 'absolute left-full top-0 z-[14] ml-2 min-w-[9.5rem] overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff] py-1 shadow-lg'
-              : 'absolute bottom-full left-0 z-[14] mb-2 min-w-[9.5rem] overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff] py-1 shadow-lg landscape:bottom-auto landscape:top-full landscape:mb-0 landscape:mt-2'
+              ? // Right-edge rail: open left so the menu stays on-screen.
+                'absolute right-full top-0 z-[var(--pb-z-focus)] mr-2 min-w-[9.5rem] overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff] py-1 shadow-lg'
+              : 'absolute bottom-full left-0 z-[var(--pb-z-focus)] mb-2 min-w-[9.5rem] overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff] py-1 shadow-lg landscape:bottom-auto landscape:top-full landscape:mb-0 landscape:mt-2'
           }
         >
           {languageList.map((item) => {
