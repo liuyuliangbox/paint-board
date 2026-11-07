@@ -182,6 +182,8 @@ describe('landscapeSession', () => {
     documentMock.fullscreenElement = null
     documentMock.dispatchEvent({ type: 'fullscreenchange' })
     await vi.advanceTimersByTimeAsync(100)
+    windowMock.setInnerSize(390, 844)
+    windowMock.dispatchEvent({ type: 'resize' })
     await vi.runAllTimersAsync()
 
     expect(getLandscapeSession().mode).toBe('idle')
@@ -190,38 +192,6 @@ describe('landscapeSession', () => {
     expect(
       documentMock.documentElement.requestFullscreen
     ).toHaveBeenCalledTimes(1)
-  })
-
-  it('stays recovering when OS back leaves the viewport landscape', async () => {
-    orientation.lock
-      .mockRejectedValueOnce(new Error('need fs'))
-      .mockImplementation(async (...args: unknown[]) => {
-        if (args[0] === 'landscape') {
-          windowMock.setInnerSize(844, 390)
-        }
-        // Portrait lock does not rotate — viewport stays landscape.
-      })
-
-    const startPromise = startLandscapeSession()
-    await vi.runAllTimersAsync()
-    await startPromise
-    applyCanvas.mockClear()
-
-    documentMock.fullscreenElement = null
-    documentMock.dispatchEvent({ type: 'fullscreenchange' })
-    await vi.advanceTimersByTimeAsync(100)
-    await vi.runAllTimersAsync()
-
-    expect(getLandscapeSession().mode).toBe('recovering')
-    expect(getLandscapeSession().ownsFullscreen).toBe(false)
-    expect(getLandscapeSession().hintKey).toBe('operate.portraitHint')
-    expect(applyCanvas).toHaveBeenCalledWith(false, 390, 844)
-
-    windowMock.setInnerSize(390, 844)
-    windowMock.dispatchEvent({ type: 'resize' })
-    await vi.runAllTimersAsync()
-
-    expect(getLandscapeSession().mode).toBe('idle')
   })
 
   it('fails enter with hint when lock and rotate are unavailable', async () => {

@@ -465,8 +465,6 @@ export class PaintBoard {
       return
     }
     if (useBoardStore.getState().isPanMode) {
-      // Must leave Fabric drawing mode or single-finger still paints.
-      canvas.isDrawingMode = false
       canvas.defaultCursor = 'grab'
       canvas.setCursor('grab')
       canvas.selection = false
