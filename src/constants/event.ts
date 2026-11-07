@@ -16,6 +16,7 @@ export enum KeyCode {
   KEY_W = 'KeyW',
   KEY_E = 'KeyE',
   KEY_R = 'KeyR',
+  KEY_Y = 'KeyY',
   KEY_A = 'KeyA',
   KEY_S = 'KeyS',
   KEY_D = 'KeyD',
@@ -27,6 +28,7 @@ export enum KeyCode {
   KEY_G = 'KeyG',
   KEY_V = 'KeyV',
   KEY_B = 'KeyB',
+  KEY_N = 'KeyN',
   BRACKET_LEFT = 'BracketLeft', // [
   BRACKET_RIGHT = 'BracketRight', // ]
   ARROW_UP = 'ArrowUp',
@@ -42,6 +44,9 @@ export enum KeyCode {
 }
 
 export const KeyCodeModeMap = {
+  // Industry-standard brush / eraser; digits kept as aliases.
+  [KeyCode.KEY_B]: ActionMode.DRAW,
+  [KeyCode.KEY_E]: ActionMode.ERASE,
   [KeyCode.DIGIT_1]: ActionMode.DRAW,
   [KeyCode.DIGIT_2]: ActionMode.ERASE,
   [KeyCode.DIGIT_3]: ActionMode.SELECT,
@@ -56,7 +61,8 @@ export const KeyCodeDrawTypeMap = {
 export const KeyCodeDrawStyleMap = {
   [KeyCode.KEY_Q]: DrawStyle.Basic,
   [KeyCode.KEY_W]: DrawStyle.Freehand,
-  [KeyCode.KEY_E]: DrawStyle.FreehandStroke,
+  // Y/N: E/B freed for brush / eraser tools.
+  [KeyCode.KEY_Y]: DrawStyle.FreehandStroke,
   [KeyCode.KEY_A]: DrawStyle.Rainbow,
   [KeyCode.KEY_S]: DrawStyle.Shape,
   [KeyCode.KEY_D]: DrawStyle.Material,
@@ -68,5 +74,5 @@ export const KeyCodeDrawStyleMap = {
   [KeyCode.KEY_V]: DrawStyle.MultiPoint,
   [KeyCode.KEY_T]: DrawStyle.Wiggle,
   [KeyCode.KEY_G]: DrawStyle.Thorn,
-  [KeyCode.KEY_B]: DrawStyle.Ink
+  [KeyCode.KEY_N]: DrawStyle.Ink
 }

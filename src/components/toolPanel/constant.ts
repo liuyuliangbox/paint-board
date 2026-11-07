@@ -4,12 +4,12 @@ export const modeSwitch = [
   {
     type: ActionMode.DRAW,
     text: 'tool.draw',
-    keyboard: '1'
+    keyboard: 'B'
   },
   {
     type: ActionMode.ERASE,
     text: 'tool.eraser',
-    keyboard: '2'
+    keyboard: 'E'
   },
   {
     type: ActionMode.SELECT,

@@ -284,12 +284,16 @@ const Shortcut = () => {
             <tr>
               <td>{t('helpInfo.toolOperations.switchDrawMode')}</td>
               <td>
+                <kbd className="kbd kbd-sm">B</kbd>
+                <span> / </span>
                 <kbd className="kbd kbd-sm">1</kbd>
               </td>
             </tr>
             <tr>
               <td>{t('helpInfo.toolOperations.switchEraserMode')}</td>
               <td>
+                <kbd className="kbd kbd-sm">E</kbd>
+                <span> / </span>
                 <kbd className="kbd kbd-sm">2</kbd>
               </td>
             </tr>

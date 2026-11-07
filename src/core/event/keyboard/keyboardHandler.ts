@@ -60,13 +60,14 @@ export class KeyboardHandler {
     switch (e.code) {
       case KeyCode.KEY_Q:
       case KeyCode.KEY_W:
-      case KeyCode.KEY_E:
+      case KeyCode.KEY_Y:
       case KeyCode.KEY_S:
       case KeyCode.KEY_X:
       case KeyCode.KEY_R:
       case KeyCode.KEY_F:
       case KeyCode.KEY_T:
       case KeyCode.KEY_G:
+      case KeyCode.KEY_N:
         this.modeHandler.switchDrawStyle(e.code)
         break
 
@@ -112,12 +113,18 @@ export class KeyboardHandler {
         break
 
       case KeyCode.KEY_B:
+        // Ctrl/Cmd+B paste system clipboard; bare B = brush (industry).
         if (this.isModifierKey(e) && !e.shiftKey && !e.altKey) {
           e.preventDefault()
           this.clipboardHandler.pasteClipboard()
         } else {
-          this.modeHandler.switchDrawStyle(e.code)
+          this.modeHandler.switchMode(e.code)
         }
+        break
+
+      case KeyCode.KEY_E:
+        // Bare E = eraser (industry).
+        this.modeHandler.switchMode(e.code)
         break
 
       case KeyCode.KEY_Z:
@@ -141,7 +148,7 @@ export class KeyboardHandler {
       case KeyCode.DIGIT_2:
       case KeyCode.DIGIT_3:
       case KeyCode.DIGIT_4:
-        // Number keys for mode switching
+        // Number keys for mode switching (1/2 alias brush/eraser)
         this.modeHandler.switchMode(e.code)
         break
 

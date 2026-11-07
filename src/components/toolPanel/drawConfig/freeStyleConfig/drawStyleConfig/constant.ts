@@ -21,7 +21,7 @@ export const styleSwitch: Record<string, Array<StyleSwitchType>> = {
     {
       type: DrawStyle.FreehandStroke,
       text: 'style.freehandStroke',
-      keyboard: 'E'
+      keyboard: 'Y'
     }
   ],
   line_2: [
@@ -89,7 +89,7 @@ export const styleSwitch: Record<string, Array<StyleSwitchType>> = {
     {
       type: DrawStyle.Ink,
       text: 'style.ink',
-      keyboard: 'B'
+      keyboard: 'N'
     }
   ]
 }
