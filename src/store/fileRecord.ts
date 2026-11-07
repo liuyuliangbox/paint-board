@@ -199,6 +199,11 @@ export const readPersistedFiles = async (
 /**
  * Write drawing data for dirty files only, then store the list without it.
  * Removes blobs for files that are no longer in the list.
+ *
+ * Before overwriting the primary list, copy the previous valid primary into
+ * FILE_LIST_BACKUP_KEY. Never delete that backup on success — wiping it used
+ * to leave zero recovery path when the next primary write was truncated or
+ * unreadable (the “无法恢复已保存的画布” case).
  */
 export const writePersistedFiles = async (
   listKey: string,
@@ -230,8 +235,22 @@ export const writePersistedFiles = async (
     dirtyIds.delete(file.id)
   }
 
-  await db.set(listKey, JSON.stringify(stripEnvelope(envelope)))
-  await db.del(FILE_LIST_BACKUP_KEY)
+  const nextList = JSON.stringify(stripEnvelope(envelope))
+  try {
+    const previous = await db.get(listKey)
+    if (previous && previous !== nextList) {
+      try {
+        parseEnvelope(previous)
+        await db.set(FILE_LIST_BACKUP_KEY, previous)
+      } catch {
+        // Keep whatever backup already exists if previous primary is junk.
+      }
+    }
+  } catch {
+    // Cannot read previous primary; still attempt to write the new list.
+  }
+
+  await db.set(listKey, nextList)
 }
 
 const THUMB_PREFIX = 'paint-board-thumb:'

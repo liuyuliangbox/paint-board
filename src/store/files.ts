@@ -68,19 +68,35 @@ const storage: StateStorage = {
       const primary = (await get(name)) || null
       return await readPersistedFiles(primary, fileDb, name)
     } catch (error) {
+      const reason =
+        error instanceof Error
+          ? `${error.name}: ${error.message}`
+          : String(error)
       try {
         const backup = (await get(FILE_LIST_BACKUP_KEY)) || null
         if (backup) {
+          console.warn(
+            '[paint-board] primary board list unreadable; restoring backup',
+            reason
+          )
           return await readPersistedFiles(backup, fileDb, name)
         }
-      } catch {
-        // fall through to soft recover
+      } catch (backupError) {
+        console.warn(
+          '[paint-board] board list backup also unreadable',
+          backupError
+        )
       }
       // localStorage settings can still load; board drawings live in IndexedDB.
       // Never hard-lock the UI — start blank and keep trying to persist.
       console.error(
         '[paint-board] board IndexedDB unreadable; starting blank board',
-        error
+        {
+          reason,
+          // Common causes: IDB open blocked/corrupt, both list+backup invalid JSON,
+          // quota/private mode, or leftover SW/CacheStorage races in embedded browsers.
+          tip: 'DevTools → Application → IndexedDB → keyval-store (not empty page alone)'
+        }
       )
       markFileHydrationSoftRecovered()
       return null

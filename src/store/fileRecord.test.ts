@@ -12,6 +12,18 @@ import {
   type KeyValueDb
 } from './fileRecord'
 
+const parseEnvelopeSafe = (raw: string | undefined) => {
+  if (!raw) {
+    return null
+  }
+  try {
+    const parsed = JSON.parse(raw) as { state?: { files?: unknown } }
+    return Array.isArray(parsed.state?.files) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
 const createDb = (): KeyValueDb & { store: Map<string, string> } => {
   const store = new Map<string, string>()
   return {
@@ -93,7 +105,9 @@ describe('file records', () => {
       objects: [{ type: 'path' }]
     })
     expect(db.store.has(fileBlobKey('b'))).toBe(false)
-    expect(db.store.has(FILE_LIST_BACKUP_KEY)).toBe(false)
+    // Previous valid primary is retained as backup for crash recovery.
+    expect(db.store.has(FILE_LIST_BACKUP_KEY)).toBe(true)
+    expect(parseEnvelopeSafe(db.store.get(FILE_LIST_BACKUP_KEY))).toBeTruthy()
     const writtenList = JSON.parse(db.store.get('list') || '{}')
     expect(writtenList.state.files[0].boardData).toBeUndefined()
   })
@@ -187,6 +201,25 @@ describe('file records', () => {
     )
     expect(store.has(FILE_LIST_STORAGE_KEY)).toBe(false)
     expect(store.has(FILE_LIST_BACKUP_KEY)).toBe(false)
+  })
+
+  it('recovers from backup when the primary list is later corrupted', async () => {
+    const db = createDb()
+    await readPersistedFiles(legacy, db, 'list')
+    const full = JSON.parse(legacy)
+    full.state.files[0].boardData = { objects: [{ type: 'path' }] }
+    markFileContentDirty('a')
+    await writePersistedFiles('list', JSON.stringify(full), db)
+
+    db.store.set('list', '{not-json')
+    const recovered = await readPersistedFiles(
+      db.store.get('list') || null,
+      db,
+      'list'
+    )
+    const parsed = JSON.parse(recovered || '{}')
+    expect(parsed.state.files).toHaveLength(2)
+    expect(parsed.state.files[0].id).toBe('a')
   })
 
   it('finishes even when individual deletes throw', async () => {
