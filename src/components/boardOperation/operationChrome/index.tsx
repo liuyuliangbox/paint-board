@@ -12,6 +12,7 @@ import ChromeActions from './ChromeActions'
 export interface OperationChromeProps {
   isFullscreen: boolean
   isLandscapeLayout: boolean
+  isLandscapeSession: boolean
   onToggleObjectList: () => void
   onOpenFiles: () => void
   onToggleFullscreen: () => void
@@ -21,6 +22,7 @@ export interface OperationChromeProps {
 const OperationChrome: FC<OperationChromeProps> = ({
   isFullscreen,
   isLandscapeLayout,
+  isLandscapeSession,
   onToggleObjectList,
   onOpenFiles,
   onToggleFullscreen,
@@ -46,6 +48,7 @@ const OperationChrome: FC<OperationChromeProps> = ({
     setBridge({
       isFullscreen,
       isLandscapeLayout,
+      isLandscapeSession,
       onToggleObjectList: () => actionsRef.current.onToggleObjectList(),
       onOpenFiles: () => actionsRef.current.onOpenFiles(),
       onToggleFullscreen: () => actionsRef.current.onToggleFullscreen(),
@@ -53,7 +56,7 @@ const OperationChrome: FC<OperationChromeProps> = ({
         actionsRef.current.onToggleLandscapeLayout()
     })
     return () => setBridge(null)
-  }, [isFullscreen, isLandscapeLayout, setBridge])
+  }, [isFullscreen, isLandscapeLayout, isLandscapeSession, setBridge])
 
   // Portrait phone: right chrome rail owns these actions.
   if (narrowPortrait || chromeHidden) {
@@ -67,6 +70,7 @@ const OperationChrome: FC<OperationChromeProps> = ({
           bridge={{
             isFullscreen,
             isLandscapeLayout,
+            isLandscapeSession,
             onToggleObjectList,
             onOpenFiles,
             onToggleFullscreen,

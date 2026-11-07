@@ -53,8 +53,10 @@ export interface OperationDockProps {
   onOpenFiles: () => void
   onToggleFullscreen: () => void
   onTogglePanMode: () => void
-  /** Viewport currently landscape (after rotate / orientation.lock). */
+  /** Viewport currently landscape (CSS / chrome placement). */
   isLandscapeLayout: boolean
+  /** App landscape session — 横版/竖版 toggle. */
+  isLandscapeSession: boolean
   onToggleLandscapeLayout: () => void
 }
 
@@ -104,6 +106,7 @@ const OperationDock: FC<OperationDockProps> = ({
   onToggleFullscreen,
   onTogglePanMode,
   isLandscapeLayout,
+  isLandscapeSession,
   onToggleLandscapeLayout
 }) => {
   const { t } = useTranslation()
@@ -251,16 +254,16 @@ const OperationDock: FC<OperationDockProps> = ({
           >
             <DockButton
               label={
-                isLandscapeLayout
+                isLandscapeSession
                   ? labelOf('operate.dock.portrait')
                   : labelOf('operate.dock.landscape')
               }
               showLabel={showLabel}
               layout={layout}
-              active={isLandscapeLayout}
+              active={isLandscapeSession}
               onClick={onToggleLandscapeLayout}
             >
-              {isLandscapeLayout ? (
+              {isLandscapeSession ? (
                 <RectangleVertical strokeWidth={iconStroke} />
               ) : (
                 <RectangleHorizontal strokeWidth={iconStroke} />

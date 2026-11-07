@@ -71,7 +71,7 @@ const ChromeActions: FC<{
   const showLabel = useUiLegendStore((s) => s.legendOpen)
   const {
     isFullscreen,
-    isLandscapeLayout,
+    isLandscapeSession,
     onToggleObjectList,
     onOpenFiles,
     onToggleFullscreen,
@@ -84,16 +84,16 @@ const ChromeActions: FC<{
       {isMobile && (
         <ChromeButton
           label={
-            isLandscapeLayout
+            isLandscapeSession
               ? labelOf('operate.dock.portrait')
               : labelOf('operate.dock.landscape')
           }
           showLabel={showLabel}
           layout={layout}
-          active={isLandscapeLayout}
+          active={isLandscapeSession}
           onClick={onToggleLandscapeLayout}
         >
-          {isLandscapeLayout ? (
+          {isLandscapeSession ? (
             <RectangleVertical strokeWidth={2} />
           ) : (
             <RectangleHorizontal strokeWidth={2} />

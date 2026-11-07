@@ -20,11 +20,12 @@ import { exportErrorMessageKey } from '@/core/export/exportError'
 import useWidgetStore, { MAX_WIDGET_COUNT } from '@/store/widgets'
 import useUiOverlayStore, { shouldMutexOverlays } from '@/store/uiOverlay'
 import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
+import { useLandscapeSession } from '@/hooks/useLandscapeSession'
 import {
-  enterLandscapeLayout,
-  exitLandscapeLayout,
-  isViewportLandscape
-} from '@/utils/screenOrientation'
+  configureLandscapeSession,
+  endLandscapeSession,
+  startLandscapeSession
+} from '@/utils/landscapeSession'
 import { canvasSizeForOrientation } from '@/utils/canvasOrientation'
 
 import FileList from './fileList'
@@ -38,6 +39,7 @@ import OperationChrome from './operationChrome'
 
 const BoardOperation = () => {
   const { landscape } = useLandscapeLayout()
+  const landscapeSession = useLandscapeSession()
   const { isPanMode, togglePanMode } = useBoardStore()
   const { cameraOpacity, openCamera } = useCameraStore()
   const currentFile = useCurrentFile()
@@ -81,32 +83,27 @@ const BoardOperation = () => {
     }
   }, [])
 
-  const toggleLandscapeLayout = useCallback(async () => {
-    if (landscape) {
-      await exitLandscapeLayout()
-      const portrait = canvasSizeForOrientation(false)
-      updateCanvasSize(portrait.width, portrait.height)
-      // Still landscape after unlock → ask user to rotate; keep FS until then.
-      if (isViewportLandscape()) {
-        setLayoutHint('operate.portraitHint')
-        window.setTimeout(() => setLayoutHint(null), 3600)
-      } else {
-        setLayoutHint(null)
+  // Session owns lock/FS/canvas; React only applies ratios when session says so.
+  useEffect(() => {
+    configureLandscapeSession({
+      applyCanvas: (wantLandscape, vw, vh) => {
+        const size = canvasSizeForOrientation(wantLandscape, vw, vh)
+        updateCanvasSize(size.width, size.height)
       }
+    })
+  }, [updateCanvasSize])
+
+  useEffect(() => {
+    setLayoutHint(landscapeSession.hintKey)
+  }, [landscapeSession.hintKey])
+
+  const toggleLandscapeLayout = useCallback(async () => {
+    if (landscapeSession.active) {
+      await endLandscapeSession()
       return
     }
-    const result = await enterLandscapeLayout()
-    if (result.ok) {
-      const next = canvasSizeForOrientation(true)
-      updateCanvasSize(next.width, next.height)
-      setLayoutHint(null)
-      return
-    }
-    if (result.hintKey) {
-      setLayoutHint(result.hintKey)
-      window.setTimeout(() => setLayoutHint(null), 2800)
-    }
-  }, [landscape, updateCanvasSize])
+    await startLandscapeSession()
+  }, [landscapeSession.active])
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -243,6 +240,7 @@ const BoardOperation = () => {
       <OperationChrome
         isFullscreen={isFullscreen}
         isLandscapeLayout={landscape}
+        isLandscapeSession={landscapeSession.active}
         onToggleObjectList={() => {
           updateShowObjectList((open) => {
             const next = !open
@@ -304,6 +302,7 @@ const BoardOperation = () => {
         onToggleFullscreen={() => void toggleFullscreen()}
         onTogglePanMode={() => togglePanMode()}
         isLandscapeLayout={landscape}
+        isLandscapeSession={landscapeSession.active}
         onToggleLandscapeLayout={() => void toggleLandscapeLayout()}
       />
       {exportError && <Toast message={exportError} type="error" />}
