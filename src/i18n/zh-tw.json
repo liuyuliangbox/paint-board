@@ -306,6 +306,24 @@
     "clearCorruptBoards": "重設為空白畫板",
     "clearCorruptBoardsFail": "正在以空白畫板重新開啟。若仍異常，請關閉本站其他分頁後再試。",
     "filePersistFail": "無法把畫布儲存到本地。請重新整理頁面。在儲存成功之前，新的編輯不會覆蓋已保存的檔案。",
+    "hydrateDiag": {
+      "technicalDetails": "技術診斷（可複製給開發者）",
+      "copyDetails": "複製診斷",
+      "copied": "已複製",
+      "hints": {
+        "forceFresh": "本次是「重設為空白畫板」後的強制跳過讀庫。",
+        "backupRestored": "主清單不可讀，已從上一份合法備份還原。",
+        "listCorrupt": "主清單 JSON 損壞或結構不是 { state: { files: [] } }。常見於寫入中斷後備份曾被刪光（現已改為保留備份）。",
+        "listAndBackupGone": "主清單與備份都不可用，只能空白開局。",
+        "idbOpenFail": "IndexedDB 開啟/讀取拋錯（不一定是「庫是空的」）。請查看 keyval-store 是否打不開。",
+        "checkKeyvalStore": "請在開發者工具 → Application → IndexedDB → keyval-store 查看 PAINT-BOARD-FILES / PAINT-BOARD-FILES-BACKUP。",
+        "closeOtherTabs": "請關閉本站其他分頁後再試（避免 IDB 被占用/阻塞）。",
+        "quota": "儲存配額不足，大畫板或大量背景圖可能導致寫入失敗。",
+        "blocked": "IndexedDB 升級/刪除被其他分頁阻塞。",
+        "rehydrate": "Zustand 再水合回呼報錯；已改為空白繼續。",
+        "persistFail": "本次儲存失敗；在成功儲存前不會覆蓋已有本機檔案。"
+      }
+    },
     "exportFail": "無法儲存圖片。畫布裡可能有來自其他網站的圖片。",
     "exportTooLarge": "圖片太大，無法匯出。請縮小內容或降低縮放後再試。",
     "exportFailGeneric": "無法儲存圖片，請重試。",

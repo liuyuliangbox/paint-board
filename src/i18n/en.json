@@ -306,6 +306,24 @@
     "clearCorruptBoards": "Reset to a blank board",
     "clearCorruptBoardsFail": "Reopening with a blank board. If it still fails, close other tabs for this site and try again.",
     "filePersistFail": "Could not save the drawing locally. Refresh the page. New edits will not overwrite saved files until saving works again.",
+    "hydrateDiag": {
+      "technicalDetails": "Technical diagnosis (copy for developers)",
+      "copyDetails": "Copy diagnosis",
+      "copied": "Copied",
+      "hints": {
+        "forceFresh": "This load skipped IndexedDB after “Reset to a blank board”.",
+        "backupRestored": "Primary list was unreadable; restored from the last good backup.",
+        "listCorrupt": "Primary list JSON is corrupt or not { state: { files: [] } }. Often followed a interrupted write when backups were deleted (backups are now kept).",
+        "listAndBackupGone": "Both primary list and backup are unusable; started blank.",
+        "idbOpenFail": "IndexedDB open/read threw (not necessarily “empty”). Check whether keyval-store fails to open.",
+        "checkKeyvalStore": "DevTools → Application → IndexedDB → keyval-store → PAINT-BOARD-FILES / PAINT-BOARD-FILES-BACKUP.",
+        "closeOtherTabs": "Close other tabs for this site (IndexedDB may be blocked).",
+        "quota": "Storage quota exceeded; large boards or background images can cause this.",
+        "blocked": "IndexedDB upgrade/delete blocked by another tab.",
+        "rehydrate": "Zustand rehydrate callback failed; continued with a blank board.",
+        "persistFail": "This save failed; existing local files are not overwritten until a save succeeds."
+      }
+    },
     "exportFail": "Could not save the image. The canvas may contain a picture from another site.",
     "exportTooLarge": "The image is too large to export. Zoom out or export a smaller area.",
     "exportFailGeneric": "Could not save the image. Please try again.",

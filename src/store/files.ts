@@ -17,6 +17,11 @@ import {
   consumeForceFreshBoards
 } from './fileHydration'
 import {
+  describeStorageError,
+  setBoardHydrateDiagnosis,
+  snapshotRaw
+} from './boardHydrateDiag'
+import {
   readPersistedFiles,
   writePersistedFiles,
   markFileContentDirty,
@@ -62,42 +67,162 @@ const storage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
     // User chose “reset to blank board”: skip IDB even if it is empty/broken.
     if (consumeForceFreshBoards()) {
+      setBoardHydrateDiagnosis({
+        code: 'FORCE_FRESH',
+        outcome: 'ok',
+        phase: 'force_fresh'
+      })
       return null
     }
+
+    let primary: string | null = null
+    let primarySnap = snapshotRaw(null)
     try {
-      const primary = (await get(name)) || null
-      return await readPersistedFiles(primary, fileDb, name)
+      primary = (await get(name)) || null
+      primarySnap = snapshotRaw(primary)
     } catch (error) {
-      const reason =
-        error instanceof Error
-          ? `${error.name}: ${error.message}`
-          : String(error)
+      const described = describeStorageError(error)
+      // Still try backup before giving up.
+      let backup: string | null = null
+      let backupSnap = snapshotRaw(null)
       try {
-        const backup = (await get(FILE_LIST_BACKUP_KEY)) || null
+        backup = (await get(FILE_LIST_BACKUP_KEY)) || null
+        backupSnap = snapshotRaw(backup)
         if (backup) {
-          console.warn(
-            '[paint-board] primary board list unreadable; restoring backup',
-            reason
-          )
-          return await readPersistedFiles(backup, fileDb, name)
+          const restored = await readPersistedFiles(backup, fileDb, name)
+          setBoardHydrateDiagnosis({
+            code: 'BACKUP_RESTORED',
+            outcome: 'backup',
+            phase: 'get_primary',
+            errorName: described.name,
+            errorMessage: described.message,
+            primaryPresent: false,
+            primaryLength: 0,
+            backupPresent: backupSnap.present,
+            backupLength: backupSnap.length,
+            backupPreview: backupSnap.preview
+          })
+          return restored
         }
       } catch (backupError) {
-        console.warn(
-          '[paint-board] board list backup also unreadable',
-          backupError
-        )
+        const backupDescribed = describeStorageError(backupError)
+        setBoardHydrateDiagnosis({
+          code:
+            described.code === 'QUOTA_EXCEEDED' ||
+            described.code === 'IDB_BLOCKED'
+              ? described.code
+              : 'IDB_BOTH_UNREADABLE',
+          outcome: 'soft_blank',
+          phase: 'get_backup',
+          errorName: `${described.name} / ${backupDescribed.name}`,
+          errorMessage: `${described.message} | ${backupDescribed.message}`,
+          primaryPresent: false,
+          backupPresent: backupSnap.present,
+          backupLength: backupSnap.length,
+          backupPreview: backupSnap.preview
+        })
+        markFileHydrationSoftRecovered()
+        return null
       }
-      // localStorage settings can still load; board drawings live in IndexedDB.
-      // Never hard-lock the UI — start blank and keep trying to persist.
-      console.error(
-        '[paint-board] board IndexedDB unreadable; starting blank board',
-        {
-          reason,
-          // Common causes: IDB open blocked/corrupt, both list+backup invalid JSON,
-          // quota/private mode, or leftover SW/CacheStorage races in embedded browsers.
-          tip: 'DevTools → Application → IndexedDB → keyval-store (not empty page alone)'
+
+      setBoardHydrateDiagnosis({
+        code:
+          described.code === 'QUOTA_EXCEEDED' || described.code === 'IDB_BLOCKED'
+            ? described.code
+            : 'IDB_GET_PRIMARY_THROW',
+        outcome: 'soft_blank',
+        phase: 'get_primary',
+        errorName: described.name,
+        errorMessage: described.message,
+        primaryPresent: false,
+        backupPresent: false
+      })
+      markFileHydrationSoftRecovered()
+      return null
+    }
+
+    try {
+      const loaded = await readPersistedFiles(primary, fileDb, name)
+      if (!primary && !loaded) {
+        setBoardHydrateDiagnosis({
+          code: 'EMPTY_OK',
+          outcome: 'ok',
+          phase: 'read_primary',
+          primaryPresent: false,
+          backupPresent: false
+        })
+      } else {
+        setBoardHydrateDiagnosis({
+          code: 'PRIMARY_OK',
+          outcome: 'ok',
+          phase: 'read_primary',
+          primaryPresent: primarySnap.present,
+          primaryLength: primarySnap.length
+        })
+      }
+      return loaded
+    } catch (error) {
+      const described = describeStorageError(error)
+      let backup: string | null = null
+      let backupSnap = snapshotRaw(null)
+      try {
+        backup = (await get(FILE_LIST_BACKUP_KEY)) || null
+        backupSnap = snapshotRaw(backup)
+        if (backup) {
+          const restored = await readPersistedFiles(backup, fileDb, name)
+          setBoardHydrateDiagnosis({
+            code: 'BACKUP_RESTORED',
+            outcome: 'backup',
+            phase: 'read_backup',
+            errorName: described.name,
+            errorMessage: described.message,
+            primaryPresent: primarySnap.present,
+            primaryLength: primarySnap.length,
+            primaryPreview: primarySnap.preview,
+            backupPresent: backupSnap.present,
+            backupLength: backupSnap.length,
+            backupPreview: backupSnap.preview
+          })
+          return restored
         }
-      )
+      } catch (backupError) {
+        const backupDescribed = describeStorageError(backupError)
+        setBoardHydrateDiagnosis({
+          code:
+            backupDescribed.code === 'PRIMARY_INVALID_JSON' ||
+            backupDescribed.code === 'PRIMARY_INVALID_SHAPE'
+              ? 'BACKUP_INVALID'
+              : 'IDB_BOTH_UNREADABLE',
+          outcome: 'soft_blank',
+          phase: 'read_backup',
+          errorName: `${described.name} / ${backupDescribed.name}`,
+          errorMessage: `${described.message} | ${backupDescribed.message}`,
+          primaryPresent: primarySnap.present,
+          primaryLength: primarySnap.length,
+          primaryPreview: primarySnap.preview,
+          backupPresent: backupSnap.present,
+          backupLength: backupSnap.length,
+          backupPreview: backupSnap.preview
+        })
+        markFileHydrationSoftRecovered()
+        return null
+      }
+
+      setBoardHydrateDiagnosis({
+        code:
+          described.code === 'PRIMARY_INVALID_JSON' ||
+          described.code === 'PRIMARY_INVALID_SHAPE'
+            ? described.code
+            : 'IDB_BOTH_UNREADABLE',
+        outcome: 'soft_blank',
+        phase: 'read_primary',
+        errorName: described.name,
+        errorMessage: described.message,
+        primaryPresent: primarySnap.present,
+        primaryLength: primarySnap.length,
+        primaryPreview: primarySnap.preview,
+        backupPresent: false
+      })
       markFileHydrationSoftRecovered()
       return null
     }
@@ -109,6 +234,17 @@ const storage: StateStorage = {
     try {
       await writePersistedFiles(name, value, fileDb)
     } catch (error) {
+      const described = describeStorageError(error)
+      setBoardHydrateDiagnosis({
+        code:
+          described.code === 'QUOTA_EXCEEDED'
+            ? 'QUOTA_EXCEEDED'
+            : 'PERSIST_WRITE_FAIL',
+        outcome: 'persist_fail',
+        phase: 'persist_write',
+        errorName: described.name,
+        errorMessage: described.message
+      })
       console.error('Failed to persist paint board file', error)
       markFilePersistFailed()
     }
@@ -649,10 +785,14 @@ const useFileStore = create<FileState & FileAction>()(
       storage: createJSONStorage(() => storage),
       onRehydrateStorage: () => (_state, error) => {
         if (error) {
-          console.error(
-            '[paint-board] board rehydrate error; continuing blank',
-            error
-          )
+          const described = describeStorageError(error)
+          setBoardHydrateDiagnosis({
+            code: 'REHYDRATE_CALLBACK_ERROR',
+            outcome: 'soft_blank',
+            phase: 'rehydrate',
+            errorName: described.name,
+            errorMessage: described.message
+          })
           markFileHydrationSoftRecovered()
         }
       }

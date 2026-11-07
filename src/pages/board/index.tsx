@@ -7,6 +7,10 @@ import {
   hasFilePersistFailed,
   subscribeFilePersistFailed
 } from '@/store/fileHydration'
+import {
+  formatBoardHydrateDiagnosisText,
+  getBoardHydrateDiagnosis
+} from '@/store/boardHydrateDiag'
 import { paintBoard } from '@/core/paintBoard'
 import { loadTemplates, type BoardTemplate } from '@/core/template/template'
 import {
@@ -34,6 +38,8 @@ const Board: React.FC = () => {
   const canvasEl = useRef<HTMLCanvasElement>(null)
   const [canvasLoaded, setCanvasLoaded] = useState(false)
   const [hydrationSoftRecovered, setHydrationSoftRecovered] = useState(false)
+  const [hydrateDiagDetail, setHydrateDiagDetail] = useState('')
+  const [hydrateDiagHints, setHydrateDiagHints] = useState<string[]>([])
   const [persistFailed, setPersistFailed] = useState(false)
   const [offerTemplates, setOfferTemplates] = useState<BoardTemplate[] | null>(
     null
@@ -45,7 +51,18 @@ const Board: React.FC = () => {
     ].reverse()
   }, [currentFile])
 
-  useEffect(() => subscribeFilePersistFailed(() => setPersistFailed(true)), [])
+  useEffect(
+    () =>
+      subscribeFilePersistFailed(() => {
+        setPersistFailed(true)
+        const diag = getBoardHydrateDiagnosis()
+        if (diag) {
+          setHydrateDiagDetail(formatBoardHydrateDiagnosisText(diag))
+          setHydrateDiagHints(diag.hintKeys)
+        }
+      }),
+    []
+  )
 
   useEffect(() => {
     if (!canvasLoaded) {
@@ -94,6 +111,11 @@ const Board: React.FC = () => {
           }
           setHydrationSoftRecovered(hasFileHydrationSoftRecovered())
           setPersistFailed(hasFilePersistFailed())
+          const diag = getBoardHydrateDiagnosis()
+          if (diag && diag.outcome !== 'ok') {
+            setHydrateDiagDetail(formatBoardHydrateDiagnosisText(diag))
+            setHydrateDiagHints(diag.hintKeys)
+          }
           if (loaded) {
             setCanvasLoaded(true)
           }
@@ -124,9 +146,21 @@ const Board: React.FC = () => {
         })}
       </div>
       {hydrationSoftRecovered && (
-        <Toast message="tip.fileHydrationSoftRecover" type="warning" />
+        <Toast
+          message="tip.fileHydrationSoftRecover"
+          type="warning"
+          hints={hydrateDiagHints}
+          detail={hydrateDiagDetail}
+        />
       )}
-      {persistFailed && <Toast message="tip.filePersistFail" type="error" />}
+      {persistFailed && (
+        <Toast
+          message="tip.filePersistFail"
+          type="error"
+          hints={hydrateDiagHints}
+          detail={hydrateDiagDetail}
+        />
+      )}
       {canvasLoaded && (
         <>
           <WidgetPanel />

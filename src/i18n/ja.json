@@ -306,6 +306,24 @@
     "clearCorruptBoards": "空白ボードにリセット",
     "clearCorruptBoardsFail": "空白ボードで開き直します。続く場合は他のタブを閉じて再試行してください。",
     "filePersistFail": "描画をローカルに保存できませんでした。ページを再読み込みしてください。保存できるまで、新しい編集は保存済みのファイルを上書きしません。",
+    "hydrateDiag": {
+      "technicalDetails": "技術診断（開発者向けにコピー可）",
+      "copyDetails": "診断をコピー",
+      "copied": "コピー済み",
+      "hints": {
+        "forceFresh": "「空白ボードにリセット」後のため IndexedDB 読み取りをスキップしました。",
+        "backupRestored": "主リストが読めず、直前の正常バックアップから復元しました。",
+        "listCorrupt": "主リストの JSON が壊れているか { state: { files: [] } } ではありません。書き込み中断＋バックアップ削除が典型原因でした（現在はバックアップを保持）。",
+        "listAndBackupGone": "主リストもバックアップも使えず、空白で開始しました。",
+        "idbOpenFail": "IndexedDB の open/read が例外（「空」とは限りません）。keyval-store が開けないか確認してください。",
+        "checkKeyvalStore": "DevTools → Application → IndexedDB → keyval-store → PAINT-BOARD-FILES / PAINT-BOARD-FILES-BACKUP。",
+        "closeOtherTabs": "このサイトの他タブを閉じて再試行（IDB 占有の可能性）。",
+        "quota": "ストレージ容量不足。大きなボードや背景画像で起きやすいです。",
+        "blocked": "IndexedDB の upgrade/delete が他タブにブロックされています。",
+        "rehydrate": "Zustand rehydrate コールバック失敗。空白で継続しました。",
+        "persistFail": "今回の保存に失敗。成功するまで既存ローカルは上書きしません。"
+      }
+    },
     "exportFail": "画像を保存できませんでした。キャンバスに他のサイトの画像が含まれている可能性があります。",
     "exportTooLarge": "画像が大きすぎて書き出せません。内容を縮小するか、ズームを下げてからもう一度お試しください。",
     "exportFailGeneric": "画像を保存できませんでした。もう一度お試しください。",

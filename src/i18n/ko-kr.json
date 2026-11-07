@@ -306,6 +306,24 @@
     "clearCorruptBoards": "빈 보드로 재설정",
     "clearCorruptBoardsFail": "빈 보드로 다시 엽니다. 계속되면 이 사이트의 다른 탭을 닫고 다시 시도하세요.",
     "filePersistFail": "그림을 로컬에 저장하지 못했습니다. 페이지를 새로고침하세요. 저장에 성공하기 전에는 새 편집이 저장된 파일을 덮어쓰지 않습니다.",
+    "hydrateDiag": {
+      "technicalDetails": "기술 진단(개발자에게 복사 가능)",
+      "copyDetails": "진단 복사",
+      "copied": "복사됨",
+      "hints": {
+        "forceFresh": "「빈 보드로 재설정」 이후라 IndexedDB 읽기를 건너뛰었습니다.",
+        "backupRestored": "기본 목록을 읽을 수 없어 마지막 정상 백업에서 복구했습니다.",
+        "listCorrupt": "기본 목록 JSON이 손상되었거나 { state: { files: [] } } 형식이 아닙니다. 쓰기 중단 후 백업이 삭제되던 경우가 전형적이었습니다(지금은 백업을 유지).",
+        "listAndBackupGone": "기본 목록과 백업 모두 사용할 수 없어 빈 보드로 시작했습니다.",
+        "idbOpenFail": "IndexedDB open/read 예외입니다(「비어 있음」과 다를 수 있음). keyval-store 가 열리는지 확인하세요.",
+        "checkKeyvalStore": "DevTools → Application → IndexedDB → keyval-store → PAINT-BOARD-FILES / PAINT-BOARD-FILES-BACKUP.",
+        "closeOtherTabs": "이 사이트의 다른 탭을 닫고 다시 시도하세요(IDB 점유 가능).",
+        "quota": "저장 용량 부족. 큰 보드나 배경 이미지에서 자주 발생합니다.",
+        "blocked": "IndexedDB upgrade/delete 가 다른 탭에 의해 차단되었습니다.",
+        "rehydrate": "Zustand rehydrate 콜백 실패. 빈 보드로 계속했습니다.",
+        "persistFail": "이번 저장 실패. 성공 전까지 기존 로컬 파일을 덮어쓰지 않습니다."
+      }
+    },
     "exportFail": "이미지를 저장하지 못했습니다. 캔버스에 다른 사이트의 그림이 있을 수 있습니다.",
     "exportTooLarge": "이미지가 너무 커서 내보낼 수 없습니다. 내용을 줄이거나 확대/축소를 낮춘 뒤 다시 시도해 주세요.",
     "exportFailGeneric": "이미지를 저장하지 못했습니다. 다시 시도해 주세요.",
