@@ -57,9 +57,11 @@ const PortraitLeftRail: FC = () => {
           }}
         >
           <InfoIcon className="h-7 w-7 shrink-0 rounded-full" />
-          <span className="max-w-[2.75rem] truncate text-center text-[9px] font-medium leading-tight text-slate-700">
-            {t('operate.help')}
-          </span>
+          {showLabel && (
+            <span className="max-w-[2.75rem] truncate text-center text-[9px] font-medium leading-tight text-slate-700">
+              {t('operate.help')}
+            </span>
+          )}
         </button>
         <ZoomInfo showLabel={showLabel} rail />
         <CameraConfig showLabel={showLabel} rail />

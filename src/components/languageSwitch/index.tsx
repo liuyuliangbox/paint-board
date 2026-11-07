@@ -11,14 +11,6 @@ const toI18nLng = (value: string) => (value === 'zh-tw' ? 'zh-TW' : value)
 const sameLang = (a: string, b: string) =>
   toI18nLng(a).toLowerCase() === toI18nLng(b).toLowerCase()
 
-const shortLabel: Record<string, string> = {
-  en: 'EN',
-  zh: '中',
-  'zh-tw': '繁',
-  ja: 'あ',
-  ko: '한'
-}
-
 interface LanguageSwitchProps {
   /** Portrait left rail: compact vertical control, menu opens to the right. */
   rail?: boolean
@@ -79,21 +71,15 @@ const LanguageSwitch: FC<LanguageSwitchProps> = ({ rail = false }) => {
         }`}
       >
         <TranslateIcon className="h-7 w-7 shrink-0 rounded-full p-1 text-[#66CC8A]" />
-        {showLabel && !rail && (
-          <span className="pr-1 text-[11px] font-medium text-slate-700">
+        {showLabel && (
+          <span
+            className={
+              rail
+                ? 'max-w-[2.75rem] truncate text-center text-[9px] font-medium leading-tight text-slate-700'
+                : 'pr-1 text-[11px] font-medium text-slate-700'
+            }
+          >
             {current.name}
-          </span>
-        )}
-        {rail && (
-          <span className="max-w-[2.75rem] truncate text-center text-[9px] font-medium leading-tight text-slate-700">
-            {showLabel
-              ? current.name
-              : shortLabel[current.value] ?? current.value.toUpperCase()}
-          </span>
-        )}
-        {!rail && !showLabel && (
-          <span className="pr-1.5 text-[11px] font-medium text-slate-700">
-            {shortLabel[current.value] ?? current.value.toUpperCase()}
           </span>
         )}
       </button>

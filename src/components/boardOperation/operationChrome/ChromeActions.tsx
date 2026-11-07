@@ -25,7 +25,7 @@ const ChromeButton: FC<{
   return (
     <button
       type="button"
-      title={showLabel || col ? undefined : label}
+      title={showLabel ? undefined : label}
       aria-label={label}
       aria-pressed={active || undefined}
       onClick={onClick}

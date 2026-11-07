@@ -8,6 +8,7 @@ import { paintBoard } from '@/core/paintBoard'
 import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
 import { useNarrowPortrait } from '@/hooks/useNarrowPortrait'
 import { isViewportLandscape } from '@/utils/screenOrientation'
+import useUiLegendStore from '@/store/uiLegend'
 import { modeSwitch } from './constant'
 
 import { X, Menu } from 'lucide-react'
@@ -27,6 +28,7 @@ const ToolPanel: FC = () => {
   const { landscape } = useLandscapeLayout()
   const narrowPortrait = useNarrowPortrait()
   const overlayActive = useUiOverlayStore((s) => s.active)
+  const showLabel = useUiLegendStore((s) => s.legendOpen)
   const setWidgetPanelOpen = useWidgetStore((s) => s.setPanelOpen)
   const [showPanel, setShowPanel] = useState(() => !isViewportLandscape())
   const panelRef = useRef<HTMLDivElement>(null)
@@ -107,7 +109,7 @@ const ToolPanel: FC = () => {
     <div className="flex shrink-0 flex-col items-center gap-0.5">
       <label
         className="btn btn-neutral btn-circle swap swap-rotate h-7 w-7 min-h-0"
-        title={drawLabel}
+        title={showLabel ? undefined : drawLabel}
         aria-label={drawLabel}
       >
         <input
@@ -128,9 +130,11 @@ const ToolPanel: FC = () => {
           className="swap-off fill-current"
         />
       </label>
-      <span className="max-w-[2.75rem] text-center text-[10px] font-medium leading-tight text-slate-700">
-        {drawLabel}
-      </span>
+      {showLabel && (
+        <span className="max-w-[2.75rem] text-center text-[10px] font-medium leading-tight text-slate-700">
+          {drawLabel}
+        </span>
+      )}
     </div>
   )
 

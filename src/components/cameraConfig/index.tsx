@@ -87,7 +87,7 @@ const CameraConfig = ({
             </>
           )}
         </span>
-        {(showLabel || rail) && (
+        {showLabel && (
           <span
             className={
               rail

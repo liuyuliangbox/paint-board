@@ -43,7 +43,7 @@ const ZoomInfo = ({ showLabel = false, rail = false }: ZoomInfoProps) => {
           } as CSSProperties
         }
       ></div>
-      {(showLabel || rail) && (
+      {showLabel && (
         <span
           className={
             rail
@@ -51,7 +51,7 @@ const ZoomInfo = ({ showLabel = false, rail = false }: ZoomInfoProps) => {
               : 'text-[11px] font-medium text-slate-700'
           }
         >
-          {rail && !showLabel ? zoomValue : label}
+          {label}
         </span>
       )}
     </button>

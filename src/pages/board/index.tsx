@@ -26,7 +26,6 @@ import WidgetPanel from '@/components/widgetPanel'
 import WidgetContextMenu from '@/components/widgetPanel/contextMenu'
 import UiLegendToggle from '@/components/uiLegendToggle'
 import PortraitLeftRail from '@/components/portraitLeftRail'
-import PortraitBottomChrome from '@/components/portraitBottomChrome'
 import BackgroundColor from '@/components/background/backgroundColor'
 import BackgroundImage from '@/components/background/backgroundImage'
 import BackgroundCamera from '@/components/background/backgroundCamera'
@@ -163,7 +162,6 @@ const Board: React.FC = () => {
           <PortraitLeftRail />
           <HelpArea />
           <UiLegendToggle />
-          <PortraitBottomChrome />
           <CleanModal />
           <BoardOperation />
         </>
