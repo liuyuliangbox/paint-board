@@ -4,7 +4,6 @@ import useBoardStore from '@/store/board'
 import useUiOverlayStore, { shouldMutexOverlays } from '@/store/uiOverlay'
 import useWidgetStore from '@/store/widgets'
 import { ActionMode } from '@/constants'
-import { paintBoard } from '@/core/paintBoard'
 import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
 import { useNarrowPortrait } from '@/hooks/useNarrowPortrait'
 import { isViewportLandscape } from '@/utils/screenOrientation'
@@ -69,41 +68,6 @@ const ToolPanel: FC = () => {
       setShowPanel(false)
     }
   }, [overlayActive, showPanel])
-
-  useEffect(() => {
-    if (!showPanel || narrowPortrait) {
-      // Portrait uses the explicit dim strip for close.
-      return
-    }
-    const onPointerDown = (event: PointerEvent) => {
-      const root = panelRef.current
-      if (root?.contains(event.target as Node)) {
-        return
-      }
-      if ((event.target as Element | null)?.closest?.('label.swap')) {
-        return
-      }
-      const canvas = paintBoard.canvas
-      if (!canvas) {
-        return
-      }
-      const lower = canvas.getElement()
-      const upper = (canvas as unknown as { upperCanvasEl?: HTMLElement })
-        .upperCanvasEl
-      const target = event.target
-      if (
-        target === lower ||
-        target === upper ||
-        (lower && lower.contains(target as Node)) ||
-        (upper && upper.contains(target as Node))
-      ) {
-        setToolsOpen(false)
-      }
-    }
-    document.addEventListener('pointerdown', onPointerDown, true)
-    return () =>
-      document.removeEventListener('pointerdown', onPointerDown, true)
-  }, [showPanel, narrowPortrait])
 
   const toggle = (
     <div className="flex shrink-0 flex-col items-center gap-0.5">
@@ -213,8 +177,7 @@ const ToolPanel: FC = () => {
     )
   }
 
-  // Desktop / landscape: no full dim (canvas stays drawable). Open panel uses
-  // focus z so it sits above dock/chrome; click canvas still closes.
+  // Desktop / landscape: same focus dim as other popups — click mask to close.
   return (
     <>
       {!showPanel && (
@@ -224,7 +187,13 @@ const ToolPanel: FC = () => {
       )}
       {showPanel && (
         <div className="pointer-events-none fixed inset-0 z-[var(--pb-z-focus)]">
-          <div className="pointer-events-auto absolute left-7 top-7 landscape:left-3 landscape:top-3">
+          <button
+            type="button"
+            aria-label="Close"
+            className="pointer-events-auto absolute inset-0 z-0 bg-black/40"
+            onClick={() => setToolsOpen(false)}
+          />
+          <div className="pointer-events-auto absolute left-7 top-7 z-[1] landscape:left-3 landscape:top-3">
             <div
               className={
                 !landscape ? 'absolute -left-3 -top-3 z-10' : 'relative mb-1'
