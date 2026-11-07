@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage, StateStorage } from 'zustand/middleware'
-import { get, set, del } from 'idb-keyval'
 import { v4 as uuidv4 } from 'uuid'
 import { produce } from 'immer'
 import { useMemo } from 'react'
@@ -13,6 +12,7 @@ import {
   shouldPersistFiles,
   markFilePersistFailed,
   markFileHydrationSoftRecovered,
+  clearFilePersistFailed,
   waitForHydration,
   consumeForceFreshBoards
 } from './fileHydration'
@@ -22,9 +22,16 @@ import {
   snapshotRaw
 } from './boardHydrateDiag'
 import {
+  isIdbInternalError,
+  rebuildKeyvalDatabase,
+  waitMs
+} from './idbKeyvalRecovery'
+import { idbDelItem, idbGetItem, idbSetItem } from './idbKeyvalStore'
+import {
   readPersistedFiles,
   writePersistedFiles,
   markFileContentDirty,
+  resetFilePersistenceCache,
   FILE_LIST_STORAGE_KEY,
   FILE_LIST_BACKUP_KEY
 } from './fileRecord'
@@ -58,9 +65,12 @@ export {
 } from './fileModel'
 
 const fileDb = {
-  get: async (key: string) => (await get(key)) || null,
-  set: (key: string, value: string) => set(key, value),
-  del: (key: string) => del(key)
+  get: async (key: string): Promise<string | null> => {
+    const value = await idbGetItem<string>(key)
+    return typeof value === 'string' ? value : null
+  },
+  set: (key: string, value: string) => idbSetItem(key, value),
+  del: (key: string) => idbDelItem(key)
 }
 
 const storage: StateStorage = {
@@ -78,67 +88,89 @@ const storage: StateStorage = {
     let primary: string | null = null
     let primarySnap = snapshotRaw(null)
     try {
-      primary = (await get(name)) || null
+      primary = (await fileDb.get(name)) || null
       primarySnap = snapshotRaw(primary)
     } catch (error) {
-      const described = describeStorageError(error)
-      // Still try backup before giving up.
-      let backup: string | null = null
-      let backupSnap = snapshotRaw(null)
-      try {
-        backup = (await get(FILE_LIST_BACKUP_KEY)) || null
-        backupSnap = snapshotRaw(backup)
-        if (backup) {
-          const restored = await readPersistedFiles(backup, fileDb, name)
+      // Stale idb-keyval connection after deleteDatabase → rotate and retry once.
+      let rotatedOk = false
+      if (isIdbInternalError(error)) {
+        try {
+          const { resetIdbStore } = await import('./idbKeyvalStore')
+          resetIdbStore()
+          await waitMs(50)
+          primary = (await fileDb.get(name)) || null
+          primarySnap = snapshotRaw(primary)
+          rotatedOk = true
+        } catch (rotatedError) {
+          error = rotatedError
+          primary = null
+          primarySnap = snapshotRaw(null)
+        }
+      }
+
+      if (!rotatedOk) {
+        const described = describeStorageError(error)
+        // Still try backup before giving up.
+        let backup: string | null = null
+        let backupSnap = snapshotRaw(null)
+        try {
+          backup = (await fileDb.get(FILE_LIST_BACKUP_KEY)) || null
+          backupSnap = snapshotRaw(backup)
+          if (backup) {
+            const restored = await readPersistedFiles(backup, fileDb, name)
+            setBoardHydrateDiagnosis({
+              code: 'BACKUP_RESTORED',
+              outcome: 'backup',
+              phase: 'get_primary',
+              errorName: described.name,
+              errorMessage: described.message,
+              primaryPresent: false,
+              primaryLength: 0,
+              backupPresent: backupSnap.present,
+              backupLength: backupSnap.length,
+              backupPreview: backupSnap.preview
+            })
+            return restored
+          }
+        } catch (backupError) {
+          const backupDescribed = describeStorageError(backupError)
           setBoardHydrateDiagnosis({
-            code: 'BACKUP_RESTORED',
-            outcome: 'backup',
-            phase: 'get_primary',
-            errorName: described.name,
-            errorMessage: described.message,
+            code:
+              described.code === 'QUOTA_EXCEEDED' ||
+              described.code === 'IDB_BLOCKED'
+                ? described.code
+                : 'IDB_BOTH_UNREADABLE',
+            outcome: 'soft_blank',
+            phase: 'get_backup',
+            errorName: `${described.name} / ${backupDescribed.name}`,
+            errorMessage: `${described.message} | ${backupDescribed.message}`,
             primaryPresent: false,
-            primaryLength: 0,
             backupPresent: backupSnap.present,
             backupLength: backupSnap.length,
             backupPreview: backupSnap.preview
           })
-          return restored
+          markFileHydrationSoftRecovered()
+          return null
         }
-      } catch (backupError) {
-        const backupDescribed = describeStorageError(backupError)
+
         setBoardHydrateDiagnosis({
           code:
             described.code === 'QUOTA_EXCEEDED' ||
             described.code === 'IDB_BLOCKED'
               ? described.code
-              : 'IDB_BOTH_UNREADABLE',
+              : described.code === 'IDB_INTERNAL'
+                ? 'IDB_INTERNAL'
+                : 'IDB_GET_PRIMARY_THROW',
           outcome: 'soft_blank',
-          phase: 'get_backup',
-          errorName: `${described.name} / ${backupDescribed.name}`,
-          errorMessage: `${described.message} | ${backupDescribed.message}`,
+          phase: 'get_primary',
+          errorName: described.name,
+          errorMessage: described.message,
           primaryPresent: false,
-          backupPresent: backupSnap.present,
-          backupLength: backupSnap.length,
-          backupPreview: backupSnap.preview
+          backupPresent: false
         })
         markFileHydrationSoftRecovered()
         return null
       }
-
-      setBoardHydrateDiagnosis({
-        code:
-          described.code === 'QUOTA_EXCEEDED' || described.code === 'IDB_BLOCKED'
-            ? described.code
-            : 'IDB_GET_PRIMARY_THROW',
-        outcome: 'soft_blank',
-        phase: 'get_primary',
-        errorName: described.name,
-        errorMessage: described.message,
-        primaryPresent: false,
-        backupPresent: false
-      })
-      markFileHydrationSoftRecovered()
-      return null
     }
 
     try {
@@ -166,7 +198,7 @@ const storage: StateStorage = {
       let backup: string | null = null
       let backupSnap = snapshotRaw(null)
       try {
-        backup = (await get(FILE_LIST_BACKUP_KEY)) || null
+        backup = (await fileDb.get(FILE_LIST_BACKUP_KEY)) || null
         backupSnap = snapshotRaw(backup)
         if (backup) {
           const restored = await readPersistedFiles(backup, fileDb, name)
@@ -231,26 +263,86 @@ const storage: StateStorage = {
     if (!shouldPersistFiles()) {
       return
     }
+
+    const writeOnce = () => writePersistedFiles(name, value, fileDb)
+
     try {
-      await writePersistedFiles(name, value, fileDb)
-    } catch (error) {
-      const described = describeStorageError(error)
-      setBoardHydrateDiagnosis({
-        code:
-          described.code === 'QUOTA_EXCEEDED'
-            ? 'QUOTA_EXCEEDED'
-            : 'PERSIST_WRITE_FAIL',
-        outcome: 'persist_fail',
-        phase: 'persist_write',
-        errorName: described.name,
-        errorMessage: described.message
-      })
-      console.error('Failed to persist paint board file', error)
-      markFilePersistFailed()
+      await writeOnce()
+      return
+    } catch (firstError) {
+      // Chromium "UnknownError: Internal error" — rotate connection, then
+      // only delete the DB if writes still fail (delete wipes boards).
+      if (!isIdbInternalError(firstError)) {
+        const described = describeStorageError(firstError)
+        setBoardHydrateDiagnosis({
+          code:
+            described.code === 'QUOTA_EXCEEDED'
+              ? 'QUOTA_EXCEEDED'
+              : described.code === 'IDB_INTERNAL'
+                ? 'IDB_INTERNAL'
+                : 'PERSIST_WRITE_FAIL',
+          outcome: 'persist_fail',
+          phase: 'persist_write',
+          errorName: described.name,
+          errorMessage: described.message
+        })
+        console.error('Failed to persist paint board file', firstError)
+        markFilePersistFailed()
+        return
+      }
+
+      console.warn(
+        '[paint-board] IDB internal error on write; rotating connection',
+        firstError
+      )
+      try {
+        const { resetIdbStore } = await import('./idbKeyvalStore')
+        resetIdbStore()
+        await waitMs(50)
+        await writeOnce()
+        clearFilePersistFailed()
+        return
+      } catch (retryError) {
+        console.warn(
+          '[paint-board] IDB write still failing; rebuilding keyval-store',
+          retryError
+        )
+        try {
+          await rebuildKeyvalDatabase()
+          resetFilePersistenceCache()
+          clearFilePersistFailed()
+          await writeOnce()
+          setBoardHydrateDiagnosis({
+            code: 'PERSIST_REBUILT',
+            outcome: 'ok',
+            phase: 'persist_write',
+            errorName: describeStorageError(firstError).name,
+            errorMessage: describeStorageError(firstError).message
+          })
+          console.info(
+            '[paint-board] persist succeeded after rebuilding keyval-store'
+          )
+          return
+        } catch (rebuildError) {
+          const described = describeStorageError(rebuildError)
+          setBoardHydrateDiagnosis({
+            code: 'IDB_INTERNAL',
+            outcome: 'persist_fail',
+            phase: 'persist_write',
+            errorName: described.name,
+            errorMessage: described.message
+          })
+          console.error(
+            'Failed to persist paint board file after IDB rebuild',
+            rebuildError
+          )
+          markFilePersistFailed()
+        }
+      }
     }
   },
   removeItem: async (name: string): Promise<void> => {
-    await del(name)
+    await idbDelItem(name)
   }
 }
 

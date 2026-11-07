@@ -12,6 +12,9 @@ interface IProps {
   actionLabel?: string
   onAction?: () => void
   actionBusy?: boolean
+  /** Optional dismiss control so a sticky toast cannot trap the user. */
+  dismissLabel?: string
+  onDismiss?: () => void
 }
 
 const Toast: FC<IProps> = ({
@@ -21,7 +24,9 @@ const Toast: FC<IProps> = ({
   detail,
   actionLabel,
   onAction,
-  actionBusy = false
+  actionBusy = false,
+  dismissLabel,
+  onDismiss
 }) => {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
@@ -77,22 +82,36 @@ const Toast: FC<IProps> = ({
               </button>
             </details>
           )}
-          {actionLabel && onAction && (
-            <button
-              type="button"
-              className="btn btn-sm btn-neutral self-end shrink-0"
-              disabled={actionBusy}
-              onClick={(event) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (!actionBusy) {
-                  onAction()
-                }
-              }}
-            >
-              {actionBusy ? '…' : t(actionLabel)}
-            </button>
-          )}
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {onDismiss && (
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={(event) => {
+                  event.preventDefault()
+                  onDismiss()
+                }}
+              >
+                {t(dismissLabel || 'tip.dismissToast')}
+              </button>
+            )}
+            {actionLabel && onAction && (
+              <button
+                type="button"
+                className="btn btn-sm btn-neutral shrink-0"
+                disabled={actionBusy}
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  if (!actionBusy) {
+                    onAction()
+                  }
+                }}
+              >
+                {actionBusy ? '…' : t(actionLabel)}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

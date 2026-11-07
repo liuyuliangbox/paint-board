@@ -57,6 +57,14 @@ export const markFilePersistFailed = () => {
   persistListeners.forEach((listener) => listener())
 }
 
+/**
+ * After a successful IDB rebuild, or when the user dismisses the sticky
+ * toast — allow writes again so the next edit can retry / auto-heal.
+ */
+export const clearFilePersistFailed = () => {
+  filePersistFailed = false
+}
+
 export const hasFilePersistFailed = () => filePersistFailed
 
 /** After clearing corrupt IndexedDB data so a reload can persist again. */

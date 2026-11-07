@@ -1,4 +1,4 @@
-import { del, get, set } from 'idb-keyval'
+import { idbDelItem, idbGetItem, idbSetItem } from '@/store/idbKeyvalStore'
 
 export const THUMBNAIL_KEY_PREFIX = 'paint-board-thumb:v2:'
 const LEGACY_THUMBNAIL_KEY_PREFIX = 'paint-board-thumb:'
@@ -24,7 +24,7 @@ export const thumbnailKey = (id: string) => `${THUMBNAIL_KEY_PREFIX}${id}`
 const legacyThumbnailKey = (id: string) => `${LEGACY_THUMBNAIL_KEY_PREFIX}${id}`
 
 const dropLegacyThumbnail = (id: string) => {
-  void del(legacyThumbnailKey(id)).catch((error) => {
+  void idbDelItem(legacyThumbnailKey(id)).catch((error) => {
     console.error('Failed to drop a legacy board thumbnail', error)
   })
 }
@@ -83,7 +83,7 @@ export const hydrateThumbnail = async (id: string) => {
   }
   const epoch = epochOf(id)
   try {
-    const raw = (await get(thumbnailKey(id))) as
+    const raw = (await idbGetItem(thumbnailKey(id))) as
       | Partial<ThumbnailRecord>
       | undefined
     if (epochOf(id) !== epoch) {
@@ -124,14 +124,14 @@ export const saveThumbnail = async (
     ? { revision, blob }
     : { revision, empty: true }
   try {
-    await set(thumbnailKey(id), record)
+    await idbSetItem(thumbnailKey(id), record)
   } catch (error) {
     console.error('Failed to store board thumbnail', error)
     return false
   }
   if (!stillCurrent() || epochOf(id) !== epoch) {
     try {
-      await del(thumbnailKey(id))
+      await idbDelItem(thumbnailKey(id))
     } catch (error) {
       console.error('Failed to drop a stale board thumbnail', error)
     }
@@ -154,8 +154,8 @@ export const deleteThumbnail = async (id: string) => {
     emitThumbnails()
   }
   try {
-    await del(thumbnailKey(id))
-    await del(legacyThumbnailKey(id))
+    await idbDelItem(thumbnailKey(id))
+    await idbDelItem(legacyThumbnailKey(id))
   } catch (error) {
     console.error('Failed to delete board thumbnail', error)
   }

@@ -17,8 +17,10 @@ export type BoardHydrateCode =
   | 'QUOTA_EXCEEDED'
   | 'IDB_BLOCKED'
   | 'IDB_UNKNOWN'
+  | 'IDB_INTERNAL'
   | 'REHYDRATE_CALLBACK_ERROR'
   | 'PERSIST_WRITE_FAIL'
+  | 'PERSIST_REBUILT'
 
 export type BoardHydrateOutcome =
   | 'ok'
@@ -66,17 +68,20 @@ const preview = (raw: string | null | undefined, max = 96) => {
 
 export const describeStorageError = (error: unknown) => {
   if (error instanceof DOMException) {
+    const msg = error.message || ''
     return {
       name: error.name,
-      message: error.message,
+      message: msg,
       code:
         error.name === 'QuotaExceededError'
           ? ('QUOTA_EXCEEDED' as const)
-          : error.name === 'InvalidStateError' ||
-              error.name === 'AbortError' ||
-              /blocked|versionchange/i.test(error.message)
-            ? ('IDB_BLOCKED' as const)
-            : ('IDB_UNKNOWN' as const)
+          : error.name === 'UnknownError' || /internal error/i.test(msg)
+            ? ('IDB_INTERNAL' as const)
+            : error.name === 'InvalidStateError' ||
+                error.name === 'AbortError' ||
+                /blocked|versionchange/i.test(msg)
+              ? ('IDB_BLOCKED' as const)
+              : ('IDB_UNKNOWN' as const)
     }
   }
   if (error instanceof Error) {
@@ -86,6 +91,13 @@ export const describeStorageError = (error: unknown) => {
         name: error.name,
         message: msg,
         code: 'QUOTA_EXCEEDED' as const
+      }
+    }
+    if (error.name === 'UnknownError' || /internal error/i.test(msg)) {
+      return {
+        name: error.name,
+        message: msg,
+        code: 'IDB_INTERNAL' as const
       }
     }
     if (/invalid file list/i.test(msg)) {
@@ -145,11 +157,20 @@ const hintKeysFor = (code: BoardHydrateCode): string[] => {
         'tip.hydrateDiag.hints.blocked',
         'tip.hydrateDiag.hints.closeOtherTabs'
       ]
+    case 'IDB_INTERNAL':
+      return [
+        'tip.hydrateDiag.hints.idbInternal',
+        'tip.hydrateDiag.hints.closeOtherTabs',
+        'tip.hydrateDiag.hints.checkKeyvalStore'
+      ]
+    case 'PERSIST_REBUILT':
+      return ['tip.hydrateDiag.hints.persistRebuilt']
     case 'REHYDRATE_CALLBACK_ERROR':
       return ['tip.hydrateDiag.hints.rehydrate']
     case 'PERSIST_WRITE_FAIL':
       return [
         'tip.hydrateDiag.hints.persistFail',
+        'tip.hydrateDiag.hints.idbInternal',
         'tip.hydrateDiag.hints.quota'
       ]
     default:

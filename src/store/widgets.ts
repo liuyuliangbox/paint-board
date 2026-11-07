@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage, StateStorage } from 'zustand/middleware'
-import { get, set, del } from 'idb-keyval'
+import { idbDelItem, idbGetItem, idbSetItem } from './idbKeyvalStore'
 import { v4 as uuidv4 } from 'uuid'
 import { produce } from 'immer'
 import {
@@ -30,9 +30,12 @@ export const WIDGET_CATEGORY_ALL = 'all'
 export { WIDGET_UNCATEGORIZED }
 
 const widgetDb = {
-  get: async (key: string) => (await get(key)) || null,
-  set: (key: string, value: string) => set(key, value),
-  del: (key: string) => del(key)
+  get: async (key: string): Promise<string | null> => {
+    const value = await idbGetItem<string>(key)
+    return typeof value === 'string' ? value : null
+  },
+  set: (key: string, value: string) => idbSetItem(key, value),
+  del: (key: string) => idbDelItem(key)
 }
 
 /** In-memory object payloads keyed by widget id; flushed with the list. */
@@ -45,7 +48,7 @@ const normalizeCategory = (value?: string) => {
 
 const storage: StateStorage = {
   getItem: async (name: string) => {
-    return readPersistedWidgets((await get(name)) || null, widgetDb)
+    return readPersistedWidgets(await widgetDb.get(name), widgetDb)
   },
   setItem: async (name: string, value: string) => {
     const payloads: Record<string, StoredWidgetPayload> = {}
@@ -63,7 +66,7 @@ const storage: StateStorage = {
     await writePersistedWidgets(name, value, payloads, widgetDb)
   },
   removeItem: async (name: string) => {
-    await del(name)
+    await idbDelItem(name)
   }
 }
 

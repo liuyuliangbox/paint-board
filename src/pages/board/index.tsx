@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { DEFAULT_BACKGROUND_SORT, useCurrentFile } from '@/store/files'
 import useBoardStore from '@/store/board'
 import {
+  clearFilePersistFailed,
   hasFileHydrationFailed,
   hasFileHydrationSoftRecovered,
   hasFilePersistFailed,
@@ -11,6 +12,7 @@ import {
   formatBoardHydrateDiagnosisText,
   getBoardHydrateDiagnosis
 } from '@/store/boardHydrateDiag'
+import { clearCorruptedBoardStorage } from '@/store/clearBoardStorage'
 import { paintBoard } from '@/core/paintBoard'
 import { loadTemplates, type BoardTemplate } from '@/core/template/template'
 import {
@@ -41,6 +43,7 @@ const Board: React.FC = () => {
   const [hydrateDiagDetail, setHydrateDiagDetail] = useState('')
   const [hydrateDiagHints, setHydrateDiagHints] = useState<string[]>([])
   const [persistFailed, setPersistFailed] = useState(false)
+  const [clearingStorage, setClearingStorage] = useState(false)
   const [offerTemplates, setOfferTemplates] = useState<BoardTemplate[] | null>(
     null
   )
@@ -151,6 +154,7 @@ const Board: React.FC = () => {
           type="warning"
           hints={hydrateDiagHints}
           detail={hydrateDiagDetail}
+          onDismiss={() => setHydrationSoftRecovered(false)}
         />
       )}
       {persistFailed && (
@@ -159,6 +163,26 @@ const Board: React.FC = () => {
           type="error"
           hints={hydrateDiagHints}
           detail={hydrateDiagDetail}
+          onDismiss={() => {
+            setPersistFailed(false)
+            // Let the next edit retry write / auto-heal instead of staying locked.
+            clearFilePersistFailed()
+          }}
+          actionLabel="tip.rebuildLocalStorage"
+          actionBusy={clearingStorage}
+          onAction={() => {
+            if (clearingStorage) {
+              return
+            }
+            setClearingStorage(true)
+            void clearCorruptedBoardStorage()
+              .catch((error) => {
+                console.warn('[paint-board] rebuild storage failed', error)
+              })
+              .finally(() => {
+                window.location.reload()
+              })
+          }}
         />
       )}
       {canvasLoaded && (
