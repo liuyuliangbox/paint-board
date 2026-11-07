@@ -39,6 +39,10 @@ module.exports = {
         },
         'min-xs': {
           min: '750px'
+        },
+        // Same contract as NARROW_PORTRAIT_MQ — rails + edge panels only.
+        'narrow-portrait': {
+          raw: '(max-width: 750px) and (orientation: portrait)'
         }
       },
       backgroundImage: {

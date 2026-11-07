@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
+import { NARROW_PORTRAIT_MQ } from '@/utils/screenOrientation'
 
-const PORTRAIT_XS = '(max-width: 750px) and (orientation: portrait)'
+export { NARROW_PORTRAIT_MQ }
 
 /** Phone portrait where left/right long-edge rails apply. */
 export const useNarrowPortrait = () => {
   const [narrowPortrait, setNarrowPortrait] = useState(() =>
     typeof window !== 'undefined' && typeof window.matchMedia === 'function'
-      ? window.matchMedia(PORTRAIT_XS).matches
+      ? window.matchMedia(NARROW_PORTRAIT_MQ).matches
       : false
   )
 
@@ -14,7 +15,7 @@ export const useNarrowPortrait = () => {
     if (typeof window.matchMedia !== 'function') {
       return
     }
-    const mq = window.matchMedia(PORTRAIT_XS)
+    const mq = window.matchMedia(NARROW_PORTRAIT_MQ)
     const sync = () => setNarrowPortrait(mq.matches)
     sync()
     mq.addEventListener('change', sync)

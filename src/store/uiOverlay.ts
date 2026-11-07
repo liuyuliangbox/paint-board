@@ -1,8 +1,7 @@
 import { create } from 'zustand'
+import { NARROW_PORTRAIT_MQ } from '@/utils/screenOrientation'
 
 export type UiOverlayId = 'none' | 'tools' | 'layers' | 'boards' | 'widgets'
-
-const PORTRAIT_XS = '(max-width: 750px) and (orientation: portrait)'
 
 /** Narrow phone portrait: only one primary overlay at a time. */
 export const shouldMutexOverlays = () => {
@@ -12,7 +11,7 @@ export const shouldMutexOverlays = () => {
   ) {
     return false
   }
-  return window.matchMedia(PORTRAIT_XS).matches
+  return window.matchMedia(NARROW_PORTRAIT_MQ).matches
 }
 
 interface UiOverlayState {

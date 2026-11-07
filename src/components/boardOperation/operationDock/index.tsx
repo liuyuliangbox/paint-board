@@ -32,7 +32,6 @@ import DockButton from './DockButton'
 
 const isMobile = isMobileFn()
 const SWIPE_PX = 40
-const SIDE_MQ = '(max-width: 750px)'
 
 export interface OperationDockProps {
   hasSelection: boolean
@@ -67,14 +66,16 @@ const Section: FC<{
   tone?: 'default' | 'selection' | 'toggle'
   children: ReactNode
   title?: string
-}> = ({ tone = 'default', children, title }) => {
+  /** Portrait long-edge rail (not width-only xs). */
+  rail?: boolean
+}> = ({ tone = 'default', children, title, rail = false }) => {
   if (!children) {
     return null
   }
   return (
     <div
       role={tone === 'toggle' ? 'group' : undefined}
-      className={`flex items-center xs:w-full xs:flex-col ${
+      className={`flex items-center ${rail ? 'w-full flex-col' : ''} ${
         tone === 'selection'
           ? 'gap-0.5 rounded-xl bg-white/70 px-1 py-0.5 ring-1 ring-[#66CC8A]/35'
           : tone === 'toggle'
@@ -117,15 +118,10 @@ const OperationDock: FC<OperationDockProps> = ({
 }) => {
   const { t } = useTranslation()
   const labelOf = (key: string) => String(t(key))
-  const narrowPortrait = useNarrowPortrait()
+  // Left vertical rail only in narrow portrait; ≤750 landscape stays a bottom bar.
+  const railLayout = useNarrowPortrait()
+  const narrowPortrait = railLayout
   const overlayActive = useUiOverlayStore((s) => s.active)
-  // Match Tailwind `xs` (max 750px) so rail layout tracks the vertical dock.
-  const [railLayout, setRailLayout] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia(SIDE_MQ).matches
-  )
   const layout = railLayout ? 'rail' : 'bar'
   const legendOpen = useUiLegendStore((s) => s.legendOpen)
   const setLegendOpen = useUiLegendStore((s) => s.setLegendOpen)
@@ -133,17 +129,6 @@ const OperationDock: FC<OperationDockProps> = ({
   const dockRef = useRef<HTMLDivElement>(null)
   const swipeStart = useRef<{ x: number; y: number } | null>(null)
   const showLabel = legendOpen
-
-  useEffect(() => {
-    if (typeof window.matchMedia !== 'function') {
-      return
-    }
-    const mq = window.matchMedia(SIDE_MQ)
-    const sync = () => setRailLayout(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
 
   useEffect(() => {
     const el = dockRef.current
@@ -169,11 +154,8 @@ const OperationDock: FC<OperationDockProps> = ({
       if (Math.hypot(dx, dy) < SWIPE_PX) {
         return
       }
-      const sideLayout =
-        typeof window.matchMedia === 'function' &&
-        window.matchMedia(SIDE_MQ).matches
 
-      if (sideLayout) {
+      if (railLayout) {
         // Phone vertical rail: swipe left = open legend, right = collapse.
         if (Math.abs(dx) < Math.abs(dy)) {
           return
@@ -186,7 +168,7 @@ const OperationDock: FC<OperationDockProps> = ({
         return
       }
 
-      // Desktop bottom bar: swipe up = open, down = collapse.
+      // Bottom bar (desktop / phone landscape): swipe up = open, down = collapse.
       if (Math.abs(dy) < Math.abs(dx)) {
         return
       }
@@ -208,7 +190,7 @@ const OperationDock: FC<OperationDockProps> = ({
       el.removeEventListener('pointerup', onPointerUp)
       el.removeEventListener('pointercancel', onPointerCancel)
     }
-  }, [setLegendOpen])
+  }, [railLayout, setLegendOpen])
 
   useEffect(() => {
     if (!moreOpen) {
@@ -237,23 +219,36 @@ const OperationDock: FC<OperationDockProps> = ({
       className={`pointer-events-none fixed ${
         underPanelDim ? 'z-[5]' : 'z-[var(--pb-z-dock)]'
       } ${
-        // Phone portrait: left ops rail. Landscape / desktop: bottom bar.
-        'bottom-3 left-1/2 w-auto max-w-[min(96vw,44rem)] -translate-x-1/2 landscape:max-w-[min(calc(96vw-7.5rem),44rem)] xs:bottom-auto xs:left-1.5 xs:right-auto xs:top-1/2 xs:max-w-none xs:translate-x-0 xs:-translate-y-1/2'
+        railLayout
+          ? 'left-1.5 top-1/2 max-w-none -translate-y-1/2 translate-x-0'
+          : 'bottom-3 left-1/2 w-auto max-w-[min(96vw,44rem)] -translate-x-1/2 landscape:max-w-[min(calc(96vw-7.5rem),44rem)]'
       }`}
     >
       <div
         ref={dockRef}
-        className={`pointer-events-auto relative flex w-auto max-w-full items-stretch overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 shadow-md backdrop-blur max-h-[30vh] xs:max-h-[85vh] xs:flex-col ${
-          legendOpen
-            ? 'gap-1 px-1 py-1 xs:w-16 xs:gap-0.5 xs:px-0.5'
-            : 'gap-0.5 px-0.5 py-0.5 xs:w-11 xs:gap-0.5 xs:px-0.5'
+        className={`pointer-events-auto relative flex max-w-full items-stretch overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 shadow-md backdrop-blur ${
+          railLayout
+            ? `max-h-[85vh] w-auto flex-col ${
+                legendOpen
+                  ? 'w-16 gap-0.5 px-0.5 py-1'
+                  : 'w-11 gap-0.5 px-0.5 py-0.5'
+              }`
+            : `max-h-[30vh] w-auto ${
+                legendOpen ? 'gap-1 px-1 py-1' : 'gap-0.5 px-0.5 py-0.5'
+              }`
         }`}
       >
         {/* Desktop cannot orientation.lock — phone/tablet only. */}
         {!chromeOutsideDock && isMobile && (
           <div
-            className={`flex shrink-0 items-center gap-0.5 border-r border-slate-200/80 xs:flex-col xs:border-r-0 xs:border-b xs:px-0.5 xs:pr-0 ${
-              legendOpen ? 'pr-1 xs:pb-1' : 'pr-0.5 xs:pb-0.5'
+            className={`flex shrink-0 items-center gap-0.5 ${
+              railLayout
+                ? `flex-col border-b border-slate-200/80 px-0.5 ${
+                    legendOpen ? 'pb-1' : 'pb-0.5'
+                  }`
+                : `border-r border-slate-200/80 ${
+                    legendOpen ? 'pr-1' : 'pr-0.5'
+                  }`
             }`}
           >
             <DockButton
@@ -276,9 +271,19 @@ const OperationDock: FC<OperationDockProps> = ({
           </div>
         )}
 
-        <div className="flex min-h-0 w-auto min-w-0 items-center gap-0.5 overflow-x-auto noScrollbar xs:w-full xs:flex-1 xs:flex-col xs:overflow-x-hidden xs:overflow-y-auto">
+        <div
+          className={`flex min-h-0 min-w-0 items-center gap-0.5 noScrollbar ${
+            railLayout
+              ? 'w-full flex-1 flex-col overflow-x-hidden overflow-y-auto'
+              : 'w-auto overflow-x-auto'
+          }`}
+        >
           {/* Pan / Select as one segmented switch, left of undo/redo. */}
-          <Section tone="toggle" title={labelOf('operate.dock.pointerTools')}>
+          <Section
+            rail={railLayout}
+            tone="toggle"
+            title={labelOf('operate.dock.pointerTools')}
+          >
             <DockButton
               label={labelOf('operate.dock.pan')}
               showLabel={showLabel}
@@ -307,7 +312,7 @@ const OperationDock: FC<OperationDockProps> = ({
             </DockButton>
           </Section>
 
-          <Section tone="default">
+          <Section rail={railLayout} tone="default">
             <DockButton
               label={labelOf('operate.dock.undo')}
               showLabel={showLabel}
@@ -328,6 +333,7 @@ const OperationDock: FC<OperationDockProps> = ({
 
           {showSelection && (
             <Section
+              rail={railLayout}
               tone="selection"
               title={labelOf('operate.selectionActions')}
             >
@@ -378,7 +384,7 @@ const OperationDock: FC<OperationDockProps> = ({
             </Section>
           )}
 
-          <Section tone="default">
+          <Section rail={railLayout} tone="default">
             <DockButton
               label={labelOf('operate.dock.text')}
               showLabel={showLabel}
@@ -443,7 +449,7 @@ const OperationDock: FC<OperationDockProps> = ({
           </Section>
 
           {!isMobile && !chromeOutsideDock && (
-            <div className="relative xs:w-full">
+            <div className={`relative ${railLayout ? 'w-full' : ''}`}>
               <DockButton
                 label={labelOf('operate.dock.more')}
                 showLabel={showLabel}

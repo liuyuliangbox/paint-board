@@ -128,8 +128,8 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
         className="pointer-events-auto absolute inset-0 z-0 bg-black/40"
         onClick={() => updateShow(false)}
       />
-      <div className="pointer-events-none absolute inset-0 z-[1] flex items-stretch justify-end">
-        <div className="pointer-events-auto pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden bg-white px-4 py-4 shadow-xl xs:m-0 xs:w-[var(--pb-panel-max-w-clear-left)] xs:max-w-[var(--pb-panel-max-w-clear-left)] xs:rounded-none xs:rounded-l-2xl xs:px-3 xs:py-3 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-3 landscape:py-3">
+      <div className="pointer-events-none absolute inset-0 z-[1] flex items-stretch justify-center narrow-portrait:justify-end">
+        <div className="pointer-events-auto pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden bg-white px-4 py-4 shadow-xl narrow-portrait:m-0 narrow-portrait:w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:max-w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:rounded-none narrow-portrait:rounded-l-2xl narrow-portrait:px-3 narrow-portrait:py-3 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-3 landscape:py-3">
           <div className="shrink-0 text-center font-fredokaOne text-xl xs:text-lg landscape:text-lg">
             {t('objectList.title')}
           </div>

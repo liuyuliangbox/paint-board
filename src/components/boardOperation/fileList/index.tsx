@@ -381,9 +381,9 @@ const FileList: FC<IProps> = ({ updateShow }) => {
           className="pointer-events-auto absolute inset-0 z-0 bg-black/40"
           onClick={() => updateShow(false)}
         />
-        <div className="pointer-events-none absolute inset-0 z-[1] flex items-stretch justify-center xs:justify-end">
+        <div className="pointer-events-none absolute inset-0 z-[1] flex items-stretch justify-center narrow-portrait:justify-end">
           <div
-            className="pointer-events-auto pb-panel-fill flex w-[min(92vw,48rem)] max-w-5xl flex-col overflow-hidden bg-white shadow-xl xs:m-0 xs:w-[var(--pb-panel-max-w-clear-left)] xs:max-w-[var(--pb-panel-max-w-clear-left)] xs:rounded-none xs:rounded-l-2xl"
+            className="pointer-events-auto pb-panel-fill flex w-[min(92vw,48rem)] max-w-5xl flex-col overflow-hidden bg-white shadow-xl narrow-portrait:m-0 narrow-portrait:w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:max-w-[var(--pb-panel-max-w-clear-left)] narrow-portrait:rounded-none narrow-portrait:rounded-l-2xl"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-3 xs:px-3 xs:py-2 landscape:px-3 landscape:py-2">

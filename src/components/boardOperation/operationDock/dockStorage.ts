@@ -1,3 +1,5 @@
+import { NARROW_PORTRAIT_MQ } from '@/utils/screenOrientation'
+
 /** Bump key when default behavior changes so old collapsed cache does not stick. */
 const LEGEND_KEY = 'PAINT-BOARD-DOCK-LEGEND-V3'
 
@@ -8,8 +10,7 @@ const isNarrowPortrait = () => {
   ) {
     return false
   }
-  return window.matchMedia('(max-width: 750px) and (orientation: portrait)')
-    .matches
+  return window.matchMedia(NARROW_PORTRAIT_MQ).matches
 }
 
 /**
