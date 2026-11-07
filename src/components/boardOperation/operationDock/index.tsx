@@ -24,6 +24,7 @@ import {
   Layers,
   LayoutTemplate,
   Link2,
+  MousePointer2,
   RectangleHorizontal,
   RectangleVertical,
   Redo2,
@@ -33,6 +34,7 @@ import {
   Undo2
 } from 'lucide-react'
 import { isMobile as isMobileFn } from '@/utils'
+import { ActionMode } from '@/constants'
 import { useTouchUi } from '@/hooks/useTouchUi'
 import ExportImageMenu from '../exportImageMenu'
 import { ExportScope } from '@/core/export/exportCanvasImage'
@@ -49,6 +51,8 @@ export interface OperationDockProps {
   canLink: boolean
   isFullscreen: boolean
   isPanMode: boolean
+  /** Current tool mode (draw / select / …). */
+  mode: string
   showTouchTools: boolean
   onUndo: () => void
   onRedo: () => void
@@ -65,6 +69,7 @@ export interface OperationDockProps {
   onOpenFiles: () => void
   onToggleFullscreen: () => void
   onTogglePanMode: () => void
+  onSelectMode: () => void
   /** Viewport currently landscape (after rotate / orientation.lock). */
   isLandscapeLayout: boolean
   onToggleLandscapeLayout: () => void
@@ -98,6 +103,7 @@ const OperationDock: FC<OperationDockProps> = ({
   canLink,
   isFullscreen,
   isPanMode,
+  mode,
   showTouchTools,
   onUndo,
   onRedo,
@@ -114,6 +120,7 @@ const OperationDock: FC<OperationDockProps> = ({
   onOpenFiles,
   onToggleFullscreen,
   onTogglePanMode,
+  onSelectMode,
   isLandscapeLayout,
   onToggleLandscapeLayout
 }) => {
@@ -341,6 +348,15 @@ const OperationDock: FC<OperationDockProps> = ({
                 <Hand strokeWidth={iconStroke} />
               </DockButton>
             )}
+            <DockButton
+              label={labelOf('operate.dock.select')}
+              showLabel={showLabel}
+              layout={layout}
+              active={mode === ActionMode.SELECT && !isPanMode}
+              onClick={onSelectMode}
+            >
+              <MousePointer2 strokeWidth={iconStroke} />
+            </DockButton>
           </Section>
 
           {showSelection && (

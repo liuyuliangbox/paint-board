@@ -8,6 +8,7 @@ import useCameraStore from '@/store/camera'
 import { canGroupActiveObjects } from '@/core/element/group/groupSelection'
 import { getLinkMenuState } from '@/core/element/layer/linkMenuState'
 import { linkActiveObjects } from '@/core/element/layer/objectListActions'
+import { ActionMode } from '@/constants'
 import { paintBoard } from '@/core/paintBoard'
 import { ImageElement } from '@/core/element/image'
 import { captureCameraFrame } from '@/core/camera/renderer'
@@ -37,7 +38,8 @@ import OperationDock from './operationDock'
 const BoardOperation = () => {
   const { touchUi } = useTouchUi()
   const { landscape } = useLandscapeLayout()
-  const { isPanMode, togglePanMode } = useBoardStore()
+  const { isPanMode, mode, togglePanMode, setPanMode, updateMode } =
+    useBoardStore()
   const { cameraOpacity, openCamera } = useCameraStore()
   const currentFile = useCurrentFile()
   const saveJSON = useFileStore((state) => state.saveJSON)
@@ -222,6 +224,7 @@ const BoardOperation = () => {
         canLink={canLink}
         isFullscreen={isFullscreen}
         isPanMode={isPanMode}
+        mode={mode}
         showTouchTools={touchUi}
         onUndo={() => paintBoard.history?.undo()}
         onRedo={() => paintBoard.history?.redo()}
@@ -238,6 +241,11 @@ const BoardOperation = () => {
         onOpenFiles={() => updateShowFile(true)}
         onToggleFullscreen={() => void toggleFullscreen()}
         onTogglePanMode={() => togglePanMode()}
+        onSelectMode={() => {
+          // Always exit hand-pan; one tap must land in select even if already SELECT.
+          setPanMode(false)
+          updateMode(ActionMode.SELECT)
+        }}
         isLandscapeLayout={landscape}
         onToggleLandscapeLayout={() => void toggleLandscapeLayout()}
       />
