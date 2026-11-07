@@ -14,10 +14,10 @@ const HelpArea: React.FC = () => {
   return (
     <>
       {/*
-        Portrait: bottom-left, clear of the side rail.
-        Landscape: top-left beside the tool-panel toggle so it does not crowd the dock.
+        Portrait: right of the bottom-left language switch.
+        Landscape: top-left beside the tool-panel toggle.
       */}
-      <div className="z-[4] fixed bottom-5 left-5 flex flex-row items-center justify-center rounded-full bg-[#eef1ff] px-2.5 py-1.5 landscape:bottom-auto landscape:left-14 landscape:top-3">
+      <div className="z-[4] fixed bottom-3 left-[6.75rem] flex flex-row items-center justify-center rounded-full bg-[#eef1ff] px-2.5 py-1.5 landscape:bottom-auto landscape:left-14 landscape:top-3">
         <button
           type="button"
           className={`flex items-center gap-1 rounded-full bg-white px-0.5 py-0.5 hover:opacity-70 ${

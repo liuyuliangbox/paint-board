@@ -16,7 +16,8 @@ const HelpModal = () => {
   )
 
   const handleChangLang = (newLanguage: string) => {
-    i18n.changeLanguage(newLanguage)
+    // Menu uses `zh-tw`; i18n resource key is `zh-TW`.
+    void i18n.changeLanguage(newLanguage === 'zh-tw' ? 'zh-TW' : newLanguage)
     updateLanguage(newLanguage)
   }
 
