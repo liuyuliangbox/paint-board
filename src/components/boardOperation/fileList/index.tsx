@@ -381,8 +381,8 @@ const FileList: FC<IProps> = ({ updateShow }) => {
           className="pb-panel-fill modal-box flex w-[94vw] max-w-5xl flex-col overflow-hidden p-0"
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-3 landscape:px-3 landscape:py-2">
-            <h3 className="font-fredokaOne text-xl landscape:text-lg">
+          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-3 xs:px-3 xs:py-2 landscape:px-3 landscape:py-2">
+            <h3 className="font-fredokaOne text-xl xs:text-lg landscape:text-lg">
               {t('fileBoard.title')}
             </h3>
             <div className="flex items-center gap-1">
@@ -419,7 +419,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
             </div>
           </div>
 
-          <div className="flex shrink-0 gap-2 border-b border-slate-100 px-4 pt-2 landscape:px-3 landscape:pt-1.5">
+          <div className="flex shrink-0 gap-2 border-b border-slate-100 px-4 pt-2 xs:px-3 xs:pt-1.5 landscape:px-3 landscape:pt-1.5">
             <button
               type="button"
               className={`rounded-t-lg px-3 py-1.5 text-sm ${
@@ -446,7 +446,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
 
           {tab === 'local' ? (
             <>
-              <div className="flex shrink-0 flex-wrap items-center gap-2 px-4 py-2 landscape:px-3 landscape:py-1.5">
+              <div className="flex shrink-0 flex-wrap items-center gap-2 px-4 py-2 xs:gap-1.5 xs:px-3 xs:py-1.5 landscape:px-3 landscape:py-1.5">
                 <label className="flex cursor-pointer items-center gap-2 text-sm">
                   <input
                     ref={selectAllRef}
@@ -557,8 +557,8 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                   {t('fileBoard.limit', { count: MAX_BOARD_COUNT })}
                 </div>
               )}
-              <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-1 landscape:px-3 landscape:pb-3">
-                <div className="grid content-start items-start gap-3 [grid-auto-rows:minmax(10rem,12.5rem)] [grid-template-columns:repeat(auto-fill,minmax(min(100%,14rem),1fr))] landscape:gap-2.5 landscape:[grid-auto-rows:minmax(8rem,min(28vh,11rem))] landscape:[grid-template-columns:repeat(auto-fill,minmax(min(100%,11rem),1fr))]">
+              <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-1 xs:px-3 xs:pb-3 landscape:px-3 landscape:pb-3">
+                <div className="grid content-start items-start gap-3 [grid-auto-rows:minmax(10rem,12.5rem)] [grid-template-columns:repeat(auto-fill,minmax(min(100%,14rem),1fr))] xs:gap-2.5 xs:[grid-auto-rows:minmax(9rem,11.5rem)] xs:[grid-template-columns:repeat(auto-fill,minmax(min(100%,11.5rem),1fr))] landscape:gap-2.5 landscape:[grid-auto-rows:minmax(8rem,min(28vh,11rem))] landscape:[grid-template-columns:repeat(auto-fill,minmax(min(100%,11rem),1fr))]">
                   {files.map((file) => {
                     void thumbVersion
                     return (
@@ -663,7 +663,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                   </p>
                 )}
               </div>
-              <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 pt-1">
+              <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 pt-1 xs:px-3 xs:pb-3 landscape:px-3 landscape:pb-3">
                 {!cloudLoadedCode ? (
                   <p className="py-8 text-center text-sm text-slate-500">
                     {t('fileBoard.syncCloudEmptyHint')}
@@ -673,7 +673,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
                     {t('fileBoard.syncCloudEmpty')}
                   </p>
                 ) : (
-                  <div className="grid content-start items-start gap-4 [grid-auto-rows:200px] [grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))] landscape:gap-3 landscape:[grid-auto-rows:minmax(140px,180px)] landscape:[grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr))]">
+                  <div className="grid content-start items-start gap-4 [grid-auto-rows:200px] [grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))] xs:gap-2.5 xs:[grid-auto-rows:minmax(9rem,11.5rem)] xs:[grid-template-columns:repeat(auto-fill,minmax(min(100%,11.5rem),1fr))] landscape:gap-3 landscape:[grid-auto-rows:minmax(140px,180px)] landscape:[grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr))]">
                     {cloudMetas.map((meta) => (
                       <CloudBoardCard
                         key={meta.id}

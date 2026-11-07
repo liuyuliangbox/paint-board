@@ -5,6 +5,7 @@ import useUiLegendStore from '@/store/uiLegend'
 import InfoIcon from '@/components/icons/info.svg?react'
 import ZoomInfo from '../zoomInfo'
 import CameraConfig from '../cameraConfig'
+import LanguageSwitch from '@/components/languageSwitch'
 import HelpModal from './helpModal'
 
 const HelpArea: React.FC = () => {
@@ -14,10 +15,11 @@ const HelpArea: React.FC = () => {
   return (
     <>
       {/*
-        Portrait: right of the bottom-left language switch.
+        Portrait: bottom-left capsule (language + help/zoom/camera).
         Landscape: top-left beside the tool-panel toggle.
       */}
-      <div className="z-[4] fixed bottom-3 left-[6.75rem] flex flex-row items-center justify-center rounded-full bg-[#eef1ff] px-2.5 py-1.5 landscape:bottom-auto landscape:left-14 landscape:top-3">
+      <div className="z-[4] fixed bottom-3 left-3 flex flex-row items-center justify-center gap-0.5 rounded-full bg-[#eef1ff] px-2 py-1.5 landscape:bottom-auto landscape:left-14 landscape:top-3">
+        <LanguageSwitch />
         <button
           type="button"
           className={`flex items-center gap-1 rounded-full bg-white px-0.5 py-0.5 hover:opacity-70 ${

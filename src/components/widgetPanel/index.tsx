@@ -22,6 +22,7 @@ import useWidgetStore, {
   WIDGET_UNCATEGORIZED,
   widgetCategoryOf
 } from '@/store/widgets'
+import useUiOverlayStore, { shouldMutexOverlays } from '@/store/uiOverlay'
 import { insertWidgetObjects } from '@/core/widget/widget'
 import {
   getMySyncCode,
@@ -46,7 +47,6 @@ const WidgetPanel = () => {
     categories,
     activeCategory,
     panelOpen,
-    togglePanel,
     setPanelOpen,
     setActiveCategory,
     addCategory,
@@ -83,8 +83,27 @@ const WidgetPanel = () => {
   /** Only fire regenerate if pointerdown also started on that button. */
   const regenerateArmedRef = useRef(false)
   const { coarse, narrow } = useTouchUi()
+  const overlayActive = useUiOverlayStore((s) => s.active)
 
   useEffect(() => subscribeCloudAuth(() => setLoggedIn(isCloudLoggedIn())), [])
+
+  const setWidgetsOpen = (open: boolean) => {
+    setPanelOpen(open)
+    if (open) {
+      useUiOverlayStore.getState().open('widgets')
+    } else {
+      useUiOverlayStore.getState().close('widgets')
+    }
+  }
+
+  useEffect(() => {
+    if (!shouldMutexOverlays()) {
+      return
+    }
+    if (overlayActive !== 'widgets' && overlayActive !== 'none' && panelOpen) {
+      setPanelOpen(false)
+    }
+  }, [overlayActive, panelOpen, setPanelOpen])
 
   // Canvas interaction must not hit panel controls (click-through / release-over-button).
   useEffect(() => {
@@ -110,7 +129,7 @@ const WidgetPanel = () => {
         (lower && lower.contains(target as Node)) ||
         (upper && upper.contains(target as Node))
       ) {
-        setPanelOpen(false)
+        setWidgetsOpen(false)
       }
     }
     document.addEventListener('pointerdown', onPointerDown, true)
@@ -435,7 +454,10 @@ const WidgetPanel = () => {
           <button
             type="button"
             className="flex w-full items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs text-slate-600 hover:bg-white/50"
-            onClick={togglePanel}
+            onClick={() => {
+              const next = !panelOpen
+              setWidgetsOpen(next)
+            }}
           >
             <LayoutTemplate className="h-3.5 w-3.5 text-[#66CC8A]" />
             <span>{t('widget.panelTitle')}</span>

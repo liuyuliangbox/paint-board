@@ -25,7 +25,6 @@ import BoardOperation from '@/components/boardOperation'
 import WidgetPanel from '@/components/widgetPanel'
 import WidgetContextMenu from '@/components/widgetPanel/contextMenu'
 import UiLegendToggle from '@/components/uiLegendToggle'
-import LanguageSwitch from '@/components/languageSwitch'
 import BackgroundColor from '@/components/background/backgroundColor'
 import BackgroundImage from '@/components/background/backgroundImage'
 import BackgroundCamera from '@/components/background/backgroundCamera'
@@ -152,7 +151,6 @@ const Board: React.FC = () => {
           <WidgetContextMenu />
           <ToolPanel />
           <HelpArea />
-          <LanguageSwitch />
           <UiLegendToggle />
           <CleanModal />
           <BoardOperation />

@@ -223,8 +223,8 @@ const OperationDock: FC<OperationDockProps> = ({
 
   const iconStroke = 2
   const showSelection = hasSelection
-  // Landscape: workspace chrome lives top-right — keep the dock for draw actions only.
-  const compactDock = isLandscapeLayout
+  // Landscape bar or phone portrait rail: chrome lives top-right — dock is draw-only.
+  const chromeOutsideDock = isLandscapeLayout || railLayout
 
   return (
     <div
@@ -237,13 +237,13 @@ const OperationDock: FC<OperationDockProps> = ({
     >
       <div
         ref={dockRef}
-        className={`pointer-events-auto relative flex w-auto max-w-full items-stretch overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 shadow-md backdrop-blur max-h-[30vh] xs:max-h-[78vh] xs:flex-col ${
+        className={`pointer-events-auto relative flex w-auto max-w-full items-stretch overflow-hidden rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 shadow-md backdrop-blur max-h-[30vh] xs:max-h-[85vh] xs:flex-col ${
           legendOpen
             ? 'gap-1 px-1 py-1 xs:w-16 xs:gap-0.5 xs:px-0.5'
             : 'gap-0.5 px-0.5 py-0.5 xs:w-11 xs:gap-0.5 xs:px-0.5'
         }`}
       >
-        {!compactDock && (
+        {!chromeOutsideDock && (
           <div
             className={`flex shrink-0 items-center gap-0.5 border-r border-slate-200/80 xs:flex-col xs:border-r-0 xs:border-b xs:px-0.5 xs:pr-0 ${
               legendOpen ? 'pr-1 xs:pb-1' : 'pr-0.5 xs:pb-0.5'
@@ -413,7 +413,7 @@ const OperationDock: FC<OperationDockProps> = ({
               layout={layout}
               label={labelOf('operate.dock.save')}
             />
-            {!compactDock && (
+            {!chromeOutsideDock && (
               <>
                 <DockButton
                   label={labelOf('operate.dock.layers')}
@@ -435,7 +435,7 @@ const OperationDock: FC<OperationDockProps> = ({
             )}
           </Section>
 
-          {!isMobile && !compactDock && (
+          {!isMobile && !chromeOutsideDock && (
             <div className="relative xs:w-full">
               <DockButton
                 label={labelOf('operate.dock.more')}

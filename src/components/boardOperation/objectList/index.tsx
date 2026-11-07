@@ -133,11 +133,11 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
           className="drawer-overlay"
           onClick={() => updateShow(false)}
         ></label>
-        <div className="pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden bg-white px-4 py-4 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-3 landscape:py-3">
-          <div className="shrink-0 text-center font-fredokaOne text-xl landscape:text-lg">
+        <div className="pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden bg-white px-4 py-4 xs:px-3 xs:py-3 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-3 landscape:py-3">
+          <div className="shrink-0 text-center font-fredokaOne text-xl xs:text-lg landscape:text-lg">
             {t('objectList.title')}
           </div>
-          <div className="mt-2 flex shrink-0 flex-wrap items-center justify-center gap-1.5">
+          <div className="mt-2 flex shrink-0 flex-wrap items-center justify-center gap-1.5 xs:mt-1.5 xs:gap-1">
             {coarse && (
               <button
                 type="button"
@@ -175,12 +175,12 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
               {t('objectList.unlink')}
             </button>
           </div>
-          <p className="mt-1.5 shrink-0 text-center text-[11px] text-slate-400 line-clamp-2 landscape:line-clamp-1">
+          <p className="mt-1.5 shrink-0 text-center text-[11px] text-slate-400 line-clamp-2 xs:mt-1 xs:line-clamp-1 landscape:line-clamp-1">
             {coarse && multiSelect
               ? t('objectList.multiSelectHint')
               : t('objectList.hint')}
           </p>
-          <div className="mt-2 flex min-h-0 w-full max-w-full flex-1 flex-col rounded-2xl bg-[#eef1ff] py-1.5">
+          <div className="mt-2 flex min-h-0 w-full max-w-full flex-1 flex-col rounded-2xl bg-[#eef1ff] py-1.5 xs:mt-1.5">
             <ul
               ref={sortableRef}
               className="text-base-content noScrollbar mx-2 my-1.5 min-h-0 max-w-full flex-1 flex-nowrap overflow-y-auto rounded-xl bg-white px-2 py-2"

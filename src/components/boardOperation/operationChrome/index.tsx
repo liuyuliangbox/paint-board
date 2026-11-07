@@ -11,8 +11,8 @@ import {
 import useUiLegendStore from '@/store/uiLegend'
 
 /**
- * Landscape / wide layout: workspace chrome at top-right so the bottom dock
- * can stay short (draw + selection only) without horizontal scrolling.
+ * Workspace chrome (orient / layers / boards / fullscreen) sits top-right so
+ * the dock stays draw-only: landscape always; phone portrait rail (`xs`) too.
  */
 export interface OperationChromeProps {
   isFullscreen: boolean
@@ -67,8 +67,10 @@ const OperationChrome: FC<OperationChromeProps> = ({
   const labelOf = (key: string) => String(t(key))
   const showLabel = useUiLegendStore((s) => s.legendOpen)
 
+  // Phone portrait (`xs`) and any landscape: top-right chrome.
+  // Wide desktop portrait keeps these actions on the dock instead.
   return (
-    <div className="pointer-events-none fixed right-3 top-3 z-[12] hidden landscape:block">
+    <div className="pointer-events-none fixed right-3 top-3 z-[12] hidden landscape:block xs:block">
       <div className="pointer-events-auto flex max-w-[min(92vw,28rem)] flex-wrap items-center justify-end gap-0.5 rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 p-0.5 shadow-md backdrop-blur">
         <ChromeButton
           label={

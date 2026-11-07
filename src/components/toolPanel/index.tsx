@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import useBoardStore from '@/store/board'
 import useUiLegendStore from '@/store/uiLegend'
+import useUiOverlayStore, { shouldMutexOverlays } from '@/store/uiOverlay'
+import useWidgetStore from '@/store/widgets'
 import { ActionMode } from '@/constants'
 import { paintBoard } from '@/core/paintBoard'
 import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
@@ -19,19 +21,43 @@ const ToolPanel: FC = () => {
   const { mode, updateMode } = useBoardStore()
   const { landscape } = useLandscapeLayout()
   const showLabel = useUiLegendStore((s) => s.legendOpen)
+  const overlayActive = useUiOverlayStore((s) => s.active)
+  const setWidgetPanelOpen = useWidgetStore((s) => s.setPanelOpen)
   // Landscape starts collapsed so the short canvas opens clear; user can reopen.
   const [showPanel, setShowPanel] = useState(() => !isViewportLandscape())
   const panelRef = useRef<HTMLDivElement>(null)
   const wasLandscape = useRef(landscape)
   const toolsLabel = String(t('operate.tools'))
 
+  const setToolsOpen = (open: boolean) => {
+    setShowPanel(open)
+    if (open) {
+      useUiOverlayStore.getState().open('tools')
+      if (shouldMutexOverlays()) {
+        setWidgetPanelOpen(false)
+      }
+    } else {
+      useUiOverlayStore.getState().close('tools')
+    }
+  }
+
   // Entering landscape: collapse so the short canvas is usable; user can reopen.
   useEffect(() => {
     if (landscape && !wasLandscape.current) {
-      setShowPanel(false)
+      setToolsOpen(false)
     }
     wasLandscape.current = landscape
   }, [landscape])
+
+  // Portrait mutex: another overlay claimed → close tools.
+  useEffect(() => {
+    if (!shouldMutexOverlays()) {
+      return
+    }
+    if (overlayActive !== 'tools' && overlayActive !== 'none' && showPanel) {
+      setShowPanel(false)
+    }
+  }, [overlayActive, showPanel])
 
   // Close when interacting with the canvas (blank / draw), same as widget panel.
   useEffect(() => {
@@ -57,7 +83,7 @@ const ToolPanel: FC = () => {
         (lower && lower.contains(target as Node)) ||
         (upper && upper.contains(target as Node))
       ) {
-        setShowPanel(false)
+        setToolsOpen(false)
       }
     }
     document.addEventListener('pointerdown', onPointerDown, true)
@@ -90,7 +116,7 @@ const ToolPanel: FC = () => {
           <input
             type="checkbox"
             checked={!showPanel}
-            onChange={() => setShowPanel((v) => !v)}
+            onChange={() => setToolsOpen(!showPanel)}
           />
           <Menu
             strokeWidth={2.5}
@@ -113,7 +139,7 @@ const ToolPanel: FC = () => {
       </div>
       {showPanel && (
         <div
-          className={`pb-panel-shell pb-panel-open flex max-w-[85%] flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl landscape:max-w-[min(78vw,38rem)] landscape:p-2`}
+          className={`pb-panel-shell pb-panel-open flex max-w-[min(85%,calc(100vw-5.5rem))] flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl landscape:max-w-[min(78vw,38rem)] landscape:p-2`}
         >
           {/* Mode tabs stay full-width; config body may flow into a 2nd column. */}
           <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">

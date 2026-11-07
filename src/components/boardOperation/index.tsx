@@ -19,6 +19,7 @@ import {
 } from '@/core/export/exportCanvasImage'
 import { exportErrorMessageKey } from '@/core/export/exportError'
 import useWidgetStore, { MAX_WIDGET_COUNT } from '@/store/widgets'
+import useUiOverlayStore, { shouldMutexOverlays } from '@/store/uiOverlay'
 import { useLandscapeLayout } from '@/hooks/useLandscapeLayout'
 import {
   enterLandscapeLayout,
@@ -184,6 +185,19 @@ const BoardOperation = () => {
     }
   }, [])
 
+  const overlayActive = useUiOverlayStore((s) => s.active)
+  useEffect(() => {
+    if (!shouldMutexOverlays()) {
+      return
+    }
+    if (overlayActive !== 'layers') {
+      updateShowObjectList(false)
+    }
+    if (overlayActive !== 'boards') {
+      updateShowFile(false)
+    }
+  }, [overlayActive])
+
   const saveImage = async (scope: ExportScope) => {
     const canvas = paintBoard.canvas
     if (!canvas || exportingRef.current) {
@@ -217,16 +231,31 @@ const BoardOperation = () => {
 
   return (
     <>
-      {landscape && (
-        <OperationChrome
-          isFullscreen={isFullscreen}
-          isLandscapeLayout={landscape}
-          onToggleObjectList={() => updateShowObjectList((open) => !open)}
-          onOpenFiles={() => updateShowFile(true)}
-          onToggleFullscreen={() => void toggleFullscreen()}
-          onToggleLandscapeLayout={() => void toggleLandscapeLayout()}
-        />
-      )}
+      <OperationChrome
+        isFullscreen={isFullscreen}
+        isLandscapeLayout={landscape}
+        onToggleObjectList={() => {
+          updateShowObjectList((open) => {
+            const next = !open
+            if (next) {
+              useUiOverlayStore.getState().open('layers')
+              updateShowFile(false)
+              setWidgetPanelOpen(false)
+            } else {
+              useUiOverlayStore.getState().close('layers')
+            }
+            return next
+          })
+        }}
+        onOpenFiles={() => {
+          useUiOverlayStore.getState().open('boards')
+          updateShowFile(true)
+          updateShowObjectList(false)
+          setWidgetPanelOpen(false)
+        }}
+        onToggleFullscreen={() => void toggleFullscreen()}
+        onToggleLandscapeLayout={() => void toggleLandscapeLayout()}
+      />
       <OperationDock
         hasSelection={hasSelection}
         canGroup={canGroup}
@@ -245,8 +274,25 @@ const BoardOperation = () => {
         onUploadImage={uploadImageFile}
         onExport={saveImage}
         onExportBoard={saveJSON}
-        onToggleObjectList={() => updateShowObjectList((open) => !open)}
-        onOpenFiles={() => updateShowFile(true)}
+        onToggleObjectList={() => {
+          updateShowObjectList((open) => {
+            const next = !open
+            if (next) {
+              useUiOverlayStore.getState().open('layers')
+              updateShowFile(false)
+              setWidgetPanelOpen(false)
+            } else {
+              useUiOverlayStore.getState().close('layers')
+            }
+            return next
+          })
+        }}
+        onOpenFiles={() => {
+          useUiOverlayStore.getState().open('boards')
+          updateShowFile(true)
+          updateShowObjectList(false)
+          setWidgetPanelOpen(false)
+        }}
         onToggleFullscreen={() => void toggleFullscreen()}
         onTogglePanMode={() => togglePanMode()}
         onSelectMode={() => {
@@ -266,8 +312,26 @@ const BoardOperation = () => {
           type={widgetNotice === 'widget.addSuccess' ? 'success' : 'error'}
         />
       )}
-      {showObjectList && <ObjectList updateShow={updateShowObjectList} />}
-      {showFile && <FileList updateShow={updateShowFile} />}
+      {showObjectList && (
+        <ObjectList
+          updateShow={(show) => {
+            updateShowObjectList(show)
+            if (!show) {
+              useUiOverlayStore.getState().close('layers')
+            }
+          }}
+        />
+      )}
+      {showFile && (
+        <FileList
+          updateShow={(show) => {
+            updateShowFile(show)
+            if (!show) {
+              useUiOverlayStore.getState().close('boards')
+            }
+          }}
+        />
+      )}
       {showDownloadModal && exportImage && (
         <DownloadImage
           url={exportImage.url}
