@@ -119,17 +119,17 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
     }
   }
 
-  // Above operation dock (z-12). Overlay leaves the portrait left rail clickable.
+  // Portrait: open from the right, clear the left ops dock (dim still masks it).
   return (
-    <div className="pointer-events-none fixed inset-0 z-[25]">
+    <div className="pointer-events-none fixed inset-0 z-[var(--pb-z-focus)]">
       <button
         type="button"
         aria-label="Close"
-        className="pointer-events-auto absolute inset-0 bg-black/40 xs:left-[var(--pb-rail-left)]"
+        className="pointer-events-auto absolute inset-0 z-0 bg-black/40"
         onClick={() => updateShow(false)}
       />
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-start justify-end">
-        <div className="pointer-events-auto pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden bg-white px-4 py-4 shadow-xl xs:max-w-[var(--pb-panel-max-w-from-right)] xs:px-3 xs:py-3 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-3 landscape:py-3">
+      <div className="pointer-events-none absolute inset-0 z-[1] flex items-stretch justify-end">
+        <div className="pointer-events-auto pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden bg-white px-4 py-4 shadow-xl xs:m-0 xs:w-[var(--pb-panel-max-w-clear-left)] xs:max-w-[var(--pb-panel-max-w-clear-left)] xs:rounded-none xs:rounded-l-2xl xs:px-3 xs:py-3 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-3 landscape:py-3">
           <div className="shrink-0 text-center font-fredokaOne text-xl xs:text-lg landscape:text-lg">
             {t('objectList.title')}
           </div>

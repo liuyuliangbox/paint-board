@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import useBoardStore from '@/store/board'
-import useUiLegendStore from '@/store/uiLegend'
 import useUiOverlayStore, { shouldMutexOverlays } from '@/store/uiOverlay'
 import useWidgetStore from '@/store/widgets'
 import { ActionMode } from '@/constants'
@@ -18,23 +17,21 @@ import SelectConfig from './selectConfig'
 import BoardConfig from './boardConfig'
 
 /**
- * Every viewport: top-left expand/collapse control.
- * Narrow portrait: open card sits between left chrome rail and right dock
- * so the right dock stays visible and usable.
+ * Top-left draw toggle (same control every viewport) + config card.
+ * Narrow portrait: tools open from the left (ops dock side), clear the right
+ * chrome rail; dim masks rails. Icon + mode tabs share one row.
  */
 const ToolPanel: FC = () => {
   const { t } = useTranslation()
   const { mode, updateMode } = useBoardStore()
   const { landscape } = useLandscapeLayout()
   const narrowPortrait = useNarrowPortrait()
-  const showLabel = useUiLegendStore((s) => s.legendOpen)
   const overlayActive = useUiOverlayStore((s) => s.active)
   const setWidgetPanelOpen = useWidgetStore((s) => s.setPanelOpen)
-  // Landscape starts collapsed so the short canvas opens clear; user can reopen.
   const [showPanel, setShowPanel] = useState(() => !isViewportLandscape())
   const panelRef = useRef<HTMLDivElement>(null)
   const wasLandscape = useRef(landscape)
-  const toolsLabel = String(t('operate.tools'))
+  const drawLabel = String(t('operate.tools'))
 
   const setToolsOpen = (open: boolean) => {
     setShowPanel(open)
@@ -55,6 +52,13 @@ const ToolPanel: FC = () => {
     wasLandscape.current = landscape
   }, [landscape])
 
+  // Keep overlay store in sync when the panel starts open (portrait default).
+  useEffect(() => {
+    if (!isViewportLandscape()) {
+      useUiOverlayStore.getState().open('tools')
+    }
+  }, [])
+
   useEffect(() => {
     if (!shouldMutexOverlays()) {
       return
@@ -65,7 +69,8 @@ const ToolPanel: FC = () => {
   }, [overlayActive, showPanel])
 
   useEffect(() => {
-    if (!showPanel) {
+    if (!showPanel || narrowPortrait) {
+      // Portrait uses the explicit dim strip for close.
       return
     }
     const onPointerDown = (event: PointerEvent) => {
@@ -73,7 +78,6 @@ const ToolPanel: FC = () => {
       if (root?.contains(event.target as Node)) {
         return
       }
-      // Ignore the top-left toggle itself.
       if ((event.target as Element | null)?.closest?.('label.swap')) {
         return
       }
@@ -97,14 +101,14 @@ const ToolPanel: FC = () => {
     document.addEventListener('pointerdown', onPointerDown, true)
     return () =>
       document.removeEventListener('pointerdown', onPointerDown, true)
-  }, [showPanel])
+  }, [showPanel, narrowPortrait])
 
   const toggle = (
-    <div className="flex items-center gap-1">
+    <div className="flex shrink-0 flex-col items-center gap-0.5">
       <label
         className="btn btn-neutral btn-circle swap swap-rotate h-7 w-7 min-h-0"
-        title={showLabel ? undefined : toolsLabel}
-        aria-label={toolsLabel}
+        title={drawLabel}
+        aria-label={drawLabel}
       >
         <input
           type="checkbox"
@@ -124,66 +128,81 @@ const ToolPanel: FC = () => {
           className="swap-off fill-current"
         />
       </label>
-      {showLabel && (
-        <span className="rounded-full bg-[#eef1ff]/95 px-2 py-0.5 text-[11px] font-medium text-slate-700 shadow-sm">
-          {toolsLabel}
-        </span>
-      )}
+      <span className="max-w-[2.75rem] text-center text-[10px] font-medium leading-tight text-slate-700">
+        {drawLabel}
+      </span>
     </div>
   )
 
-  const panelBody = showPanel && (
+  const modeTabs = (
+    <div className="tabs tabs-sm tabs-boxed min-w-0 flex-1 bg-[#333C4D]">
+      {modeSwitch.map(({ type, text, keyboard }) => (
+        <a
+          key={type}
+          className={`tab flex-grow font-fredokaOne text-white font-medium ${
+            mode === type ? 'tab-active' : 'hover:text-base-300'
+          }`}
+          onClick={() => {
+            updateMode(type)
+          }}
+        >
+          {t(text)}
+          <span className="ml-1 text-xs leading-none font-normal opacity-70 pt-1 font-sans xs:hidden">
+            {keyboard}
+          </span>
+        </a>
+      ))}
+    </div>
+  )
+
+  const panelBody = (
     <div
-      ref={panelRef}
-      className={`pb-panel-shell pb-panel-open flex flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl ${
-        narrowPortrait
-          ? 'w-[var(--pb-panel-max-w-from-left)] max-w-[var(--pb-panel-max-w-from-left)] p-2'
-          : 'max-w-[min(85%,calc(100vw-5.5rem))] landscape:max-w-[min(78vw,38rem)] landscape:p-2'
+      className={`mt-1 min-h-0 flex-1 p-0.5 ${
+        landscape
+          ? 'pb-panel-flow-cols'
+          : 'flex flex-col overflow-y-auto noScrollbar'
       }`}
     >
-      <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
-        {modeSwitch.map(({ type, text, keyboard }) => (
-          <a
-            key={type}
-            className={`tab flex-grow font-fredokaOne text-white font-medium ${
-              mode === type ? 'tab-active' : 'hover:text-base-300'
-            }`}
-            onClick={() => {
-              updateMode(type)
-            }}
-          >
-            {t(text)}
-            <span className="ml-1 text-xs leading-none font-normal opacity-70 pt-1 font-sans xs:hidden">
-              {keyboard}
-            </span>
-          </a>
-        ))}
-      </div>
-      <div
-        className={`mt-1 min-h-0 flex-1 p-0.5 ${
-          landscape
-            ? 'pb-panel-flow-cols'
-            : 'flex flex-col overflow-y-auto noScrollbar'
-        }`}
-      >
-        {mode === ActionMode.DRAW && <DrawConfig />}
-        {mode === ActionMode.ERASE && <EraserConfig />}
-        {mode === ActionMode.SELECT && <SelectConfig />}
-        {mode === ActionMode.Board && <BoardConfig />}
-      </div>
+      {mode === ActionMode.DRAW && <DrawConfig />}
+      {mode === ActionMode.ERASE && <EraserConfig />}
+      {mode === ActionMode.SELECT && <SelectConfig />}
+      {mode === ActionMode.Board && <BoardConfig />}
     </div>
   )
 
-  // Narrow portrait: toggle stays true top-left; panel between long-edge rails.
+  // Narrow portrait: focused tools panel is topmost. Closed draw toggle only
+  // shows when nothing else is focused, so it never covers widgets/layers/boards.
   if (narrowPortrait) {
     return (
       <>
-        <div className="pointer-events-auto fixed left-3 top-3 z-[14]">
-          {toggle}
-        </div>
+        {!showPanel && overlayActive === 'none' && (
+          <div className="pointer-events-auto fixed left-3 top-3 z-[var(--pb-z-chrome)]">
+            {toggle}
+          </div>
+        )}
         {showPanel && (
-          <div className="pointer-events-none fixed left-[var(--pb-rail-left)] top-3 z-[3]">
-            <div className="pointer-events-auto">{panelBody}</div>
+          <div className="pointer-events-none fixed inset-0 z-[var(--pb-z-focus)]">
+            <button
+              type="button"
+              aria-label="Close"
+              className="pointer-events-auto absolute inset-0 z-0 bg-black/40"
+              onClick={() => setToolsOpen(false)}
+            />
+            <div
+              className="pointer-events-auto absolute inset-y-0 left-0 z-[1]"
+              style={{ width: 'var(--pb-panel-max-w-clear-right)' }}
+            >
+              <div
+                ref={panelRef}
+                className="pb-panel-shell pb-panel-open flex h-full max-h-full w-full flex-col overflow-hidden rounded-none rounded-r-2xl bg-[#eef1ff] px-2 pb-2 pt-2 card shadow-xl"
+              >
+                <div className="flex shrink-0 items-center gap-2">
+                  {toggle}
+                  {modeTabs}
+                </div>
+                {panelBody}
+              </div>
+            </div>
           </div>
         )}
       </>
@@ -191,10 +210,7 @@ const ToolPanel: FC = () => {
   }
 
   return (
-    <div
-      ref={!showPanel ? panelRef : undefined}
-      className="fixed left-7 top-7 z-[3] landscape:left-3 landscape:top-3"
-    >
+    <div className="fixed left-7 top-7 z-[3] landscape:left-3 landscape:top-3">
       <div
         className={
           showPanel && !landscape
@@ -204,7 +220,32 @@ const ToolPanel: FC = () => {
       >
         {toggle}
       </div>
-      {panelBody}
+      {showPanel && (
+        <div
+          ref={panelRef}
+          className="pb-panel-shell pb-panel-open flex flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl max-w-[min(85%,calc(100vw-5.5rem))] landscape:max-w-[min(78vw,38rem)] landscape:p-2"
+        >
+          <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
+            {modeSwitch.map(({ type, text, keyboard }) => (
+              <a
+                key={type}
+                className={`tab flex-grow font-fredokaOne text-white font-medium ${
+                  mode === type ? 'tab-active' : 'hover:text-base-300'
+                }`}
+                onClick={() => {
+                  updateMode(type)
+                }}
+              >
+                {t(text)}
+                <span className="ml-1 text-xs leading-none font-normal opacity-70 pt-1 font-sans xs:hidden">
+                  {keyboard}
+                </span>
+              </a>
+            ))}
+          </div>
+          {panelBody}
+        </div>
+      )}
     </div>
   )
 }

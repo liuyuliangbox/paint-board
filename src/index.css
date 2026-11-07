@@ -41,32 +41,47 @@
   --pb-rail-left: 0;
   --pb-rail-right: 0;
   --pb-panel-side-gap: 0.5rem;
-  /* From-left panel sits after the left rail — subtract both rails. */
-  --pb-panel-max-w-from-left: min(
-    22rem,
-    calc(
-      100vw - var(--pb-rail-left) - var(--pb-rail-right) -
-        var(--pb-panel-side-gap)
-    )
+
+  /*
+   * Stacking: the focused open panel is always on top.
+   * dock < idle chrome (closed toggles) < focused panel (+ its dim).
+   */
+  --pb-z-dock: 12;
+  --pb-z-chrome: 14;
+  --pb-z-focus: 50;
+
+  /* Content that must sit above its own dim (e.g. widget panel sheet). */
+  --pb-z-focus-panel: 51;
+
+  /*
+   * Portrait: ops dock on the left, chrome rail on the right.
+   * Tools panel opens from the left (clears right chrome).
+   * Layers / boards open from the right (clear left ops dock).
+   */
+  --pb-panel-max-w-clear-right: min(
+    28rem,
+    calc(100vw - var(--pb-rail-right) - var(--pb-panel-side-gap))
   );
-  /* From-right panel is flush to the right edge — subtract left rail only. */
-  --pb-panel-max-w-from-right: min(
-    24rem,
+  --pb-panel-max-w-clear-left: min(
+    28rem,
     calc(100vw - var(--pb-rail-left) - var(--pb-panel-side-gap))
   );
-  --pb-panel-max-w-center: min(
-    94vw,
-    calc(100vw - var(--pb-rail-left) - var(--pb-rail-right))
-  );
+
+  /* Aliases kept for existing class names. */
+  --pb-panel-max-w-from-left: var(--pb-panel-max-w-clear-right);
+  --pb-panel-max-w-from-right: var(--pb-panel-max-w-clear-left);
+  --pb-panel-max-w-center: var(--pb-panel-max-w-clear-left);
 }
 
 @media (orientation: portrait) and (max-width: 750px) {
   :root {
-    --pb-dock-clearance: 0.75rem;
+    --pb-dock-clearance: 0;
+    --pb-panel-inset: 0;
+    --pb-panel-max-h: 100dvh;
 
-    /* left-1.5 + rail shell; right inset + dock (up to xs:w-16 when labeled) */
-    --pb-rail-left: 3.75rem;
-    --pb-rail-right: 4.25rem;
+    /* left ops dock (xs:w-16 labeled); right chrome rail */
+    --pb-rail-left: 4.25rem;
+    --pb-rail-right: 3.75rem;
   }
 }
 
@@ -111,12 +126,6 @@
   max-height: var(--pb-panel-max-h);
   margin-top: var(--pb-panel-inset);
   margin-bottom: auto;
-}
-
-/* Only top-align modals that host a full-height panel (boards list, etc.). */
-.modal.modal-open:has(> .pb-panel-fill) {
-  align-items: flex-start;
-  justify-content: center;
 }
 
 .colorInput {

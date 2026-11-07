@@ -5,8 +5,8 @@ import ChromeActions from './ChromeActions'
 
 /**
  * Landscape: top-right horizontal chrome (long top edge).
- * Narrow portrait: chrome lives on the left long-edge rail inside ToolPanel
- * via operationChromeBridge.
+ * Narrow portrait: chrome lives on the right long-edge rail via
+ * operationChromeBridge (ops dock is on the left).
  */
 export interface OperationChromeProps {
   isFullscreen: boolean
@@ -53,7 +53,7 @@ const OperationChrome: FC<OperationChromeProps> = ({
     return () => setBridge(null)
   }, [isFullscreen, isLandscapeLayout, setBridge])
 
-  // Portrait phone: left rail owns these actions.
+  // Portrait phone: right chrome rail owns these actions.
   if (narrowPortrait) {
     return null
   }

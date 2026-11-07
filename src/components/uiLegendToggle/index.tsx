@@ -22,7 +22,7 @@ const UiLegendToggle: FC = () => {
   }
 
   return (
-    <div className="pointer-events-none fixed bottom-3 right-3 z-[13] xs:right-[3.75rem] landscape:right-3">
+    <div className="pointer-events-none fixed bottom-3 right-3 z-[var(--pb-z-chrome)] xs:right-[3.75rem] landscape:right-3">
       <button
         type="button"
         title={label}

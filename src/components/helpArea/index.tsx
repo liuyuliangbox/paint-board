@@ -17,7 +17,7 @@ const HelpArea: React.FC = () => {
   return (
     <>
       {/*
-        Narrow portrait: language/help/zoom/camera live on PortraitLeftRail.
+        Narrow portrait: language/help/zoom/camera live on the right chrome rail.
         Landscape/desktop: bottom-left (or top-left in landscape) capsule.
       */}
       {!narrowPortrait && (

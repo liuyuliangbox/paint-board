@@ -26,6 +26,8 @@ import { ActionMode } from '@/constants'
 import ExportImageMenu from '../exportImageMenu'
 import { ExportScope } from '@/core/export/exportCanvasImage'
 import useUiLegendStore from '@/store/uiLegend'
+import useUiOverlayStore from '@/store/uiOverlay'
+import { useNarrowPortrait } from '@/hooks/useNarrowPortrait'
 import DockButton from './DockButton'
 
 const isMobile = isMobileFn()
@@ -115,6 +117,8 @@ const OperationDock: FC<OperationDockProps> = ({
 }) => {
   const { t } = useTranslation()
   const labelOf = (key: string) => String(t(key))
+  const narrowPortrait = useNarrowPortrait()
+  const overlayActive = useUiOverlayStore((s) => s.active)
   // Match Tailwind `xs` (max 750px) so rail layout tracks the vertical dock.
   const [railLayout, setRailLayout] = useState(
     () =>
@@ -225,14 +229,16 @@ const OperationDock: FC<OperationDockProps> = ({
   const showSelection = hasSelection
   // Landscape bar or phone portrait rail: chrome lives top-right — dock is draw-only.
   const chromeOutsideDock = isLandscapeLayout || railLayout
+  // Keep the dock visible when a panel is open, but drop under the focused dim.
+  const underPanelDim = narrowPortrait && overlayActive !== 'none'
 
   return (
     <div
-      className={`pointer-events-none fixed z-[12] ${
-        // Phone portrait: right rail. Landscape / desktop: bottom bar that hugs content
-        // (max-w only — fixed width left empty gaps after collapsing labels).
-        // Leave room on the right for the global labels toggle (bottom-right).
-        'bottom-3 left-1/2 w-auto max-w-[min(96vw,44rem)] -translate-x-1/2 landscape:max-w-[min(calc(96vw-7.5rem),44rem)] xs:bottom-auto xs:left-auto xs:right-1.5 xs:top-1/2 xs:max-w-none xs:translate-x-0 xs:-translate-y-1/2'
+      className={`pointer-events-none fixed ${
+        underPanelDim ? 'z-[5]' : 'z-[var(--pb-z-dock)]'
+      } ${
+        // Phone portrait: left ops rail. Landscape / desktop: bottom bar.
+        'bottom-3 left-1/2 w-auto max-w-[min(96vw,44rem)] -translate-x-1/2 landscape:max-w-[min(calc(96vw-7.5rem),44rem)] xs:bottom-auto xs:left-1.5 xs:right-auto xs:top-1/2 xs:max-w-none xs:translate-x-0 xs:-translate-y-1/2'
       }`}
     >
       <div

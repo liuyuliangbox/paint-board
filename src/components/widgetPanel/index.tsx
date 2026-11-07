@@ -440,10 +440,20 @@ const WidgetPanel = () => {
 
   return (
     <>
+      {panelOpen && (
+        <button
+          type="button"
+          aria-label="Close"
+          className="pointer-events-auto fixed inset-0 z-[var(--pb-z-focus)] bg-black/40"
+          onClick={() => setWidgetsOpen(false)}
+        />
+      )}
       <div
         ref={panelRef}
-        className={`pointer-events-none fixed left-1/2 top-0 z-[20] -translate-x-1/2 ${
-          panelOpen ? 'w-[min(96vw,56rem)]' : 'w-auto'
+        className={`pointer-events-none fixed left-1/2 top-0 -translate-x-1/2 ${
+          panelOpen
+            ? 'z-[var(--pb-z-focus-panel)] w-[min(96vw,56rem)]'
+            : 'z-[var(--pb-z-chrome)] w-auto'
         }`}
       >
         <div

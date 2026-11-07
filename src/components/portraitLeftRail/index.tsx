@@ -1,6 +1,7 @@
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import useUiLegendStore from '@/store/uiLegend'
+import useUiOverlayStore from '@/store/uiOverlay'
 import useOperationChromeBridge from '@/store/operationChromeBridge'
 import { useNarrowPortrait } from '@/hooks/useNarrowPortrait'
 import ChromeActions from '@/components/boardOperation/operationChrome/ChromeActions'
@@ -10,21 +11,32 @@ import CameraConfig from '@/components/cameraConfig'
 import InfoIcon from '@/components/icons/info.svg?react'
 
 /**
- * Portrait long left edge: workspace chrome + help cluster.
- * Tool-panel toggle stays top-left (ToolPanel) on every viewport.
+ * Portrait long right edge: workspace chrome + help cluster.
+ * Ops dock sits on the left; draw toggle stays top-left (ToolPanel).
+ * Hidden while layers/boards/widgets cover this side; stays for tools
+ * (tools open from the left and clear this rail).
  */
 const PortraitLeftRail: FC = () => {
   const { t } = useTranslation()
   const showLabel = useUiLegendStore((s) => s.legendOpen)
   const chromeBridge = useOperationChromeBridge((s) => s.bridge)
   const narrowPortrait = useNarrowPortrait()
+  const overlayActive = useUiOverlayStore((s) => s.active)
 
   if (!narrowPortrait) {
     return null
   }
+  // Layers / boards / widgets cover the right chrome; tools clears it so keep it.
+  if (
+    overlayActive === 'layers' ||
+    overlayActive === 'boards' ||
+    overlayActive === 'widgets'
+  ) {
+    return null
+  }
 
   return (
-    <div className="pointer-events-none fixed left-1.5 top-1/2 z-[13] flex max-h-[min(70vh,32rem)] -translate-y-1/2 flex-col">
+    <div className="pointer-events-none fixed right-1.5 top-1/2 z-[var(--pb-z-chrome)] flex max-h-[min(70vh,32rem)] -translate-y-1/2 flex-col">
       <div className="pointer-events-auto flex max-h-full flex-col items-center gap-0.5 overflow-y-auto noScrollbar rounded-2xl border border-slate-200/80 bg-[#eef1ff]/95 px-1 py-1.5 shadow-md backdrop-blur">
         {chromeBridge && (
           <>

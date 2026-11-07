@@ -2,18 +2,21 @@ import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Tags } from 'lucide-react'
 import useUiLegendStore from '@/store/uiLegend'
+import useUiOverlayStore from '@/store/uiOverlay'
 import { useNarrowPortrait } from '@/hooks/useNarrowPortrait'
 
 /**
  * Portrait short-edge bottom: labels toggle only (help lives on the left rail).
+ * Hidden while a primary panel is open so the panel can use full height.
  */
 const PortraitBottomChrome: FC = () => {
   const { t } = useTranslation()
   const legendOpen = useUiLegendStore((s) => s.legendOpen)
   const toggleLegend = useUiLegendStore((s) => s.toggleLegend)
   const narrowPortrait = useNarrowPortrait()
+  const overlayActive = useUiOverlayStore((s) => s.active)
 
-  if (!narrowPortrait) {
+  if (!narrowPortrait || overlayActive !== 'none') {
     return null
   }
 
@@ -22,7 +25,7 @@ const PortraitBottomChrome: FC = () => {
   )
 
   return (
-    <div className="pointer-events-none fixed bottom-3 left-1/2 z-[13] flex -translate-x-1/2">
+    <div className="pointer-events-none fixed bottom-3 left-1/2 z-[var(--pb-z-chrome)] flex -translate-x-1/2">
       <button
         type="button"
         title={legendLabel}
