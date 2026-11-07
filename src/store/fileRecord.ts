@@ -64,6 +64,28 @@ const parseEnvelope = (raw: string): PersistEnvelope => {
   return parsed
 }
 
+/** Prefer a valid envelope; fall back to backup string when primary is corrupt. */
+export const resolvePersistEnvelope = (
+  primary: string | null,
+  backup: string | null
+): PersistEnvelope => {
+  if (primary) {
+    try {
+      return parseEnvelope(primary)
+    } catch {
+      // try backup below
+    }
+  }
+  if (backup && backup !== primary) {
+    return parseEnvelope(backup)
+  }
+  if (primary) {
+    // Re-throw with primary parse for a clearer failure.
+    return parseEnvelope(primary)
+  }
+  throw new Error('invalid file list')
+}
+
 const stripEnvelope = (envelope: PersistEnvelope): PersistEnvelope => ({
   ...envelope,
   state: {
@@ -76,21 +98,29 @@ const mergeFile = (file: StoredFile, blobRaw: string | null): StoredFile => {
   if (!blobRaw) {
     return { ...file, boardData: {}, backgroundImage: '' }
   }
-  const heavy = JSON.parse(blobRaw) as {
-    boardData?: unknown
-    backgroundImage?: string
-  }
-  return {
-    ...file,
-    boardData: heavy.boardData ?? {},
-    backgroundImage: heavy.backgroundImage ?? ''
+  try {
+    const heavy = JSON.parse(blobRaw) as {
+      boardData?: unknown
+      backgroundImage?: string
+    }
+    return {
+      ...file,
+      boardData: heavy.boardData ?? {},
+      backgroundImage: heavy.backgroundImage ?? ''
+    }
+  } catch {
+    // Corrupt blob: keep the list entry with an empty drawing.
+    return { ...file, boardData: {}, backgroundImage: '' }
   }
 }
 
+const validStoredFiles = (files: StoredFile[]) =>
+  files.filter((file) => file && typeof file.id === 'string' && file.id)
+
 /**
  * Load the file list. A legacy record still has boardData inline; split it into
- * one key per file and keep the original string as a backup. If splitting throws,
- * the caller keeps the legacy value and stops further writes.
+ * one key per file and keep the original string as a backup. Corrupt individual
+ * blobs are skipped (empty boardData) so one bad board does not block hydration.
  */
 export const readPersistedFiles = async (
   raw: string | null,
@@ -98,32 +128,71 @@ export const readPersistedFiles = async (
   listKey: string
 ): Promise<string | null> => {
   if (!raw) {
-    return null
+    const backupOnly = await db.get(FILE_LIST_BACKUP_KEY)
+    if (!backupOnly) {
+      return null
+    }
+    raw = backupOnly
   }
-  const envelope = parseEnvelope(raw)
-  const files = envelope.state.files
+
+  const backup = await db.get(FILE_LIST_BACKUP_KEY)
+  const envelope = resolvePersistEnvelope(raw, backup)
+  const files = validStoredFiles(envelope.state.files)
+  // Prefer a parseable source string for legacy return / backup writes.
+  const recoveredRaw = (() => {
+    try {
+      parseEnvelope(raw)
+      return raw
+    } catch {
+      return backup && backup !== raw ? backup : JSON.stringify(envelope)
+    }
+  })()
+
   if (files.some(isLegacyFileRecord)) {
     for (const file of files) {
       const serialized = JSON.stringify(heavyFilePayload(file))
       await db.set(fileBlobKey(file.id), serialized)
       blobCache.set(file.id, serialized)
     }
-    await db.set(FILE_LIST_BACKUP_KEY, raw)
-    await db.set(listKey, JSON.stringify(stripEnvelope(envelope)))
-    return raw
+    await db.set(FILE_LIST_BACKUP_KEY, recoveredRaw)
+    await db.set(
+      listKey,
+      JSON.stringify(
+        stripEnvelope({ ...envelope, state: { ...envelope.state, files } })
+      )
+    )
+    return recoveredRaw
   }
 
   const mergedFiles: StoredFile[] = []
   for (const file of files) {
-    const blobRaw = await db.get(fileBlobKey(file.id))
+    let blobRaw: string | null = null
+    try {
+      blobRaw = await db.get(fileBlobKey(file.id))
+    } catch {
+      blobRaw = null
+    }
     if (blobRaw) {
       blobCache.set(file.id, blobRaw)
     }
     mergedFiles.push(mergeFile(file, blobRaw))
   }
+
+  let currentId = envelope.state.currentId
+  if (
+    typeof currentId !== 'string' ||
+    !mergedFiles.some((file) => file.id === currentId)
+  ) {
+    currentId = mergedFiles[0]?.id
+  }
+
   return JSON.stringify({
     ...envelope,
-    state: { ...envelope.state, files: mergedFiles }
+    state: {
+      ...envelope.state,
+      currentId,
+      files: mergedFiles
+    }
   })
 }
 
@@ -163,4 +232,32 @@ export const writePersistedFiles = async (
 
   await db.set(listKey, JSON.stringify(stripEnvelope(envelope)))
   await db.del(FILE_LIST_BACKUP_KEY)
+}
+
+const THUMB_PREFIX = 'paint-board-thumb:'
+
+/** True when a storage key belongs to board list / drawing / thumbnails. */
+export const isBoardStorageKey = (key: IDBValidKey) => {
+  if (typeof key !== 'string') {
+    return false
+  }
+  return (
+    key === FILE_LIST_STORAGE_KEY ||
+    key === FILE_LIST_BACKUP_KEY ||
+    key.startsWith(FILE_BLOB_PREFIX) ||
+    key.startsWith(THUMB_PREFIX)
+  )
+}
+
+/**
+ * Delete local board list + drawing blobs via the given key enumerator.
+ * Does not touch widgets or other app keys.
+ */
+export const clearPersistedBoardKeys = async (
+  listKeys: () => Promise<IDBValidKey[]>,
+  remove: (key: IDBValidKey) => Promise<void>
+) => {
+  const allKeys = await listKeys()
+  await Promise.all(allKeys.filter(isBoardStorageKey).map((key) => remove(key)))
+  resetFilePersistenceCache()
 }

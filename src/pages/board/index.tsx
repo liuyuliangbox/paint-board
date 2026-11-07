@@ -6,6 +6,7 @@ import {
   hasFilePersistFailed,
   subscribeFilePersistFailed
 } from '@/store/fileHydration'
+import { clearCorruptedBoardStorage } from '@/store/clearBoardStorage'
 import { paintBoard } from '@/core/paintBoard'
 import { loadTemplates, type BoardTemplate } from '@/core/template/template'
 import {
@@ -32,6 +33,7 @@ const Board: React.FC = () => {
   const [canvasLoaded, setCanvasLoaded] = useState(false)
   const [hydrationFailed, setHydrationFailed] = useState(false)
   const [persistFailed, setPersistFailed] = useState(false)
+  const [clearingStorage, setClearingStorage] = useState(false)
   const [offerTemplates, setOfferTemplates] = useState<BoardTemplate[] | null>(
     null
   )
@@ -118,7 +120,25 @@ const Board: React.FC = () => {
         })}
       </div>
       {hydrationFailed && (
-        <Toast message="tip.fileHydrationFail" type="error" />
+        <Toast
+          message="tip.fileHydrationFail"
+          type="error"
+          actionLabel="tip.clearCorruptBoards"
+          actionBusy={clearingStorage}
+          onAction={() => {
+            if (clearingStorage) {
+              return
+            }
+            setClearingStorage(true)
+            void clearCorruptedBoardStorage()
+              .then(() => {
+                window.location.reload()
+              })
+              .catch(() => {
+                setClearingStorage(false)
+              })
+          }}
+        />
       )}
       {persistFailed && <Toast message="tip.filePersistFail" type="error" />}
       {canvasLoaded && (

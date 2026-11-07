@@ -19,7 +19,8 @@ import {
   readPersistedFiles,
   writePersistedFiles,
   markFileContentDirty,
-  FILE_LIST_STORAGE_KEY
+  FILE_LIST_STORAGE_KEY,
+  FILE_LIST_BACKUP_KEY
 } from './fileRecord'
 import {
   BOARD_VERSION,
@@ -58,9 +59,18 @@ const fileDb = {
 
 const storage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
+    const primary = (await get(name)) || null
     try {
-      return await readPersistedFiles((await get(name)) || null, fileDb, name)
+      return await readPersistedFiles(primary, fileDb, name)
     } catch (error) {
+      try {
+        const backup = (await get(FILE_LIST_BACKUP_KEY)) || null
+        if (backup && backup !== primary) {
+          return await readPersistedFiles(backup, fileDb, name)
+        }
+      } catch {
+        // fall through to mark failed
+      }
       markFileHydrationFailed()
       throw error
     }

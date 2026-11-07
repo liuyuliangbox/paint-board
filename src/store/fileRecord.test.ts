@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
   FILE_LIST_BACKUP_KEY,
+  FILE_LIST_STORAGE_KEY,
+  clearPersistedBoardKeys,
   fileBlobKey,
+  isBoardStorageKey,
   markFileContentDirty,
   readPersistedFiles,
   resetFilePersistenceCache,
@@ -108,5 +111,66 @@ describe('file records', () => {
       'quota'
     )
     expect(db.store.has('list')).toBe(false)
+  })
+
+  it('skips a corrupt blob and still hydrates sibling boards', async () => {
+    const db = createDb()
+    const split = JSON.stringify({
+      state: {
+        currentId: 'a',
+        files: [
+          { id: 'a', title: 'good' },
+          { id: 'b', title: 'bad' }
+        ]
+      },
+      version: 0
+    })
+    db.store.set('list', split)
+    db.store.set(
+      fileBlobKey('a'),
+      JSON.stringify({ boardData: { objects: [1] }, backgroundImage: '' })
+    )
+    db.store.set(fileBlobKey('b'), '{not-json')
+
+    const hydrated = JSON.parse(
+      (await readPersistedFiles(db.store.get('list') || null, db, 'list')) ||
+        '{}'
+    )
+    expect(hydrated.state.files[0].boardData).toEqual({ objects: [1] })
+    expect(hydrated.state.files[1].boardData).toEqual({})
+    expect(hydrated.state.files[1].title).toBe('bad')
+  })
+
+  it('falls back to backup list when the primary list is corrupt', async () => {
+    const db = createDb()
+    db.store.set('list', '{broken')
+    db.store.set(FILE_LIST_BACKUP_KEY, legacy)
+
+    const hydrated = await readPersistedFiles(
+      db.store.get('list') || null,
+      db,
+      'list'
+    )
+    expect(JSON.parse(hydrated || '{}').state.files).toHaveLength(2)
+  })
+
+  it('clears only board-related storage keys', async () => {
+    const store = new Map<string, string>([
+      [FILE_LIST_STORAGE_KEY, 'list'],
+      [fileBlobKey('a'), 'blob'],
+      ['paint-board-thumb:a', 'thumb'],
+      ['PAINT-BOARD-WIDGETS', 'keep']
+    ])
+    await clearPersistedBoardKeys(
+      async () => [...store.keys()],
+      async (key) => {
+        store.delete(String(key))
+      }
+    )
+    expect(store.has(FILE_LIST_STORAGE_KEY)).toBe(false)
+    expect(store.has(fileBlobKey('a'))).toBe(false)
+    expect(store.has('paint-board-thumb:a')).toBe(false)
+    expect(store.get('PAINT-BOARD-WIDGETS')).toBe('keep')
+    expect(isBoardStorageKey('PAINT-BOARD-WIDGETS')).toBe(false)
   })
 })

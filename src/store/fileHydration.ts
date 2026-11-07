@@ -26,6 +26,12 @@ export const markFilePersistFailed = () => {
 
 export const hasFilePersistFailed = () => filePersistFailed
 
+/** After clearing corrupt IndexedDB data so a reload can persist again. */
+export const clearFileHydrationState = () => {
+  fileHydrationFailed = false
+  filePersistFailed = false
+}
+
 export const subscribeFilePersistFailed = (listener: () => void) => {
   persistListeners.add(listener)
   return () => {
