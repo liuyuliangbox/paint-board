@@ -71,6 +71,17 @@ describe('file hydration', () => {
     expect(listener).toBeUndefined()
   })
 
+  it('soft-recover does not block later persists', async () => {
+    const {
+      hasFileHydrationSoftRecovered,
+      markFileHydrationSoftRecovered,
+      shouldPersistFiles
+    } = await import('./fileHydration')
+    markFileHydrationSoftRecovered()
+    expect(hasFileHydrationSoftRecovered()).toBe(true)
+    expect(shouldPersistFiles()).toBe(true)
+  })
+
   it('consumes force-fresh flag only once', async () => {
     const store = new Map<string, string>()
     vi.stubGlobal('sessionStorage', {

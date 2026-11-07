@@ -1,5 +1,7 @@
 let fileHydrationFailed = false
 let filePersistFailed = false
+/** IDB unreadable → started blank without locking the session. */
+let fileHydrationSoftRecovered = false
 
 const failureListeners = new Set<() => void>()
 const persistListeners = new Set<() => void>()
@@ -37,6 +39,13 @@ export const markFileHydrationFailed = () => {
 
 export const hasFileHydrationFailed = () => fileHydrationFailed
 
+/** Prefer this over hard-fail: blank board, settings stay, persist still allowed. */
+export const markFileHydrationSoftRecovered = () => {
+  fileHydrationSoftRecovered = true
+}
+
+export const hasFileHydrationSoftRecovered = () => fileHydrationSoftRecovered
+
 export const shouldPersistFiles = () =>
   !fileHydrationFailed && !filePersistFailed
 
@@ -54,6 +63,7 @@ export const hasFilePersistFailed = () => filePersistFailed
 export const clearFileHydrationState = () => {
   fileHydrationFailed = false
   filePersistFailed = false
+  fileHydrationSoftRecovered = false
 }
 
 export const subscribeFilePersistFailed = (listener: () => void) => {

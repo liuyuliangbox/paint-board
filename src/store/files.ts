@@ -11,8 +11,8 @@ import { ActionMode } from '@/constants'
 import { parseImportedBoardFile } from '@/core/utils/importBoardFile'
 import {
   shouldPersistFiles,
-  markFileHydrationFailed,
   markFilePersistFailed,
+  markFileHydrationSoftRecovered,
   waitForHydration,
   consumeForceFreshBoards
 } from './fileHydration'
@@ -60,7 +60,7 @@ const fileDb = {
 
 const storage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
-    // User chose “clear corrupted data”: skip IDB even if it is empty/broken.
+    // User chose “reset to blank board”: skip IDB even if it is empty/broken.
     if (consumeForceFreshBoards()) {
       return null
     }
@@ -74,10 +74,16 @@ const storage: StateStorage = {
           return await readPersistedFiles(backup, fileDb, name)
         }
       } catch {
-        // fall through to mark failed
+        // fall through to soft recover
       }
-      markFileHydrationFailed()
-      throw error
+      // localStorage settings can still load; board drawings live in IndexedDB.
+      // Never hard-lock the UI — start blank and keep trying to persist.
+      console.error(
+        '[paint-board] board IndexedDB unreadable; starting blank board',
+        error
+      )
+      markFileHydrationSoftRecovered()
+      return null
     }
   },
   setItem: async (name: string, value: string): Promise<void> => {
@@ -627,7 +633,11 @@ const useFileStore = create<FileState & FileAction>()(
       storage: createJSONStorage(() => storage),
       onRehydrateStorage: () => (_state, error) => {
         if (error) {
-          markFileHydrationFailed()
+          console.error(
+            '[paint-board] board rehydrate error; continuing blank',
+            error
+          )
+          markFileHydrationSoftRecovered()
         }
       }
     }

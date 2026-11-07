@@ -3,10 +3,10 @@ import { DEFAULT_BACKGROUND_SORT, useCurrentFile } from '@/store/files'
 import useBoardStore from '@/store/board'
 import {
   hasFileHydrationFailed,
+  hasFileHydrationSoftRecovered,
   hasFilePersistFailed,
   subscribeFilePersistFailed
 } from '@/store/fileHydration'
-import { clearCorruptedBoardStorage } from '@/store/clearBoardStorage'
 import { paintBoard } from '@/core/paintBoard'
 import { loadTemplates, type BoardTemplate } from '@/core/template/template'
 import {
@@ -33,9 +33,8 @@ import BackgroundCamera from '@/components/background/backgroundCamera'
 const Board: React.FC = () => {
   const canvasEl = useRef<HTMLCanvasElement>(null)
   const [canvasLoaded, setCanvasLoaded] = useState(false)
-  const [hydrationFailed, setHydrationFailed] = useState(false)
+  const [hydrationSoftRecovered, setHydrationSoftRecovered] = useState(false)
   const [persistFailed, setPersistFailed] = useState(false)
-  const [clearingStorage, setClearingStorage] = useState(false)
   const [offerTemplates, setOfferTemplates] = useState<BoardTemplate[] | null>(
     null
   )
@@ -57,7 +56,10 @@ const Board: React.FC = () => {
       if (hasFileHydrationFailed() || hasSeenTemplatePrompt()) {
         return
       }
-      const hasPersistedBoards = await hasPersistedBoardList()
+      // Soft-recover already started blank; IDB probe would false-positive “has boards”.
+      const hasPersistedBoards = hasFileHydrationSoftRecovered()
+        ? false
+        : await hasPersistedBoardList()
       if (cancelled || hasPersistedBoards) {
         return
       }
@@ -90,7 +92,7 @@ const Board: React.FC = () => {
           if (cancelled) {
             return
           }
-          setHydrationFailed(hasFileHydrationFailed())
+          setHydrationSoftRecovered(hasFileHydrationSoftRecovered())
           setPersistFailed(hasFilePersistFailed())
           if (loaded) {
             setCanvasLoaded(true)
@@ -121,30 +123,8 @@ const Board: React.FC = () => {
           }
         })}
       </div>
-      {hydrationFailed && (
-        <Toast
-          message="tip.fileHydrationFail"
-          type="error"
-          actionLabel="tip.clearCorruptBoards"
-          actionBusy={clearingStorage}
-          onAction={() => {
-            if (clearingStorage) {
-              return
-            }
-            setClearingStorage(true)
-            void clearCorruptedBoardStorage()
-              .catch((error) => {
-                // Designed not to throw; still reload so the user is never stuck.
-                console.warn(
-                  '[paint-board] clearCorruptedBoardStorage unexpected error',
-                  error
-                )
-              })
-              .finally(() => {
-                window.location.reload()
-              })
-          }}
-        />
+      {hydrationSoftRecovered && (
+        <Toast message="tip.fileHydrationSoftRecover" type="warning" />
       )}
       {persistFailed && <Toast message="tip.filePersistFail" type="error" />}
       {canvasLoaded && (
