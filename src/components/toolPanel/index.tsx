@@ -113,32 +113,34 @@ const ToolPanel: FC = () => {
       </div>
       {showPanel && (
         <div
-          className={`pb-panel-shell flex max-w-[85%] flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl landscape:max-w-[min(48vw,22rem)] landscape:p-2 ${
-            // Portrait: fill the band above the rail. Landscape: cap height only
-            // so the draw form does not stretch over the bottom dock.
-            landscape ? '' : 'pb-panel-open'
-          }`}
+          className={`pb-panel-shell pb-panel-open flex max-w-[85%] flex-col overflow-hidden bg-[#eef1ff] p-3 card shadow-xl landscape:max-w-[min(78vw,38rem)] landscape:p-2`}
         >
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto noScrollbar p-0.5">
-            {/* switch mode tabs */}
-            <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
-              {modeSwitch.map(({ type, text, keyboard }) => (
-                <a
-                  key={type}
-                  className={`tab flex-grow font-fredokaOne text-white font-medium ${
-                    mode === type ? 'tab-active' : 'hover:text-base-300'
-                  }`}
-                  onClick={() => {
-                    updateMode(type)
-                  }}
-                >
-                  {t(text)}
-                  <span className="ml-1 text-xs leading-none font-normal opacity-70 pt-1 font-sans xs:hidden">
-                    {keyboard}
-                  </span>
-                </a>
-              ))}
-            </div>
+          {/* Mode tabs stay full-width; config body may flow into a 2nd column. */}
+          <div className="tabs tabs-sm tabs-boxed shrink-0 bg-[#333C4D]">
+            {modeSwitch.map(({ type, text, keyboard }) => (
+              <a
+                key={type}
+                className={`tab flex-grow font-fredokaOne text-white font-medium ${
+                  mode === type ? 'tab-active' : 'hover:text-base-300'
+                }`}
+                onClick={() => {
+                  updateMode(type)
+                }}
+              >
+                {t(text)}
+                <span className="ml-1 text-xs leading-none font-normal opacity-70 pt-1 font-sans xs:hidden">
+                  {keyboard}
+                </span>
+              </a>
+            ))}
+          </div>
+          <div
+            className={`mt-1 min-h-0 flex-1 p-0.5 ${
+              landscape
+                ? 'pb-panel-flow-cols'
+                : 'flex flex-col overflow-y-auto noScrollbar'
+            }`}
+          >
             {mode === ActionMode.DRAW && <DrawConfig />}
             {mode === ActionMode.ERASE && <EraserConfig />}
             {mode === ActionMode.SELECT && <SelectConfig />}

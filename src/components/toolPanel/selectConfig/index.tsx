@@ -32,7 +32,7 @@ const SelectConfig = () => {
 
   if (!activeObject) {
     return (
-      <div className="flex mt-3 w-56">
+      <div className="mt-3 flex w-56">
         <Info size={16} className="mr-1 shrink-0" />
         <span className="text-sm">{t('tip.unselectedElementTip')}</span>
       </div>
@@ -40,7 +40,8 @@ const SelectConfig = () => {
   }
 
   return (
-    <div className="form-control">
+    // `contents` lets each block flow into landscape multi-columns.
+    <div className="form-control landscape:contents">
       <OpacityConfig refreshCount={refreshCount} />
 
       <EraserConfig refreshCount={refreshCount} />
