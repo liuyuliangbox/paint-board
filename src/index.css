@@ -36,11 +36,37 @@
   --pb-panel-max-h: calc(
     100dvh - var(--pb-dock-clearance) - var(--pb-panel-inset)
   );
+
+  /* Portrait long-edge rails (overridden below on narrow portrait). */
+  --pb-rail-left: 0;
+  --pb-rail-right: 0;
+  --pb-panel-side-gap: 0.5rem;
+  /* From-left panel sits after the left rail — subtract both rails. */
+  --pb-panel-max-w-from-left: min(
+    22rem,
+    calc(
+      100vw - var(--pb-rail-left) - var(--pb-rail-right) -
+        var(--pb-panel-side-gap)
+    )
+  );
+  /* From-right panel is flush to the right edge — subtract left rail only. */
+  --pb-panel-max-w-from-right: min(
+    24rem,
+    calc(100vw - var(--pb-rail-left) - var(--pb-panel-side-gap))
+  );
+  --pb-panel-max-w-center: min(
+    94vw,
+    calc(100vw - var(--pb-rail-left) - var(--pb-rail-right))
+  );
 }
 
 @media (orientation: portrait) and (max-width: 750px) {
   :root {
     --pb-dock-clearance: 0.75rem;
+
+    /* left-1.5 + rail shell; right inset + dock (up to xs:w-16 when labeled) */
+    --pb-rail-left: 3.75rem;
+    --pb-rail-right: 4.25rem;
   }
 }
 

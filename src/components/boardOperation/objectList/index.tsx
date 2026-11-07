@@ -119,21 +119,17 @@ const ObjectList: FC<IProps> = ({ updateShow }) => {
     }
   }
 
-  // Above operation dock (z-12) so landscape bottom bar cannot cover the list.
+  // Above operation dock (z-12). Overlay leaves the portrait left rail clickable.
   return (
-    <div className="drawer drawer-end fixed inset-0 z-[25]">
-      <input
-        id="object-list-drawer"
-        type="checkbox"
-        className="drawer-toggle"
-        defaultChecked
+    <div className="pointer-events-none fixed inset-0 z-[25]">
+      <button
+        type="button"
+        aria-label="Close"
+        className="pointer-events-auto absolute inset-0 bg-black/40 xs:left-[var(--pb-rail-left)]"
+        onClick={() => updateShow(false)}
       />
-      <div className="drawer-side">
-        <label
-          className="drawer-overlay"
-          onClick={() => updateShow(false)}
-        ></label>
-        <div className="pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden bg-white px-4 py-4 xs:px-3 xs:py-3 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-3 landscape:py-3">
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-start justify-end">
+        <div className="pointer-events-auto pb-panel-fill flex w-96 max-w-[min(80vw,24rem)] flex-col overflow-hidden bg-white px-4 py-4 shadow-xl xs:max-w-[var(--pb-panel-max-w-from-right)] xs:px-3 xs:py-3 landscape:w-[min(90vw,28rem)] landscape:max-w-[90vw] landscape:px-3 landscape:py-3">
           <div className="shrink-0 text-center font-fredokaOne text-xl xs:text-lg landscape:text-lg">
             {t('objectList.title')}
           </div>

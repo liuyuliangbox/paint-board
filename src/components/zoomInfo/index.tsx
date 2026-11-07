@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next'
 
 interface ZoomInfoProps {
   showLabel?: boolean
+  /** Portrait left rail: stack label under the dial. */
+  rail?: boolean
 }
 
-const ZoomInfo = ({ showLabel = false }: ZoomInfoProps) => {
+const ZoomInfo = ({ showLabel = false, rail = false }: ZoomInfoProps) => {
   const { t } = useTranslation()
   const [zoomValue, setZoomValue] = useState(
     paintBoard.evnet?.zoomEvent.handleZoomPercentage(false)
@@ -22,8 +24,10 @@ const ZoomInfo = ({ showLabel = false }: ZoomInfoProps) => {
   return (
     <button
       type="button"
-      className={`ml-2 flex items-center gap-1 rounded-full ${
-        showLabel ? 'bg-white/80 pr-1.5' : ''
+      className={`flex items-center rounded-full ${
+        rail
+          ? 'w-full flex-col gap-0.5 px-0.5 py-1'
+          : `ml-2 gap-1 ${showLabel ? 'bg-white/80 pr-1.5' : ''}`
       }`}
       title={showLabel ? undefined : label}
       aria-label={label}
@@ -39,8 +43,16 @@ const ZoomInfo = ({ showLabel = false }: ZoomInfoProps) => {
           } as CSSProperties
         }
       ></div>
-      {showLabel && (
-        <span className="text-[11px] font-medium text-slate-700">{label}</span>
+      {(showLabel || rail) && (
+        <span
+          className={
+            rail
+              ? 'max-w-[2.75rem] truncate text-center text-[9px] font-medium leading-tight text-slate-700'
+              : 'text-[11px] font-medium text-slate-700'
+          }
+        >
+          {rail && !showLabel ? zoomValue : label}
+        </span>
       )}
     </button>
   )

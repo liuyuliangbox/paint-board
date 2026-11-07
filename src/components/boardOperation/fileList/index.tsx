@@ -378,7 +378,7 @@ const FileList: FC<IProps> = ({ updateShow }) => {
         onClick={() => updateShow(false)}
       >
         <div
-          className="pb-panel-fill modal-box flex w-[94vw] max-w-5xl flex-col overflow-hidden p-0"
+          className="pb-panel-fill modal-box flex w-[var(--pb-panel-max-w-center)] max-w-5xl flex-col overflow-hidden p-0"
           onClick={(event) => event.stopPropagation()}
         >
           <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-3 xs:px-3 xs:py-2 landscape:px-3 landscape:py-2">

@@ -9,9 +9,14 @@ import CountDown from './countDown'
 
 interface CameraConfigProps {
   showLabel?: boolean
+  /** Portrait left rail: compact + menu opens to the right. */
+  rail?: boolean
 }
 
-const CameraConfig = ({ showLabel = false }: CameraConfigProps) => {
+const CameraConfig = ({
+  showLabel = false,
+  rail = false
+}: CameraConfigProps) => {
   const { t } = useTranslation()
   const { openCamera, updateOpenCamera, pauseCamera, updatePauseCamera } =
     useCameraStore()
@@ -50,17 +55,23 @@ const CameraConfig = ({ showLabel = false }: CameraConfigProps) => {
 
   return (
     <div
-      className={`dropdown dropdown-hover ml-2 dropdown-top landscape:dropdown-bottom ${
-        showLabel ? 'h-7' : 'h-7 w-7'
-      }`}
+      className={`dropdown dropdown-hover ${
+        rail
+          ? 'dropdown-right w-full'
+          : 'ml-2 dropdown-top landscape:dropdown-bottom'
+      } ${showLabel && !rail ? 'h-7' : rail ? '' : 'h-7 w-7'}`}
     >
       <div
         tabIndex={0}
         role="button"
         title={showLabel ? undefined : cameraLabel}
         aria-label={cameraLabel}
-        className={`relative flex cursor-pointer items-center justify-center rounded-full bg-[#eef1ff] ${
-          showLabel ? 'h-7 gap-1 pl-0.5 pr-1.5' : 'h-7 w-7'
+        className={`relative flex cursor-pointer items-center justify-center rounded-full bg-white ${
+          rail
+            ? 'w-full flex-col gap-0.5 px-0.5 py-1'
+            : showLabel
+            ? 'h-7 gap-1 pl-0.5 pr-1.5'
+            : 'h-7 w-7'
         }`}
       >
         <span className="relative flex h-7 w-7 shrink-0 items-center justify-center">
@@ -76,8 +87,14 @@ const CameraConfig = ({ showLabel = false }: CameraConfigProps) => {
             </>
           )}
         </span>
-        {showLabel && (
-          <span className="text-[11px] font-medium text-slate-700">
+        {(showLabel || rail) && (
+          <span
+            className={
+              rail
+                ? 'max-w-[2.75rem] truncate text-center text-[9px] font-medium leading-tight text-slate-700'
+                : 'text-[11px] font-medium text-slate-700'
+            }
+          >
             {cameraLabel}
           </span>
         )}
